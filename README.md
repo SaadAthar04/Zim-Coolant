@@ -109,7 +109,7 @@ CREATE TABLE products (
   name VARCHAR NOT NULL,
   description TEXT,
   price DECIMAL(10,2) NOT NULL,
-  category VARCHAR NOT NULL CHECK (category IN ('coolant', 'engine-oil')),
+  category VARCHAR NOT NULL CHECK (category IN ('Coolant', 'ATF', 'Gear Oil')),
   image_url TEXT,
   specifications TEXT,
   stock INTEGER DEFAULT 0,

@@ -1,14 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, Menu, X } from 'lucide-react'
-import { useCartStore } from '@/lib/store'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const { getTotalItems } = useCartStore()
+  const [mounted, setMounted] = useState(false)
+  const [cartItems, setCartItems] = useState(0)
+
+  useEffect(() => {
+    setMounted(true)
+    if (typeof window !== 'undefined') {
+      try {
+        const storedCart = localStorage.getItem('cart-storage')
+        if (storedCart) {
+          const cartData = JSON.parse(storedCart)
+          const total =
+            cartData.state?.items?.reduce(
+              (sum: number, item: any) => sum + (item.quantity || 0),
+              0
+            ) || 0
+          setCartItems(total)
+        }
+      } catch (error) {
+        console.error('Error reading cart from localStorage:', error)
+      }
+    }
+  }, [])
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -42,19 +62,20 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Cart and Mobile Menu Button */}
+          {/* Cart + Mobile Menu Button */}
           <div className="flex items-center space-x-4">
             <Link href="/cart" className="relative">
               <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary-600 transition-colors" />
-              {getTotalItems() > 0 && (
+              {mounted && cartItems > 0 && (
                 <span className="absolute -top-2 -right-2 bg-accent-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {getTotalItems()}
+                  {cartItems}
                 </span>
               )}
             </Link>
-            
+
+            {/* Mobile Toggle */}
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => setIsOpen((prev) => !prev)}
               className="md:hidden p-2 rounded-md text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -82,7 +103,6 @@ export default function Navbar() {
                     {item.name}
                   </Link>
                 ))}
-
               </div>
             </motion.div>
           )}

@@ -66,15 +66,21 @@ export const useCartStore = create<CartStore>()(
       },
       
       getTotalItems: () => {
+        // Check if we're on the client side to avoid SSR hydration issues
+        if (typeof window === 'undefined') return 0
         return get().items.reduce((total, item) => total + item.quantity, 0)
       },
       
       getTotalPrice: () => {
+        // Check if we're on the client side to avoid SSR hydration issues
+        if (typeof window === 'undefined') return 0
         return get().items.reduce((total, item) => total + (item.product.price * item.quantity), 0)
       }
     }),
     {
       name: 'cart-storage',
+      // Add skipHydration to prevent SSR issues
+      skipHydration: true,
     }
   )
 )

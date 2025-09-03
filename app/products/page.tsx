@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -6,71 +6,105 @@ import { Search, Filter, Grid3X3, List, ArrowUpDown } from 'lucide-react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { supabase } from '@/lib/supabase'
-import { Product } from '@/lib/supabase'
+
+interface Product {
+  id: string
+  name: string
+  description: string
+  price: number
+  category: string
+  image_url: string
+  stock_quantity: number
+  specifications?: any
+  created_at: string
+  updated_at: string
+}
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sortBy, setSortBy] = useState('name')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [categories, setCategories] = useState<string[]>([])
+  const [categories] = useState<string[]>(['Coolant', 'ATF', 'Gear Oil'])
 
-  useEffect(() => {
-    fetchProducts()
-    // Reset category filter to "All Categories" when page loads
+  // Reset filters function
+  const resetAllFilters = () => {
+    setSearchTerm('')
     setSelectedCategory('all')
-  }, [])
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true)
-      
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('name', { ascending: true })
-      
-      if (error) {
-        console.error('Error fetching products:', error)
-        return
-      }
-
-      if (data) {
-        setProducts(data)
-        setFilteredProducts(data)
-        
-        // Extract unique categories
-        const uniqueCategories = Array.from(new Set(data.map(product => product.category)))
-        setCategories(uniqueCategories)
-      }
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
+    setSortBy('name')
+    setViewMode('grid')
   }
 
+  // Fetch mock products
   useEffect(() => {
-    let filtered = products
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        const mockProducts: Product[] = [
+          {
+            id: '1',
+            name: 'Premium Coolant',
+            description: 'High-performance engine coolant for optimal temperature regulation',
+            price: 25.99,
+            category: 'Coolant',
+            image_url: '/images/coolant-1.jpg',
+            stock_quantity: 100,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          {
+            id: '2',
+            name: 'ATF Fluid',
+            description: 'Automatic transmission fluid for smooth gear operation',
+            price: 32.99,
+            category: 'ATF',
+            image_url: '/images/atf-1.jpg',
+            stock_quantity: 75,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          {
+            id: '3',
+            name: 'Gear Oil Premium',
+            description: 'Heavy-duty gear oil for maximum protection',
+            price: 28.99,
+            category: 'Gear Oil',
+            image_url: '/images/gear-oil-1.jpg',
+            stock_quantity: 50,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ]
+        setProducts(mockProducts)
+        setFilteredProducts(mockProducts)
+      } catch (error) {
+        console.error('Error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [])
 
-    // Filter by search term
+  // Apply filters
+  useEffect(() => {
+    let filtered = [...products]
+
     if (searchTerm) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
-    // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.category === selectedCategory)
+      filtered = filtered.filter((p) => p.category === selectedCategory)
     }
 
-    // Sort products
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
@@ -107,91 +141,102 @@ export default function Products() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="bg-gradient-primary">
-        <div className="container-custom section-padding">
-          <motion.div
+        <div className="container-custom section-padding text-center">
+          <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-4xl mx-auto"
+            className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6"
           >
-            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Our <span className="text-gradient">Products</span>
-            </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
-              Discover our premium selection of engine oils and coolants designed for optimal performance 
-              and protection of your vehicle.
-            </p>
-          </motion.div>
+            Our <span className="text-gradient">Products</span>
+          </motion.h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Discover our premium selection of engine oils and coolants designed
+            for optimal performance and protection of your vehicle.
+          </p>
         </div>
       </section>
 
-      {/* Filter and Search Section */}
+      {/* Filters + Search */}
       <section className="section-padding bg-white border-b">
-        <div className="container-custom">
-          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
-            {/* Search Bar */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
+        <div className="container-custom flex flex-col lg:flex-row gap-6 items-center justify-between">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white"
+              >
+                <option value="all">All Categories</option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-wrap gap-4 items-center">
-              {/* Category Filter */}
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white"
-                >
-                  <option value="all">All Categories</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Sort Dropdown */}
-              <div className="relative">
-                <ArrowUpDown className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white"
-                >
-                  <option value="name">Sort by Name</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="category">Sort by Category</option>
-                </select>
-              </div>
-
-              {/* View Mode Toggle */}
-              <div className="flex border border-gray-300 rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-3 ${viewMode === 'grid' ? 'bg-primary-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                >
-                  <Grid3X3 className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-3 ${viewMode === 'list' ? 'bg-primary-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                >
-                  <List className="w-5 h-5" />
-                </button>
-              </div>
+            {/* Sort */}
+            <div className="relative">
+              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="category">Sort by Category</option>
+              </select>
             </div>
+
+            {/* View Mode */}
+            <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-3 ${viewMode === 'grid'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                <Grid3X3 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-3 ${viewMode === 'list'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                <List className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Reset Button */}
+            <button
+              onClick={resetAllFilters}
+              className="px-4 py-2 text-sm text-gray-600 hover:text-primary-600 border border-gray-300 rounded-lg hover:border-primary-300 transition-colors"
+            >
+              Reset Filters
+            </button>
           </div>
         </div>
       </section>
@@ -199,108 +244,87 @@ export default function Products() {
       {/* Products Section */}
       <section className="section-padding bg-gray-50">
         <div className="container-custom">
-          {/* Results Count */}
-          <div className="mb-8">
-            <p className="text-gray-600">
-              Showing {filteredProducts.length} of {products.length} products
-            </p>
-          </div>
+          <p className="text-gray-600 mb-6">
+            Showing {filteredProducts.length} of {products.length} products
+          </p>
 
-          {/* Products Grid/List */}
           {filteredProducts.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-gray-400 text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-600 mb-6">
-                Try adjusting your search terms or filters.
-              </p>
-              <button
-                onClick={() => {
-                  setSearchTerm('')
-                  setSelectedCategory('all')
-                  setSortBy('name')
-                }}
-                className="btn-primary"
-              >
-                Clear Filters
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                No products found
+              </h3>
+              <button onClick={resetAllFilters} className="btn-primary">
+                Clear All Filters
               </button>
             </div>
           ) : (
-            <div className={viewMode === 'grid' 
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'
-              : 'space-y-6'
-            }>
-              {filteredProducts.map((product, index) => (
+            <div
+              className={
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'
+                  : 'space-y-6'
+              }
+            >
+              {filteredProducts.map((product, i) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className={viewMode === 'grid' ? 'card group cursor-pointer' : 'card group cursor-pointer flex'}
+                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  className={`card group cursor-pointer ${viewMode === 'list' ? 'flex' : ''
+                    }`}
                 >
+                  {/* Grid View */}
                   {viewMode === 'grid' ? (
                     <div className="p-6">
-                                                                     <div className="w-full h-48 bg-black rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                          <img 
-                            src={product.image_url} 
-                            alt={product.name}
-                            className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                      <div className="space-y-3">
-                        <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
-                          {product.category}
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-48 object-contain mb-4 rounded-lg"
+                      />
+                      <h3 className="text-lg font-semibold">{product.name}</h3>
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {product.description}
+                      </p>
+                      <div className="flex items-center justify-between mt-4">
+                        <span className="text-2xl font-bold text-primary-600">
+                          Rs. {product.price}
                         </span>
-                        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
-                          {product.name}
-                        </h3>
-                        <p className="text-gray-600 text-sm line-clamp-2">
-                          {product.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-2xl font-bold text-primary-600">
-                            Rs. {product.price}
-                          </span>
-                          <Link href={`/products/${product.id}`} className="btn-primary text-sm py-2 px-4">
-                            View Details
-                          </Link>
-                        </div>
+                        <Link
+                          href={`/products/${product.id}`}
+                          className="btn-primary text-sm py-2 px-4"
+                        >
+                          View Details
+                        </Link>
                       </div>
                     </div>
                   ) : (
+                    // List View
                     <>
-                                                                     <div className="w-32 h-32 bg-black rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                          <img 
-                            src={product.image_url} 
-                            alt={product.name}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-32 h-32 object-contain rounded-lg flex-shrink-0"
+                      />
                       <div className="flex-1 p-6">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full mb-3">
-                              {product.category}
-                            </span>
-                            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors mb-2">
-                              {product.name}
-                            </h3>
-                            <p className="text-gray-600 mb-4">
-                              {product.description}
-                            </p>
-                            <div className="flex items-center gap-4">
-                              <span className="text-2xl font-bold text-primary-600">
-                                Rs. {product.price}
-                              </span>
-                              <span className="text-sm text-gray-500">
-                                Stock: {product.stock_quantity}
-                              </span>
-                            </div>
-                          </div>
-                          <Link href={`/products/${product.id}`} className="btn-primary">
-                            View Details
-                          </Link>
+                        <h3 className="text-xl font-semibold mb-2">
+                          {product.name}
+                        </h3>
+                        <p className="text-gray-600 mb-4">{product.description}</p>
+                        <div className="flex items-center gap-4">
+                          <span className="text-2xl font-bold text-primary-600">
+                            Rs. {product.price}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            Stock: {product.stock_quantity}
+                          </span>
                         </div>
+                        <Link
+                          href={`/products/${product.id}`}
+                          className="btn-primary mt-4 inline-block"
+                        >
+                          View Details
+                        </Link>
                       </div>
                     </>
                   )}

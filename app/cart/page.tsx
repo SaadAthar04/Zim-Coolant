@@ -1,18 +1,64 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingCart, Trash2, ArrowLeft, CreditCard, Truck, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { useCartStore } from '@/lib/store'
+import { Product } from '@/lib/supabase'
 
 export default function Cart() {
-  const { items, removeItem, updateQuantity, clearCart, getTotalPrice } = useCartStore()
+  const [mounted, setMounted] = useState(false)
+  const [cartItems, setCartItems] = useState<Array<{ product: Product; quantity: number }>>([])
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'success'>('cart')
+
+  useEffect(() => {
+    setMounted(true)
+    // Load cart data from localStorage after mounting
+    if (typeof window !== 'undefined') {
+      try {
+        const storedCart = localStorage.getItem('cart-storage')
+        if (storedCart) {
+          const cartData = JSON.parse(storedCart)
+          setCartItems(cartData.state?.items || [])
+        }
+      } catch (error) {
+        console.error('Error reading cart from localStorage:', error)
+      }
+    }
+  }, [])
+
+  const removeItem = (productId: string) => {
+    const updatedItems = cartItems.filter(item => item.product.id !== productId)
+    setCartItems(updatedItems)
+    // Update localStorage
+    localStorage.setItem('cart-storage', JSON.stringify({ state: { items: updatedItems } }))
+  }
+
+  const updateQuantity = (productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeItem(productId)
+      return
+    }
+    const updatedItems = cartItems.map(item =>
+      item.product.id === productId ? { ...item, quantity } : item
+    )
+    setCartItems(updatedItems)
+    // Update localStorage
+    localStorage.setItem('cart-storage', JSON.stringify({ state: { items: updatedItems } }))
+  }
+
+  const clearCart = () => {
+    setCartItems([])
+    localStorage.setItem('cart-storage', JSON.stringify({ state: { items: [] } }))
+  }
+
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => total + (item.product.price * item.quantity), 0)
+  }
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -66,7 +112,7 @@ export default function Cart() {
     )
   }
 
-  if (items.length === 0) {
+  if (!mounted || cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-white">
         <Navbar />
@@ -125,7 +171,7 @@ export default function Cart() {
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    Cart Items ({items.length})
+                    Cart Items ({cartItems.length})
                   </h2>
                   <button
                     onClick={clearCart}
@@ -137,7 +183,7 @@ export default function Cart() {
 
                 <div className="space-y-6">
                   <AnimatePresence>
-                    {items.map((item, index) => (
+                    {cartItems.map((item, index) => (
                       <motion.div
                         key={item.product.id}
                         initial={{ opacity: 0, x: -50 }}
@@ -147,13 +193,13 @@ export default function Cart() {
                         className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
                       >
                         {/* Product Image */}
-                                                 <div className="w-20 h-20 bg-black rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                           <img 
-                             src={item.product.image_url} 
-                             alt={item.product.name}
-                             className="w-full h-full object-contain"
-                           />
-                         </div>
+                        <div className="w-20 h-20 bg-black rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <img 
+                            src={item.product.image_url} 
+                            alt={item.product.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
 
                         {/* Product Info */}
                         <div className="flex-1 min-w-0">
@@ -163,14 +209,14 @@ export default function Cart() {
                           <p className="text-sm text-gray-600 truncate">
                             {item.product.description}
                           </p>
-                                                     <div className="flex items-center space-x-4 mt-2">
-                             <span className="text-lg font-bold text-primary-600">
-                               Rs. {item.product.price}
-                             </span>
-                             <span className="text-sm text-gray-500">
-                               Stock: {item.product.stock_quantity}
-                             </span>
-                           </div>
+                          <div className="flex items-center space-x-4 mt-2">
+                            <span className="text-lg font-bold text-primary-600">
+                              Rs. {item.product.price}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              Stock: {item.product.stock_quantity}
+                            </span>
+                          </div>
                         </div>
 
                         {/* Quantity Controls */}
@@ -195,9 +241,9 @@ export default function Cart() {
 
                         {/* Total Price */}
                         <div className="text-right min-w-[80px]">
-                                                   <div className="text-lg font-bold text-gray-900">
-                           Rs. {(item.product.price * item.quantity).toFixed(2)}
-                         </div>
+                          <div className="text-lg font-bold text-gray-900">
+                            Rs. {(item.product.price * item.quantity).toFixed(2)}
+                          </div>
                         </div>
 
                         {/* Remove Button */}
@@ -222,24 +268,24 @@ export default function Cart() {
                 </h2>
 
                 <div className="space-y-4 mb-6">
-                                     <div className="flex justify-between text-gray-600">
-                     <span>Subtotal ({items.length} items)</span>
-                     <span>Rs. {getTotalPrice().toFixed(2)}</span>
-                   </div>
-                   <div className="flex justify-between text-gray-600">
-                     <span>Shipping</span>
-                     <span className="text-green-600">Free</span>
-                   </div>
-                   <div className="flex justify-between text-gray-600">
-                     <span>Tax</span>
-                     <span>Rs. {(getTotalPrice() * 0.15).toFixed(2)}</span>
-                   </div>
-                   <div className="border-t border-gray-200 pt-4">
-                     <div className="flex justify-between text-xl font-bold text-gray-900">
-                       <span>Total</span>
-                       <span>Rs. {(getTotalPrice() * 1.15).toFixed(2)}</span>
-                     </div>
-                   </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal ({cartItems.length} items)</span>
+                    <span>Rs. {getTotalPrice().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Shipping</span>
+                    <span className="text-green-600">Free</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Tax</span>
+                    <span>Rs. {(getTotalPrice() * 0.15).toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="flex justify-between text-xl font-bold text-gray-900">
+                      <span>Total</span>
+                      <span>Rs. {(getTotalPrice() * 1.15).toFixed(2)}</span>
+                    </div>
+                  </div>
                 </div>
 
                 <button

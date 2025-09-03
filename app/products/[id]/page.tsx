@@ -8,10 +8,7 @@ import { useParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { useCartStore } from '@/lib/store'
 import { Product, supabase } from '@/lib/supabase'
-
-
 
 export default function ProductDetail() {
   const params = useParams()
@@ -20,12 +17,10 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
   const [loading, setLoading] = useState(true)
-  const { addItem } = useCartStore()
-
-  console.log('ProductDetail component - params:', params)
-  console.log('ProductDetail component - productId:', productId)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     fetchProduct()
   }, [productId])
 
@@ -83,9 +78,34 @@ export default function ProductDetail() {
   }
 
   const handleAddToCart = () => {
-    if (product) {
-      addItem(product, quantity)
-      toast.success(`${quantity} ${product.name} added to cart!`)
+    if (product && mounted) {
+      try {
+        // Access cart store only after mounting
+        const storedCart = localStorage.getItem('cart-storage')
+        let cartData: { state: { items: Array<{ product: Product; quantity: number }> } } = { state: { items: [] } }
+        
+        if (storedCart) {
+          cartData = JSON.parse(storedCart)
+        }
+        
+        // Check if product already exists in cart
+        const existingItemIndex = cartData.state.items.findIndex((item) => item.product.id === product.id)
+        
+        if (existingItemIndex >= 0) {
+          // Update existing item quantity
+          cartData.state.items[existingItemIndex].quantity += quantity
+        } else {
+          // Add new item
+          cartData.state.items.push({ product, quantity })
+        }
+        
+        // Save back to localStorage
+        localStorage.setItem('cart-storage', JSON.stringify(cartData))
+        toast.success(`${quantity} ${product.name} added to cart!`)
+      } catch (error) {
+        console.error('Error adding to cart:', error)
+        toast.error('Failed to add to cart')
+      }
     }
   }
 
@@ -161,13 +181,13 @@ export default function ProductDetail() {
               transition={{ duration: 0.8 }}
               className="space-y-6"
             >
-                               <div className="w-full h-96 bg-black rounded-2xl flex items-center justify-center overflow-hidden">
-                  <img 
-                    src={product.image_url} 
-                    alt={product.name}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
+              <div className="w-full h-96 bg-black rounded-2xl flex items-center justify-center overflow-hidden">
+                <img 
+                  src={product.image_url} 
+                  alt={product.name}
+                  className="w-full h-full object-contain"
+                />
+              </div>
               
               {/* Thumbnail Images */}
               <div className="flex space-x-4">
@@ -196,9 +216,9 @@ export default function ProductDetail() {
             >
               {/* Category and Rating */}
               <div className="space-y-4">
-                                 <span className="inline-block px-4 py-2 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">
-                   {product.category}
-                 </span>
+                <span className="inline-block px-4 py-2 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">
+                  {product.category}
+                </span>
                 
                 <div className="flex items-center space-x-2">
                   <div className="flex items-center space-x-1">
@@ -215,17 +235,17 @@ export default function ProductDetail() {
                 <h1 className="text-4xl font-bold text-gray-900">
                   {product.name}
                 </h1>
-                                 <div className="flex items-baseline space-x-4">
-                   <span className="text-4xl font-bold text-primary-600">
-                     Rs. {product.price}
-                   </span>
-                   <span className="text-lg text-gray-500 line-through">
-                     Rs. {(product.price * 1.2).toFixed(2)}
-                   </span>
-                   <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-medium rounded-full">
-                     Save 20%
-                   </span>
-                 </div>
+                <div className="flex items-baseline space-x-4">
+                  <span className="text-4xl font-bold text-primary-600">
+                    Rs. {product.price}
+                  </span>
+                  <span className="text-lg text-gray-500 line-through">
+                    Rs. {(product.price * 1.2).toFixed(2)}
+                  </span>
+                  <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-medium rounded-full">
+                    Save 20%
+                  </span>
+                </div>
               </div>
 
               {/* Description */}
@@ -247,10 +267,10 @@ export default function ProductDetail() {
               {/* Stock Status */}
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                                  <div className={`w-3 h-3 rounded-full ${product.stock_quantity > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-sm text-gray-600">
-                  {product.stock_quantity > 0 ? `${product.stock_quantity} units in stock` : 'Out of stock'}
-                </span>
+                  <div className={`w-3 h-3 rounded-full ${product.stock_quantity > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <span className="text-sm text-gray-600">
+                    {product.stock_quantity > 0 ? `${product.stock_quantity} units in stock` : 'Out of stock'}
+                  </span>
                 </div>
               </div>
 
@@ -272,7 +292,7 @@ export default function ProductDetail() {
                     <button
                       onClick={() => handleQuantityChange(quantity + 1)}
                       disabled={quantity >= product.stock_quantity}
-                      className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2 hover:bg-gray-50 disabled:cursor-not-allowed"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -281,7 +301,7 @@ export default function ProductDetail() {
 
                 <button
                   onClick={handleAddToCart}
-                  disabled={product.stock_quantity === 0}
+                  disabled={product.stock_quantity === 0 || !mounted}
                   className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   <ShoppingCart className="w-5 h-5" />
@@ -342,13 +362,13 @@ export default function ProductDetail() {
                 >
                   <Link href={`/products/${relatedProduct.id}`}>
                     <div className="p-6">
-                                                                     <div className="w-full h-48 bg-black rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                          <img 
-                            src={relatedProduct.image_url} 
-                            alt={relatedProduct.name}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
+                      <div className="w-full h-48 bg-black rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                        <img 
+                          src={relatedProduct.image_url} 
+                          alt={relatedProduct.name}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                       <div className="space-y-3">
                         <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
                           {relatedProduct.category}
@@ -359,14 +379,14 @@ export default function ProductDetail() {
                         <p className="text-gray-600 text-sm line-clamp-2">
                           {relatedProduct.description}
                         </p>
-                                                 <div className="flex items-center justify-between">
-                           <span className="text-2xl font-bold text-primary-600">
-                             Rs. {relatedProduct.price}
-                           </span>
-                           <span className="text-sm text-gray-500">
-                             Stock: {relatedProduct.stock_quantity}
-                           </span>
-                         </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl font-bold text-primary-600">
+                            Rs. {relatedProduct.price}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            Stock: {relatedProduct.stock_quantity}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Link>

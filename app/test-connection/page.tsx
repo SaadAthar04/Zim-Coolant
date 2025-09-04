@@ -99,7 +99,7 @@ export default function TestConnection() {
                   <h3 className="font-semibold text-lg text-gray-900 mb-2">{product.name}</h3>
                   <p className="text-gray-600 text-sm mb-3">{product.description}</p>
                   <div className="flex justify-between items-center">
-                    <span className="text-primary-600 font-bold">${product.price}</span>
+                    <span className="text-primary-600 font-bold">Rs. {product.price}</span>
                     <span className="text-sm text-gray-500">{product.category}</span>
                   </div>
                   <div className="mt-2 text-xs text-gray-400">

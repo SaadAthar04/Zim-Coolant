@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
@@ -81,22 +81,22 @@ export default function Contact() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-primary pt-32 pb-16">
+      <section className="relative hero-gradient pt-32 pb-16">
         <div className="container-custom">
-          <motion.div
+          <div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Get in <span className="text-gradient">Touch</span>
+              Get in <span className="text-brand-gradient">Touch</span>
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">
               Have questions about our products or need technical support? 
               We're here to help you find the perfect solution for your vehicle.
             </p>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -105,7 +105,7 @@ export default function Contact() {
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Information */}
-            <motion.div
+            <div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -124,7 +124,7 @@ export default function Contact() {
 
               <div className="space-y-6">
                 {contactInfo.map((info, index) => (
-                  <motion.div
+                  <div
                     key={info.title}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -132,21 +132,21 @@ export default function Contact() {
                     viewport={{ once: true }}
                     className="flex items-start space-x-4"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <info.icon className="w-6 h-6 text-primary-600" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-brand-light to-brand-bright/30 rounded-xl flex items-center justify-center flex-shrink-0 shadow-glow">
+                      <info.icon className="w-6 h-6 text-brand-dark" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         {info.title}
                       </h3>
-                      <p className="text-primary-600 font-medium mb-1">
+                      <p className="text-brand-bright font-medium mb-1">
                         {info.details}
                       </p>
                       <p className="text-gray-600 text-sm">
                         {info.description}
                       </p>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
 
@@ -161,10 +161,10 @@ export default function Contact() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Contact Form */}
-            <motion.div
+            <div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -172,7 +172,7 @@ export default function Contact() {
               className="card p-8"
             >
               {isSubmitted ? (
-                <motion.div
+                <div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-12"
@@ -190,7 +190,7 @@ export default function Contact() {
                   >
                     Send Another Message
                   </button>
-                </motion.div>
+                </div>
               ) : (
                 <>
                   <h2 className="text-3xl font-bold text-gray-900 mb-6">
@@ -209,7 +209,7 @@ export default function Contact() {
                           value={formData.name}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors"
                           placeholder="Enter your full name"
                         />
                       </div>
@@ -224,7 +224,7 @@ export default function Contact() {
                           value={formData.email}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors"
                           placeholder="Enter your email"
                         />
                       </div>
@@ -241,7 +241,7 @@ export default function Contact() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors"
                           placeholder="Enter your phone number"
                         />
                       </div>
@@ -255,7 +255,7 @@ export default function Contact() {
                           value={formData.subject}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors"
                         >
                           <option value="">Select a subject</option>
                           <option value="product-inquiry">Product Inquiry</option>
@@ -278,7 +278,7 @@ export default function Contact() {
                         onChange={handleInputChange}
                         required
                         rows={6}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors resize-none"
                         placeholder="Tell us how we can help you..."
                       />
                     </div>
@@ -303,7 +303,7 @@ export default function Contact() {
                   </form>
                 </>
               )}
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -311,7 +311,7 @@ export default function Contact() {
       {/* FAQ Section */}
       <section className="py-16 bg-gray-50">
         <div className="container-custom">
-          <motion.div
+          <div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -324,7 +324,7 @@ export default function Contact() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Find quick answers to common questions about our products and services.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
@@ -345,7 +345,7 @@ export default function Contact() {
                 answer: "Absolutely! Our technical team can help you select the perfect product for your specific vehicle and requirements."
               }
             ].map((faq, index) => (
-              <motion.div
+              <div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -359,7 +359,7 @@ export default function Contact() {
                 <p className="text-gray-600 leading-relaxed">
                   {faq.answer}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

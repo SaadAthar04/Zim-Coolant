@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: 'Zim Coolant - Premium Engine Oil & Coolant Solutions',
@@ -17,7 +16,6 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans">
         {children}
-        <Toaster position="top-right" />
       </body>
     </html>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { ArrowRight, Shield, Zap, Users, Award } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
@@ -75,10 +75,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-secondary-50/50"></div>
         <div className="relative container-custom section-padding">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
+            <div
               className="space-y-8"
             >
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
@@ -99,18 +96,15 @@ export default function Home() {
                   Learn More
                 </Link>
               </div>
-            </motion.div>
+            </div>
             
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+            <div
               className="relative"
             >
               <div className="relative z-10">
-                <div className="bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500 border-brand-glow">
                   <div className="space-y-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-xl flex items-center justify-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-brand-bright to-brand-dark rounded-xl flex items-center justify-center shadow-glow">
                       <span className="text-white font-bold text-2xl">Z</span>
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900">Premium Quality</h3>
@@ -118,9 +112,9 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-accent-400 to-accent-600 rounded-full opacity-20 animate-bounce-gentle"></div>
-              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full opacity-20 animate-bounce-gentle" style={{ animationDelay: '1s' }}></div>
-            </motion.div>
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-brand-bright to-brand-dark rounded-full opacity-20 animate-bounce-gentle"></div>
+              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-br from-brand-dark to-brand-bright rounded-full opacity-20 animate-bounce-gentle" style={{ animationDelay: '1s' }}></div>
+            </div>
           </div>
         </div>
       </section>
@@ -128,11 +122,7 @@ export default function Home() {
       {/* Features Section */}
       <section className="section-padding bg-white">
         <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+          <div
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -142,20 +132,16 @@ export default function Home() {
               We provide the highest quality automotive fluids backed by years of expertise 
               and commitment to excellence.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <motion.div
+              <div
                 key={feature.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
                 className="text-center group"
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <feature.icon className="w-8 h-8 text-primary-600" />
+                <div className="w-16 h-16 bg-gradient-to-br from-brand-light to-brand-bright/30 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-glow hover:shadow-glow-lg">
+                  <feature.icon className="w-8 h-8 text-brand-dark" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {feature.title}
@@ -163,7 +149,7 @@ export default function Home() {
                 <p className="text-gray-600 leading-relaxed">
                   {feature.description}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -172,11 +158,7 @@ export default function Home() {
       {/* Featured Products Section */}
       <section className="section-padding bg-gray-50">
         <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+          <div
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -185,7 +167,7 @@ export default function Home() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Discover our premium selection of engine oils and coolants designed for optimal performance.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {loading ? (
@@ -194,12 +176,8 @@ export default function Home() {
               <p>No featured products found.</p>
             ) : (
               featuredProducts.map((product, index) => (
-                <motion.div
+                <div
                   key={product.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
                   className="card group cursor-pointer"
                 >
                   <div className="p-6">
@@ -230,34 +208,26 @@ export default function Home() {
                        </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))
             )}
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
+          <div
             className="text-center mt-12"
           >
             <Link href="/products" className="btn-outline inline-flex items-center space-x-2">
               <span>View All Products</span>
               <ArrowRight className="w-5 h-5" />
             </Link>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="section-padding bg-gradient-to-r from-primary-600 to-primary-700">
         <div className="container-custom text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+          <div
             className="max-w-3xl mx-auto space-y-6"
           >
             <h2 className="text-4xl font-bold text-white">
@@ -274,7 +244,7 @@ export default function Home() {
                 Contact Us
               </Link>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 

@@ -6,6 +6,11 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
+  // Increase timeout for chunk loading
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
 }
 
 module.exports = nextConfig

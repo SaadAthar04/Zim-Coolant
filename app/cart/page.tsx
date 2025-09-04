@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+// import { motion, div } from 'framer-motion'
 import { ShoppingCart, Trash2, ArrowLeft, CreditCard, Truck, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
@@ -85,7 +85,7 @@ export default function Cart() {
       <div className="min-h-screen bg-white">
         <Navbar />
         <div className="container-custom py-32">
-          <motion.div
+          <div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="max-w-2xl mx-auto text-center"
@@ -105,7 +105,7 @@ export default function Cart() {
                 Back to Home
               </Link>
             </div>
-          </motion.div>
+          </div>
         </div>
         <Footer />
       </div>
@@ -117,7 +117,7 @@ export default function Cart() {
       <div className="min-h-screen bg-white">
         <Navbar />
         <div className="container-custom py-32">
-          <motion.div
+          <div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             className="max-w-2xl mx-auto text-center"
@@ -132,7 +132,7 @@ export default function Cart() {
             <Link href="/products" className="btn-primary">
               Start Shopping
             </Link>
-          </motion.div>
+          </div>
         </div>
         <Footer />
       </div>
@@ -146,7 +146,7 @@ export default function Cart() {
       {/* Hero Section */}
       <section className="relative bg-gradient-primary pt-32 pb-16">
         <div className="container-custom">
-          <motion.div
+          <div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -158,7 +158,7 @@ export default function Cart() {
             <p className="text-xl text-gray-600 leading-relaxed">
               Review your items and proceed to checkout
             </p>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -182,9 +182,9 @@ export default function Cart() {
                 </div>
 
                 <div className="space-y-6">
-                  <AnimatePresence>
+                  <div>
                     {cartItems.map((item, index) => (
-                      <motion.div
+                      <div
                         key={item.product.id}
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -210,7 +210,7 @@ export default function Cart() {
                             {item.product.description}
                           </p>
                           <div className="flex items-center space-x-4 mt-2">
-                            <span className="text-lg font-bold text-primary-600">
+                            <span className="text-lg font-bold text-brand-bright">
                               Rs. {item.product.price}
                             </span>
                             <span className="text-sm text-gray-500">
@@ -253,9 +253,9 @@ export default function Cart() {
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
-                      </motion.div>
+                      </div>
                     ))}
-                  </AnimatePresence>
+                  </div>
                 </div>
               </div>
             </div>
@@ -308,10 +308,10 @@ export default function Cart() {
 
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <Truck className="w-5 h-5 text-primary-600" />
+                    <Truck className="w-5 h-5 text-brand-bright" />
                     <div className="text-sm">
                       <p className="font-medium text-gray-900">Free Shipping</p>
-                      <p className="text-gray-600">Orders over $50</p>
+                      <p className="text-gray-600">Orders over Rs. 50</p>
                     </div>
                   </div>
                 </div>
@@ -330,7 +330,7 @@ export default function Cart() {
           </div>
 
           {/* Continue Shopping */}
-          <motion.div
+          <div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -340,7 +340,7 @@ export default function Cart() {
               <ArrowLeft className="w-5 h-5" />
               <span>Continue Shopping</span>
             </Link>
-          </motion.div>
+          </div>
         </div>
       </section>
 

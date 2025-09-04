@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { ShoppingCart, Star, Truck, Shield, ArrowLeft, Minus, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -175,7 +175,7 @@ export default function ProductDetail() {
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Product Images */}
-            <motion.div
+            <div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -205,10 +205,10 @@ export default function ProductDetail() {
                   </button>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
             {/* Product Info */}
-            <motion.div
+            <div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -326,7 +326,7 @@ export default function ProductDetail() {
                   <p className="text-sm text-gray-600">Premium Grade</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -335,7 +335,7 @@ export default function ProductDetail() {
       {relatedProducts.length > 0 && (
         <section className="py-16 bg-gray-50">
           <div className="container-custom">
-            <motion.div
+            <div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
@@ -348,11 +348,11 @@ export default function ProductDetail() {
               <p className="text-xl text-gray-600">
                 You might also be interested in these products
               </p>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {relatedProducts.map((relatedProduct, index) => (
-                <motion.div
+                <div
                   key={relatedProduct.id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -390,7 +390,7 @@ export default function ProductDetail() {
                       </div>
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>

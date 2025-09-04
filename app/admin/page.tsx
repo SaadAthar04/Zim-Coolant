@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+// import { motion } from 'framer-motion'
 import { 
   BarChart3, 
   TrendingUp, 
   Users, 
   Package, 
-  DollarSign, 
+  IndianRupee, 
   ShoppingCart,
   Eye,
   Edit,
@@ -16,37 +16,196 @@ import {
   Search,
   Filter,
   Calendar,
-  Download
+  Download,
+  LogOut
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { supabase } from '@/lib/supabase'
+import { checkAdminAuth, logoutAdmin } from '@/lib/auth'
+import { useRouter } from 'next/navigation'
 
-// Mock data for admin dashboard
-const mockStats = [
-  { title: 'Total Sales', value: '$24,567', change: '+12.5%', icon: DollarSign, color: 'text-green-600' },
-  { title: 'Orders', value: '156', change: '+8.2%', icon: ShoppingCart, color: 'text-blue-600' },
-  { title: 'Customers', value: '89', change: '+15.3%', icon: Users, color: 'text-purple-600' },
-  { title: 'Products', value: '24', change: '+2.1%', icon: Package, color: 'text-orange-600' }
-]
+// Types for admin dashboard data
+interface DashboardStats {
+  title: string
+  value: string
+  change: string
+  icon: any
+  color: string
+}
 
-const mockRecentOrders = [
-  { id: '#ORD-001', customer: 'John Doe', product: 'Premium Engine Oil 5W-30', amount: 45.99, status: 'completed', date: '2024-01-15' },
-  { id: '#ORD-002', customer: 'Jane Smith', product: 'Advanced Coolant Formula', amount: 32.99, status: 'processing', date: '2024-01-14' },
-  { id: '#ORD-003', customer: 'Mike Johnson', product: 'Heavy Duty Engine Oil 15W-40', amount: 52.99, status: 'shipped', date: '2024-01-13' },
-  { id: '#ORD-004', customer: 'Sarah Wilson', product: 'Universal Coolant Concentrate', amount: 28.99, status: 'pending', date: '2024-01-12' },
-  { id: '#ORD-005', customer: 'David Brown', product: 'Synthetic Engine Oil 0W-20', amount: 48.99, status: 'completed', date: '2024-01-11' }
-]
+interface Order {
+  id: string
+  customer: string
+  product: string
+  amount: number
+  status: string
+  date: string
+}
 
-const mockTopProducts = [
-  { name: 'Premium Engine Oil 5W-30', sales: 45, revenue: 2070.55, stock_quantity: 150 },
-  { name: 'Advanced Coolant Formula', sales: 38, revenue: 1253.62, stock_quantity: 200 },
-  { name: 'Heavy Duty Engine Oil 15W-40', sales: 32, revenue: 1695.68, stock_quantity: 100 },
-  { name: 'Universal Coolant Concentrate', sales: 28, revenue: 811.72, stock_quantity: 300 }
-]
+interface TopProduct {
+  name: string
+  sales: number
+  revenue: number
+  stock_quantity: number
+}
 
 export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('7d')
   const [searchTerm, setSearchTerm] = useState('')
+  const [stats, setStats] = useState<DashboardStats[]>([])
+  const [recentOrders, setRecentOrders] = useState<Order[]>([])
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const router = useRouter()
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const authCheck = checkAdminAuth()
+    if (!authCheck) {
+      router.push('/admin/login')
+    } else {
+      setIsAuthenticated(true)
+    }
+  }, [router])
+
+  const handleLogout = () => {
+    logoutAdmin()
+    router.push('/admin/login')
+  }
+
+  // Fetch dashboard data from Supabase
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true)
+        
+        // Fetch products count
+        const { count: productsCount } = await supabase
+          .from('products')
+          .select('*', { count: 'exact', head: true })
+
+        // Fetch orders count (if orders table exists)
+        const { count: ordersCount } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+
+        // Calculate total sales from orders
+        const { data: allOrders } = await supabase
+          .from('orders')
+          .select('total_amount')
+
+        const totalSales = allOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+
+        // Calculate stats
+        const dashboardStats: DashboardStats[] = [
+          { 
+            title: 'Total Sales', 
+            value: `Rs. ${totalSales.toFixed(2)}`, 
+            change: '+0%', 
+            icon: IndianRupee, 
+            color: 'text-green-600' 
+          },
+          { 
+            title: 'Orders', 
+            value: ordersCount?.toString() || '0', 
+            change: '+0%', 
+            icon: ShoppingCart, 
+            color: 'text-blue-600' 
+          },
+          { 
+            title: 'Customers', 
+            value: allOrders?.length?.toString() || '0', 
+            change: '+0%', 
+            icon: Users, 
+            color: 'text-purple-600' 
+          },
+          { 
+            title: 'Products', 
+            value: productsCount?.toString() || '0', 
+            change: '+0%', 
+            icon: Package, 
+            color: 'text-orange-600' 
+          }
+        ]
+
+        setStats(dashboardStats)
+
+        // Fetch recent orders (if orders table exists)
+        const { data: ordersData } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5)
+
+        if (ordersData) {
+          const orders: Order[] = ordersData.map(order => ({
+            id: order.id,
+            customer: order.customer_name || 'Unknown',
+            product: order.product_name || 'Unknown Product',
+            amount: order.total_amount || 0,
+            status: order.status || 'pending',
+            date: new Date(order.created_at).toISOString().split('T')[0]
+          }))
+          setRecentOrders(orders)
+        }
+
+        // Fetch top products with real sales data
+        const { data: productsData } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(4)
+
+        if (productsData) {
+          // Calculate real sales data from orders
+          const topProductsData: TopProduct[] = await Promise.all(
+            productsData.map(async (product) => {
+              // Get orders that contain this product
+              const { data: orderItems } = await supabase
+                .from('orders')
+                .select('items, total_amount')
+                .contains('items', [{ id: product.id }])
+
+              let totalSales = 0
+              let totalRevenue = 0
+
+              if (orderItems) {
+                orderItems.forEach(order => {
+                  // Find the specific item in the order
+                  const item = order.items.find((item: any) => item.id === product.id)
+                  if (item) {
+                    totalSales += item.quantity || 0
+                    totalRevenue += (item.quantity || 0) * item.price
+                  }
+                })
+              }
+
+              return {
+                name: product.name,
+                sales: totalSales,
+                revenue: totalRevenue,
+                stock_quantity: product.stock_quantity || 0
+              }
+            })
+          )
+          setTopProducts(topProductsData)
+        }
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error)
+        // Set empty data on error
+        setStats([])
+        setRecentOrders([])
+        setTopProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -62,6 +221,18 @@ export default function AdminDashboard() {
     return status.charAt(0).toUpperCase() + status.slice(1)
   }
 
+  // Show loading or redirect if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-brand-bright border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -69,10 +240,19 @@ export default function AdminDashboard() {
       {/* Hero Section */}
       <section className="relative bg-gradient-primary pt-32 pb-16">
         <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+          <div className="flex justify-between items-start mb-8">
+            <div></div>
+            {isAuthenticated && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+            )}
+          </div>
+          <div
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
@@ -81,7 +261,7 @@ export default function AdminDashboard() {
             <p className="text-xl text-gray-600 leading-relaxed">
               Monitor your business performance, manage orders, and track sales analytics
             </p>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -89,12 +269,24 @@ export default function AdminDashboard() {
       <section className="py-16 bg-white">
         <div className="container-custom">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {mockStats.map((stat, index) => (
-              <motion.div
+            {loading ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="card p-6 animate-pulse">
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                    <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="mt-4">
+                    <div className="w-20 h-6 bg-gray-200 rounded mb-2"></div>
+                    <div className="w-16 h-4 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              stats.map((stat, index) => (
+              <div
                 key={stat.title}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="card p-6"
               >
                 <div className="flex items-center justify-between">
@@ -107,8 +299,9 @@ export default function AdminDashboard() {
                     <stat.icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
                 </div>
-              </motion.div>
-            ))}
+              </div>
+            ))
+            )}
           </div>
         </div>
       </section>
@@ -118,11 +311,7 @@ export default function AdminDashboard() {
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Sales Chart */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
+            <div
               className="card p-6"
             >
               <div className="flex items-center justify-between mb-6">
@@ -130,7 +319,7 @@ export default function AdminDashboard() {
                 <select
                   value={selectedPeriod}
                   onChange={(e) => setSelectedPeriod(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-bright focus:border-transparent"
                 >
                   <option value="7d">Last 7 days</option>
                   <option value="30d">Last 30 days</option>
@@ -145,38 +334,34 @@ export default function AdminDashboard() {
                   <p className="text-gray-400 text-sm">Interactive chart showing sales trends</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Top Products */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
+            <div
               className="card p-6"
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Top Products</h3>
-                <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                <button className="text-brand-bright hover:text-brand-dark text-sm font-medium">
                   View All
                 </button>
               </div>
               
               <div className="space-y-4">
-                {mockTopProducts.map((product, index) => (
+                {topProducts.map((product, index) => (
                   <div key={product.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{product.name}</p>
                       <p className="text-sm text-gray-600">{product.sales} sales</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-gray-900">${product.revenue}</p>
+                      <p className="font-medium text-gray-900">Rs. {product.revenue}</p>
                       <p className="text-sm text-gray-600">Stock: {product.stock_quantity}</p>
                     </div>
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -184,11 +369,7 @@ export default function AdminDashboard() {
       {/* Recent Orders */}
       <section className="py-16 bg-white">
         <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+          <div
             className="card p-6"
           >
             <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
@@ -201,7 +382,7 @@ export default function AdminDashboard() {
                     placeholder="Search orders..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-bright focus:border-transparent"
                   />
                 </div>
                 <button className="btn-primary text-sm py-2 px-4">
@@ -225,18 +406,15 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockRecentOrders.map((order, index) => (
-                    <motion.tr
+                  {recentOrders.map((order, index) => (
+                    <tr
                       key={order.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
                       className="border-b border-gray-100 hover:bg-gray-50"
                     >
                       <td className="py-3 px-4 font-medium text-gray-900">{order.id}</td>
                       <td className="py-3 px-4 text-gray-600">{order.customer}</td>
                       <td className="py-3 px-4 text-gray-600">{order.product}</td>
-                      <td className="py-3 px-4 font-medium text-gray-900">${order.amount}</td>
+                      <td className="py-3 px-4 font-medium text-gray-900">Rs. {order.amount}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                           {getStatusLabel(order.status)}
@@ -256,23 +434,19 @@ export default function AdminDashboard() {
                           </button>
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Quick Actions */}
       <section className="py-16 bg-gray-50">
         <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+          <div
             className="text-center mb-12"
           >
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -281,7 +455,7 @@ export default function AdminDashboard() {
             <p className="text-xl text-gray-600">
               Manage your business operations efficiently
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
@@ -290,12 +464,8 @@ export default function AdminDashboard() {
               { title: 'Analytics', icon: TrendingUp, color: 'bg-purple-500', description: 'View detailed reports' },
               { title: 'Export Data', icon: Download, color: 'bg-orange-500', description: 'Download business data' }
             ].map((action, index) => (
-              <motion.div
+              <div
                 key={action.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
                 className="card p-6 text-center cursor-pointer hover:shadow-xl transition-shadow group"
               >
                 <div className={`w-16 h-16 ${action.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
@@ -307,7 +477,7 @@ export default function AdminDashboard() {
                 <p className="text-gray-600 text-sm">
                   {action.description}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

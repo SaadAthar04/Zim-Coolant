@@ -6,63 +6,75 @@ export default function Footer() {
     <footer className="bg-gray-900 text-white">
       <div className="container-custom section-padding">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-24">
-          {/* Company Info */}
+          {/* Company Info - Left */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-brand-bright to-brand-dark rounded-lg flex items-center justify-center shadow-glow">
                 <span className="text-white font-bold text-sm">Z</span>
               </div>
-              <span className="text-lg font-bold">Zim Coolant</span>
+              <span className="text-lg font-bold navbar-brand">Zim Coolant</span>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
               Premium quality engine oils and coolants for optimal vehicle performance. 
               Professional-grade products for automotive excellence.
             </p>
             <div className="flex space-x-4">
-              {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
-                <a key={i} href="#" className="text-gray-400 hover:text-primary-400 transition-colors">
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
+              <a href="#" className="text-gray-400 hover:text-brand-bright transition-colors hover:scale-110 transform duration-200">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-brand-bright transition-colors hover:scale-110 transform duration-200">
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-brand-bright transition-colors hover:scale-110 transform duration-200">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-brand-bright transition-colors hover:scale-110 transform duration-200">
+                <Linkedin className="w-5 h-5" />
+              </a>
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links - Center */}
           <div className="space-y-4 flex flex-col items-center justify-center">
             <h3 className="text-lg font-semibold">Quick Links</h3>
             <ul className="space-y-2 text-center">
-              {[
-                { name: 'Home', href: '/' },
-                { name: 'About Us', href: '/about' },
-                { name: 'Products', href: '/products' },
-                { name: 'Contact', href: '/contact' }
-              ].map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-300 hover:text-primary-400 transition-colors text-sm"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link href="/" className="text-gray-300 hover:text-brand-bright transition-colors text-sm hover:scale-105 transform duration-200">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="text-gray-300 hover:text-brand-bright transition-colors text-sm hover:scale-105 transform duration-200">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/products" className="text-gray-300 hover:text-brand-bright transition-colors text-sm hover:scale-105 transform duration-200">
+                  Products
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-300 hover:text-brand-bright transition-colors text-sm hover:scale-105 transform duration-200">
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact Info - Right */}
           <div className="space-y-4 flex flex-col items-center md:items-end">
             <h3 className="text-lg font-semibold">Contact Info</h3>
             <div className="space-y-3 text-center md:text-right">
               <div className="flex items-center space-x-3 md:justify-end">
-                <MapPin className="w-5 h-5 text-primary-400" />
+                <MapPin className="w-5 h-5 text-brand-bright" />
                 <span className="text-gray-300 text-sm">123 Business Ave, Harare, Zimbabwe</span>
               </div>
               <div className="flex items-center space-x-3 md:justify-end">
-                <Phone className="w-5 h-5 text-primary-400" />
+                <Phone className="w-5 h-5 text-brand-bright" />
                 <span className="text-gray-300 text-sm">+263 123 456 789</span>
               </div>
               <div className="flex items-center space-x-3 md:justify-end">
-                <Mail className="w-5 h-5 text-primary-400" />
+                <Mail className="w-5 h-5 text-brand-bright" />
                 <span className="text-gray-300 text-sm">info@zimcoolant.com</span>
               </div>
             </div>
@@ -76,12 +88,12 @@ export default function Footer() {
               © 2024 Zim Coolant. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
-              <Link href="/privacy" className="text-gray-400 hover:text-primary-400 transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-gray-400 hover:text-primary-400 transition-colors">
-                Terms of Service
-              </Link>
+                             <Link href="/privacy" className="text-gray-400 hover:text-brand-bright transition-colors">
+                 Privacy Policy
+               </Link>
+               <Link href="/terms" className="text-gray-400 hover:text-brand-bright transition-colors">
+                 Terms of Service
+               </Link>
             </div>
           </div>
         </div>

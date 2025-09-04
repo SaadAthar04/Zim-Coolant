@@ -1,24 +1,13 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { Search, Filter, Grid3X3, List, ArrowUpDown } from 'lucide-react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-
-interface Product {
-  id: string
-  name: string
-  description: string
-  price: number
-  category: string
-  image_url: string
-  stock_quantity: number
-  specifications?: any
-  created_at: string
-  updated_at: string
-}
+import { supabase } from '@/lib/supabase'
+import { Product } from '@/lib/supabase'
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([])
@@ -38,48 +27,24 @@ export default function Products() {
     setViewMode('grid')
   }
 
-  // Fetch mock products
+  // Fetch products from Supabase
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const mockProducts: Product[] = [
-          {
-            id: '1',
-            name: 'Premium Coolant',
-            description: 'High-performance engine coolant for optimal temperature regulation',
-            price: 25.99,
-            category: 'Coolant',
-            image_url: '/images/coolant-1.jpg',
-            stock_quantity: 100,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: '2',
-            name: 'ATF Fluid',
-            description: 'Automatic transmission fluid for smooth gear operation',
-            price: 32.99,
-            category: 'ATF',
-            image_url: '/images/atf-1.jpg',
-            stock_quantity: 75,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: '3',
-            name: 'Gear Oil Premium',
-            description: 'Heavy-duty gear oil for maximum protection',
-            price: 28.99,
-            category: 'Gear Oil',
-            image_url: '/images/gear-oil-1.jpg',
-            stock_quantity: 50,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ]
-        setProducts(mockProducts)
-        setFilteredProducts(mockProducts)
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.error('Error fetching products:', error)
+          setProducts([])
+          setFilteredProducts([])
+        } else {
+          setProducts(data || [])
+          setFilteredProducts(data || [])
+        }
       } catch (error) {
         console.error('Error:', error)
       } finally {
@@ -145,14 +110,9 @@ export default function Products() {
       {/* Hero Section */}
       <section className="bg-gradient-primary">
         <div className="container-custom section-padding text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6"
-          >
+          <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
             Our <span className="text-gradient">Products</span>
-          </motion.h1>
+          </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Discover our premium selection of engine oils and coolants designed
             for optimal performance and protection of your vehicle.
@@ -253,7 +213,7 @@ export default function Products() {
               <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                 No products found
               </h3>
-              <button onClick={resetAllFilters} className="btn-primary">
+              <button onClick={resetAllFilters} className="btn-primary animate-pulse-green">
                 Clear All Filters
               </button>
             </div>
@@ -266,11 +226,8 @@ export default function Products() {
               }
             >
               {filteredProducts.map((product, i) => (
-                <motion.div
+                <div
                   key={product.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
                   className={`card group cursor-pointer ${viewMode === 'list' ? 'flex' : ''
                     }`}
                 >
@@ -287,7 +244,7 @@ export default function Products() {
                         {product.description}
                       </p>
                       <div className="flex items-center justify-between mt-4">
-                        <span className="text-2xl font-bold text-primary-600">
+                        <span className="text-2xl font-bold text-brand-bright">
                           Rs. {product.price}
                         </span>
                         <Link
@@ -312,7 +269,7 @@ export default function Products() {
                         </h3>
                         <p className="text-gray-600 mb-4">{product.description}</p>
                         <div className="flex items-center gap-4">
-                          <span className="text-2xl font-bold text-primary-600">
+                          <span className="text-2xl font-bold text-brand-bright">
                             Rs. {product.price}
                           </span>
                           <span className="text-sm text-gray-500">
@@ -328,7 +285,7 @@ export default function Products() {
                       </div>
                     </>
                   )}
-                </motion.div>
+                </div>
               ))}
             </div>
           )}

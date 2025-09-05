@@ -2,6 +2,9 @@
   "name": "zim-coolant-website",
   "version": "0.1.0",
   "private": true,
+  "description": "Zim Coolant - Professional coolant and automotive fluids e-commerce website with admin dashboard (Pakistani Rupees)",
+  "keywords": ["ecommerce", "coolant", "automotive", "nextjs", "supabase", "admin-dashboard"],
+  "author": "Zim Coolant",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -18,6 +21,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
+    "recharts": "^3.1.2",
     "tailwind-merge": "^2.0.0",
     "zustand": "^4.4.6"
   },

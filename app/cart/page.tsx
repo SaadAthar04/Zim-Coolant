@@ -1,19 +1,26 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-// import { motion, div } from 'framer-motion'
 import { ShoppingCart, Trash2, ArrowLeft, CreditCard, Truck, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { Product } from '@/lib/supabase'
+import { Product, supabase } from '@/lib/supabase'
 
 export default function Cart() {
   const [mounted, setMounted] = useState(false)
   const [cartItems, setCartItems] = useState<Array<{ product: Product; quantity: number }>>([])
   const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false)
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'success'>('cart')
+  const [customerDetails, setCustomerDetails] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: ''
+  })
+  const [orderId, setOrderId] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -36,6 +43,8 @@ export default function Cart() {
     setCartItems(updatedItems)
     // Update localStorage
     localStorage.setItem('cart-storage', JSON.stringify({ state: { items: updatedItems } }))
+    // Dispatch cart update event to sync navbar
+    window.dispatchEvent(new CustomEvent('cartUpdated'))
   }
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -49,11 +58,15 @@ export default function Cart() {
     setCartItems(updatedItems)
     // Update localStorage
     localStorage.setItem('cart-storage', JSON.stringify({ state: { items: updatedItems } }))
+    // Dispatch cart update event to sync navbar
+    window.dispatchEvent(new CustomEvent('cartUpdated'))
   }
 
   const clearCart = () => {
     setCartItems([])
     localStorage.setItem('cart-storage', JSON.stringify({ state: { items: [] } }))
+    // Dispatch cart update event to sync navbar
+    window.dispatchEvent(new CustomEvent('cartUpdated'))
   }
 
   const getTotalPrice = () => {
@@ -69,15 +82,75 @@ export default function Cart() {
     }
   }
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
+    if (cartItems.length === 0 || isCheckingOut) return
+    
+    // Validate customer details
+    if (!customerDetails.name || !customerDetails.email) {
+      toast.error('Please fill in your name and email')
+      return
+    }
+    
     setIsCheckingOut(true)
-    // Simulate checkout process
-    setTimeout(() => {
-      setCheckoutStep('success')
-      setIsCheckingOut(false)
-      clearCart()
+    
+    try {
+      // Calculate order totals
+      const subtotal = getTotalPrice()
+      const shippingCost = subtotal > 50 ? 0 : 10 // Free shipping over Rs. 50
+      const taxAmount = subtotal * 0.15 // 15% tax
+      const totalAmount = subtotal + shippingCost + taxAmount
+      
+      // Prepare order data
+      const orderData = {
+        customer_name: customerDetails.name,
+        customer_email: customerDetails.email,
+        customer_phone: customerDetails.phone || null,
+        shipping_address: customerDetails.address || null,
+        items: cartItems.map(item => ({
+          product_id: item.product.id,
+          product_name: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price
+        })),
+        subtotal: subtotal,
+        shipping_cost: shippingCost,
+        tax_amount: taxAmount,
+        total_amount: totalAmount,
+        status: 'pending',
+        payment_status: 'pending'
+      }
+      
+      // Save order to database
+      const { data, error } = await supabase
+        .from('orders')
+        .insert([orderData])
+        .select()
+        .single()
+      
+      if (error) {
+        throw error
+      }
+      
+      // Show success state
+      setOrderId(data.id)
+      setCheckoutSuccess(true)
       toast.success('Order placed successfully!')
-    }, 3000)
+      
+      // Clear cart and show success page
+      clearCart()
+      setCheckoutStep('success')
+      
+      // Reset success state after 3 seconds
+      setTimeout(() => {
+        setCheckoutSuccess(false)
+      }, 3000)
+      
+    } catch (error) {
+      console.error('Checkout error:', error)
+      toast.error('Checkout failed. Please try again.')
+    } finally {
+      setIsCheckingOut(false)
+    }
   }
 
   if (checkoutStep === 'success') {
@@ -94,9 +167,15 @@ export default function Cart() {
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Thank You for Your Order!
             </h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-600 mb-4">
               Your order has been placed successfully. We'll send you a confirmation email with order details.
             </p>
+            {orderId && (
+              <div className="bg-gray-50 rounded-lg p-4 mb-8">
+                <p className="text-sm text-gray-600 mb-1">Order ID:</p>
+                <p className="text-lg font-mono font-semibold text-gray-900">{orderId}</p>
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/products" className="btn-primary">
                 Continue Shopping
@@ -288,23 +367,118 @@ export default function Cart() {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleCheckout}
-                  disabled={isCheckingOut}
-                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                >
-                  {isCheckingOut ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Processing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-5 h-5" />
-                      <span>Proceed to Checkout</span>
-                    </>
-                  )}
-                </button>
+                {/* Checkout Form */}
+                {checkoutStep === 'checkout' && (
+                  <div className="mt-6 p-6 bg-gray-50 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Details</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={customerDetails.name}
+                          onChange={(e) => setCustomerDetails(prev => ({ ...prev, name: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                          placeholder="Enter your full name"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          value={customerDetails.email}
+                          onChange={(e) => setCustomerDetails(prev => ({ ...prev, email: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                          placeholder="Enter your email"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          value={customerDetails.phone}
+                          onChange={(e) => setCustomerDetails(prev => ({ ...prev, phone: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                          placeholder="Enter your phone number"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Shipping Address
+                        </label>
+                        <textarea
+                          value={customerDetails.address}
+                          onChange={(e) => setCustomerDetails(prev => ({ ...prev, address: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                          placeholder="Enter your shipping address"
+                          rows={3}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-4 flex space-x-3">
+                      <button
+                        onClick={() => setCheckoutStep('cart')}
+                        className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Back to Cart
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {checkoutStep === 'cart' ? (
+                  <button
+                    onClick={() => setCheckoutStep('checkout')}
+                    disabled={cartItems.length === 0}
+                    className={`w-full min-h-[48px] flex items-center justify-center space-x-2 transition-all duration-300 ${
+                      cartItems.length === 0
+                        ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                        : 'btn-primary'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    <span className="whitespace-nowrap">
+                      {cartItems.length === 0 ? 'Cart is Empty' : 'Proceed to Checkout'}
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleCheckout}
+                    disabled={isCheckingOut}
+                    className={`w-full min-h-[48px] flex items-center justify-center space-x-2 transition-all duration-300 ${
+                      checkoutSuccess 
+                        ? 'bg-green-600 hover:bg-green-700 text-white' 
+                        : isCheckingOut 
+                          ? 'bg-gray-400 cursor-not-allowed text-white' 
+                          : 'btn-primary'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {isCheckingOut ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <span className="whitespace-nowrap">Processing Order...</span>
+                      </>
+                    ) : checkoutSuccess ? (
+                      <>
+                        <CheckCircle className="w-5 h-5" />
+                        <span className="whitespace-nowrap">Order Placed!</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-5 h-5" />
+                        <span className="whitespace-nowrap">Place Order</span>
+                      </>
+                    )}
+                  </button>
+                )}
 
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">

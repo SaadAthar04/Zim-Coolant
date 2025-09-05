@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-// import { motion } from 'framer-motion'
 import { Search, Filter, Grid3X3, List, ArrowUpDown } from 'lucide-react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'

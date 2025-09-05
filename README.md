@@ -1,6 +1,6 @@
 # Zim Coolant - Premium Engine Oil & Coolant Website
 
-A modern, responsive website for Zim Coolant, a premium engine oil and coolant company. Built with Next.js 14, TypeScript, Tailwind CSS, and Supabase for a serverless backend.
+A modern, responsive website for Zim Coolant, a premium engine oil and coolant company based in Pakistan. Built with Next.js 14, TypeScript, Tailwind CSS, and Supabase for a serverless backend. All pricing is displayed in Pakistani Rupees (Rs.).
 
 ## 🚀 Features
 
@@ -14,10 +14,12 @@ A modern, responsive website for Zim Coolant, a premium engine oil and coolant c
 - **Responsive Design**: Mobile-first design that works on all devices
 
 ### Admin Features
-- **Dashboard**: Sales analytics, order management, and business insights
-- **Order Management**: View and manage customer orders
-- **Product Management**: Overview of product performance and stock levels
-- **Analytics**: Sales trends and business metrics
+- **Dashboard**: Real-time sales analytics, order management, and business insights
+- **Order Management**: View, confirm, and manage customer orders with status tracking
+- **Payment Tracking**: Mark orders as paid and track payment status
+- **Sales Analytics**: Interactive charts showing sales trends and revenue
+- **Product Performance**: Top-selling products and inventory insights
+- **Real-time Updates**: Dashboard refreshes automatically when orders are updated
 
 ## 🛠️ Tech Stack
 
@@ -25,10 +27,12 @@ A modern, responsive website for Zim Coolant, a premium engine oil and coolant c
 - **Styling**: Tailwind CSS with custom design system
 - **Animations**: Framer Motion for smooth interactions
 - **State Management**: Zustand for cart and application state
-- **Backend**: Supabase (serverless)
+- **Backend**: Supabase (serverless database and authentication)
 - **Icons**: Lucide React
-- **Notifications**: React Hot Toast
+- **Notifications**: React Hot Toast for user feedback
+- **Charts**: Recharts for interactive data visualization
 - **TypeScript**: Full type safety
+- **Utilities**: clsx and tailwind-merge for conditional styling
 
 ## 📁 Project Structure
 
@@ -47,8 +51,9 @@ zim-coolant-website/
 │   ├── Navbar.tsx         # Navigation component
 │   └── Footer.tsx         # Footer component
 ├── lib/                    # Utility libraries
-│   ├── supabase.ts        # Supabase client
-│   └── store.ts           # Zustand store
+│   ├── supabase.ts        # Supabase client and database types
+│   ├── store.ts           # Zustand store for state management
+│   └── auth.ts            # Authentication utilities
 ├── public/                 # Static assets
 └── package.json            # Dependencies
 ```
@@ -121,10 +126,19 @@ CREATE TABLE products (
 ```sql
 CREATE TABLE orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id),
+  customer_name VARCHAR NOT NULL,
+  customer_email VARCHAR NOT NULL,
+  customer_phone VARCHAR,
+  shipping_address TEXT,
+  items JSONB NOT NULL,
+  subtotal DECIMAL(10,2) NOT NULL,
+  shipping_cost DECIMAL(10,2) DEFAULT 0,
+  tax_amount DECIMAL(10,2) DEFAULT 0,
   total_amount DECIMAL(10,2) NOT NULL,
-  status VARCHAR DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'shipped', 'delivered')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  status VARCHAR DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'completed', 'cancelled')),
+  payment_status VARCHAR DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 

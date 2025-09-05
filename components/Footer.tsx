@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
 
 export default function Footer() {
@@ -8,11 +9,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-24">
           {/* Company Info - Left */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-brand-bright to-brand-dark rounded-lg flex items-center justify-center shadow-glow">
-                <span className="text-white font-bold text-sm">Z</span>
+            <div className="flex items-center space-x-3">
+              <div className="w-13 h-12 rounded-xl overflow-hidden shadow-glow ring-2 ring-brand-bright/30 hover:ring-brand-bright/50 transition-all duration-300 hover:scale-105 bg-gradient-to-br from-brand-bright to-brand-dark p-1">
+                <Image
+                  src="/logo.png"
+                  alt="Zim Coolant Logo"
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <span className="text-lg font-bold navbar-brand">Zim Coolant</span>
+              <span className="text-xl font-bold navbar-brand">Zim Coolant</span>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
               Premium quality engine oils and coolants for optimal vehicle performance. 

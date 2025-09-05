@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShoppingCart, Menu, X } from 'lucide-react'
 
 export default function Navbar() {
@@ -9,8 +10,7 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false)
   const [cartItems, setCartItems] = useState(0)
 
-  useEffect(() => {
-    setMounted(true)
+  const updateCartCount = () => {
     if (typeof window !== 'undefined') {
       try {
         const storedCart = localStorage.getItem('cart-storage')
@@ -22,10 +22,38 @@ export default function Navbar() {
               0
             ) || 0
           setCartItems(total)
+        } else {
+          setCartItems(0)
         }
       } catch (error) {
         console.error('Error reading cart from localStorage:', error)
+        setCartItems(0)
       }
+    }
+  }
+
+  useEffect(() => {
+    setMounted(true)
+    updateCartCount()
+
+    // Listen for cart updates from other components
+    const handleCartUpdate = () => {
+      updateCartCount()
+    }
+
+    // Listen for custom cart update events
+    window.addEventListener('cartUpdated', handleCartUpdate)
+    
+    // Listen for storage changes (when cart is updated in other tabs)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'cart-storage') {
+        updateCartCount()
+      }
+    })
+
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate)
+      window.removeEventListener('storage', updateCartCount)
     }
   }, [])
 
@@ -37,15 +65,21 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-brand-light via-white to-brand-light shadow-lg sticky top-0 z-50 border-b border-brand-bright/20">
       <div className="container-custom">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-brand-bright to-brand-dark rounded-lg flex items-center justify-center shadow-glow">
-              <span className="text-white font-bold text-xl">Z</span>
+          <Link href="/" className="flex items-center space-x-3">
+            <div className="w-15 h-14 rounded-xl overflow-hidden shadow-glow ring-2 ring-brand-bright/20 hover:ring-brand-bright/40 transition-all duration-300 hover:scale-105 bg-gradient-to-br from-brand-bright to-brand-dark p-1">
+              <Image
+                src="/logo.png"
+                alt="Zim Coolant Logo"
+                width={56}
+                height={56}
+                className="w-full h-full object-contain"
+              />
             </div>
-            <span className="text-xl font-bold navbar-brand">Zim Coolant</span>
+            <span className="text-2xl font-bold navbar-brand">Zim Coolant</span>
           </Link>
 
           {/* Desktop Navigation */}

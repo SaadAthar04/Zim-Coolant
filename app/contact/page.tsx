@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-// import { motion } from 'framer-motion'
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'

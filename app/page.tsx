@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-// import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { ArrowRight, Shield, Zap, Users, Award } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
@@ -104,8 +104,14 @@ export default function Home() {
               <div className="relative z-10">
                 <div className="bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500 border-brand-glow">
                   <div className="space-y-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-brand-bright to-brand-dark rounded-xl flex items-center justify-center shadow-glow">
-                      <span className="text-white font-bold text-2xl">Z</span>
+                    <div className="w-16 h-16 bg-gradient-to-br from-brand-bright to-brand-dark rounded-xl flex items-center justify-center shadow-glow ring-2 ring-brand-bright/20">
+                      <Image
+                        src="/logo.png"
+                        alt="Zim Coolant Logo"
+                        width={48}
+                        height={48}
+                        className="w-12 h-12 object-contain"
+                      />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900">Premium Quality</h3>
                     <p className="text-gray-600">Engine oils and coolants that exceed industry standards</p>

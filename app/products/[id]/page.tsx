@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-// import { motion } from 'framer-motion'
-import { ShoppingCart, Star, Truck, Shield, ArrowLeft, Minus, Plus } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ShoppingCart, Star, Truck, Shield, ArrowLeft, Minus, Plus, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
@@ -18,16 +18,25 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
+  const [relatedLoading, setRelatedLoading] = useState(false)
+  const [addingToCart, setAddingToCart] = useState(false)
+  const [cartSuccess, setCartSuccess] = useState(false)
 
   useEffect(() => {
     setMounted(true)
     fetchProduct()
   }, [productId])
 
+  useEffect(() => {
+    if (product) {
+      fetchRelatedProducts()
+    }
+  }, [product])
+
   const fetchProduct = async () => {
     try {
       setLoading(true)
-      console.log('Fetching product with ID:', productId)
       
       // First try to fetch by ID
       let { data, error } = await supabase
@@ -38,20 +47,17 @@ export default function ProductDetail() {
 
       // If no product found by ID, try to fetch by name (fallback)
       if (error && error.code === 'PGRST116') {
-        console.log('Product not found by ID, trying to fetch all products...')
         const { data: allProducts, error: allError } = await supabase
           .from('products')
           .select('*')
         
         if (!allError && allProducts) {
-          console.log('All products:', allProducts)
           // Try to find by name or description
           const foundProduct = allProducts.find(p => 
             p.name.toLowerCase().includes(productId.toLowerCase()) ||
             p.description.toLowerCase().includes(productId.toLowerCase())
           )
           if (foundProduct) {
-            console.log('Product found by search:', foundProduct)
             setProduct(foundProduct)
             setLoading(false)
             return
@@ -65,10 +71,7 @@ export default function ProductDetail() {
       }
 
       if (data) {
-        console.log('Product found:', data)
         setProduct(data)
-      } else {
-        console.log('No product found with ID:', productId)
       }
     } catch (error) {
       console.error('Error:', error)
@@ -77,9 +80,44 @@ export default function ProductDetail() {
     }
   }
 
-  const handleAddToCart = () => {
-    if (product && mounted) {
+  const fetchRelatedProducts = async () => {
+    if (!product) return
+    
+    try {
+      setRelatedLoading(true)
+      
+      // Fetch products from the same category, excluding the current product
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('category', product.category)
+        .neq('id', product.id)
+        .limit(4)
+        .order('created_at', { ascending: false })
+      
+      if (error) {
+        console.error('Error fetching related products:', error)
+        return
+      }
+
+      if (data) {
+        setRelatedProducts(data)
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setRelatedLoading(false)
+    }
+  }
+
+  const handleAddToCart = async () => {
+    if (product && mounted && !addingToCart) {
+      setAddingToCart(true)
+      
       try {
+        // Simulate a brief loading state for better UX
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
         // Access cart store only after mounting
         const storedCart = localStorage.getItem('cart-storage')
         let cartData: { state: { items: Array<{ product: Product; quantity: number }> } } = { state: { items: [] } }
@@ -101,10 +139,24 @@ export default function ProductDetail() {
         
         // Save back to localStorage
         localStorage.setItem('cart-storage', JSON.stringify(cartData))
+        
+        // Dispatch cart update event to sync navbar
+        window.dispatchEvent(new CustomEvent('cartUpdated'))
+        
+        // Show success feedback
+        setCartSuccess(true)
         toast.success(`${quantity} ${product.name} added to cart!`)
+        
+        // Reset success state after 2 seconds
+        setTimeout(() => {
+          setCartSuccess(false)
+        }, 2000)
+        
       } catch (error) {
         console.error('Error adding to cart:', error)
         toast.error('Failed to add to cart')
+      } finally {
+        setAddingToCart(false)
       }
     }
   }
@@ -145,9 +197,6 @@ export default function ProductDetail() {
     )
   }
 
-  // For now, we'll show an empty related products section
-  // In a real app, you'd fetch related products from Supabase
-  const relatedProducts: Product[] = []
 
   return (
     <div className="min-h-screen bg-white">
@@ -175,7 +224,7 @@ export default function ProductDetail() {
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Product Images */}
-            <div
+            <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -205,10 +254,10 @@ export default function ProductDetail() {
                   </button>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Product Info */}
-            <div
+            <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -251,9 +300,10 @@ export default function ProductDetail() {
               {/* Description */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {product.description}
-                </p>
+                <div 
+                  className="text-gray-600 leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: product.description1 || '' }}
+                />
               </div>
 
               {/* Specifications */}
@@ -301,13 +351,33 @@ export default function ProductDetail() {
 
                 <button
                   onClick={handleAddToCart}
-                  disabled={product.stock_quantity === 0 || !mounted}
-                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  disabled={product.stock_quantity === 0 || !mounted || addingToCart}
+                  className={`w-full min-h-[48px] flex items-center justify-center space-x-2 transition-all duration-300 ${
+                    cartSuccess 
+                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                      : addingToCart 
+                        ? 'bg-gray-400 cursor-not-allowed text-white' 
+                        : 'btn-primary'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  <span>
-                    {product.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}
-                  </span>
+                  {addingToCart ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span className="whitespace-nowrap">Adding...</span>
+                    </>
+                  ) : cartSuccess ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="whitespace-nowrap">Added to Cart!</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-5 h-5" />
+                      <span className="whitespace-nowrap">
+                        {product.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}
+                      </span>
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -326,16 +396,16 @@ export default function ProductDetail() {
                   <p className="text-sm text-gray-600">Premium Grade</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Related Products */}
-      {relatedProducts.length > 0 && (
+      {!relatedLoading && relatedProducts.length > 0 && (
         <section className="py-16 bg-gray-50">
           <div className="container-custom">
-            <div
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
@@ -346,13 +416,13 @@ export default function ProductDetail() {
                 Related Products
               </h2>
               <p className="text-xl text-gray-600">
-                You might also be interested in these products
+                You might also be interested in these {product?.category} products
               </p>
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.map((relatedProduct, index) => (
-                <div
+                <motion.div
                   key={relatedProduct.id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -366,7 +436,7 @@ export default function ProductDetail() {
                         <img 
                           src={relatedProduct.image_url} 
                           alt={relatedProduct.name}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                       <div className="space-y-3">
@@ -390,14 +460,13 @@ export default function ProductDetail() {
                       </div>
                     </div>
                   </Link>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
       )}
-
-      <Footer />
+      <Footer />  
     </div>
   )
 }

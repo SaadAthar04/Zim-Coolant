@@ -1,6 +1,6 @@
 'use client'
 
-// import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { Users, Target, Award, Globe, CheckCircle } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -235,8 +235,14 @@ export default function About() {
             >
               <div className="bg-gradient-to-br from-brand-light to-brand-bright/20 rounded-2xl p-8 border border-brand-bright/20">
                 <div className="space-y-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-brand-bright to-brand-dark rounded-xl flex items-center justify-center shadow-glow">
-                    <span className="text-white font-bold text-2xl">Z</span>
+                  <div className="w-16 h-16 bg-gradient-to-br from-brand-bright to-brand-dark rounded-xl flex items-center justify-center shadow-glow p-2">
+                    <Image
+                      src="/logo.png"
+                      alt="Zim Coolant Logo"
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 object-contain"
+                    />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900">15 Years of Excellence</h3>
                   <p className="text-gray-600">

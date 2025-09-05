@@ -197,7 +197,7 @@ export default function Cart() {
       <div className="min-h-screen bg-white">
         <Navbar />
         <div className="container-custom py-32">
-          <div
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             className="max-w-2xl mx-auto text-center"
@@ -212,7 +212,7 @@ export default function Cart() {
             <Link href="/products" className="btn-primary">
               Start Shopping
             </Link>
-          </div>
+          </motion.div>
         </div>
         <Footer />
       </div>

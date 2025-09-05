@@ -226,7 +226,7 @@ export default function Cart() {
       {/* Hero Section */}
       <section className="relative bg-gradient-primary pt-32 pb-16">
         <div className="container-custom">
-          <div
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -238,7 +238,7 @@ export default function Cart() {
             <p className="text-xl text-gray-600 leading-relaxed">
               Review your items and proceed to checkout
             </p>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -264,7 +264,7 @@ export default function Cart() {
                 <div className="space-y-6">
                   <div>
                     {cartItems.map((item, index) => (
-                      <div
+                      <motion.div
                         key={item.product.id}
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -333,7 +333,7 @@ export default function Cart() {
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
@@ -505,7 +505,7 @@ export default function Cart() {
           </div>
 
           {/* Continue Shopping */}
-          <div
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -515,7 +515,7 @@ export default function Cart() {
               <ArrowLeft className="w-5 h-5" />
               <span>Continue Shopping</span>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 

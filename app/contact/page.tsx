@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { motion } from 'framer-motion'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
@@ -82,7 +83,7 @@ export default function Contact() {
       {/* Hero Section */}
       <section className="relative hero-gradient pt-32 pb-16">
         <div className="container-custom">
-          <div
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -95,7 +96,7 @@ export default function Contact() {
               Have questions about our products or need technical support? 
               We're here to help you find the perfect solution for your vehicle.
             </p>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -104,7 +105,7 @@ export default function Contact() {
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Information */}
-            <div
+            <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -123,7 +124,7 @@ export default function Contact() {
 
               <div className="space-y-6">
                 {contactInfo.map((info, index) => (
-                  <div
+                  <motion.div
                     key={info.title}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -145,9 +146,9 @@ export default function Contact() {
                         {info.description}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
               {/* Map Placeholder */}
               <div className="mt-8">
@@ -163,7 +164,7 @@ export default function Contact() {
             </div>
 
             {/* Contact Form */}
-            <div
+            <motion.div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -171,7 +172,7 @@ export default function Contact() {
               className="card p-8"
             >
               {isSubmitted ? (
-                <div
+                <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-12"
@@ -302,7 +303,7 @@ export default function Contact() {
                   </form>
                 </>
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -310,7 +311,7 @@ export default function Contact() {
       {/* FAQ Section */}
       <section className="py-16 bg-gray-50">
         <div className="container-custom">
-          <div
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -323,7 +324,7 @@ export default function Contact() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Find quick answers to common questions about our products and services.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
@@ -344,7 +345,7 @@ export default function Contact() {
                 answer: "Absolutely! Our technical team can help you select the perfect product for your specific vehicle and requirements."
               }
             ].map((faq, index) => (
-              <div
+              <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -360,7 +361,7 @@ export default function Contact() {
                 </p>
               </div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ShoppingCart, Trash2, ArrowLeft, CreditCard, Truck, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
+import { motion } from 'framer-motion'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Product, supabase } from '@/lib/supabase'
@@ -158,7 +159,7 @@ export default function Cart() {
       <div className="min-h-screen bg-white">
         <Navbar />
         <div className="container-custom py-32">
-          <div
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="max-w-2xl mx-auto text-center"
@@ -184,7 +185,7 @@ export default function Cart() {
                 Back to Home
               </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
         <Footer />
       </div>

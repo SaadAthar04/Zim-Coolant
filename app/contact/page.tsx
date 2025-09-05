@@ -17,14 +17,14 @@ const contactInfo = [
   {
     icon: Phone,
     title: 'Call Us',
-    details: '+263 123 456 789',
-    description: 'Available Monday to Friday, 8AM-6PM'
+    details: '+263 4 123 4567',
+    description: 'Mon-Fri: 8AM-6PM'
   },
   {
     icon: Mail,
     title: 'Email Us',
     details: 'info@zimcoolant.com',
-    description: 'We\'ll respond within 24 hours'
+    description: 'We respond within 24 hours'
   },
   {
     icon: Clock,
@@ -90,7 +90,7 @@ export default function Contact() {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Get in <span className="text-brand-gradient">Touch</span>
+              Get in Touch
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">
               Have questions about our products or need technical support? 
@@ -117,8 +117,7 @@ export default function Contact() {
                   Contact Information
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed mb-8">
-                  Reach out to us through any of these channels. Our team is ready to assist you 
-                  with product inquiries, technical support, or general questions.
+                  Reach out to us through any of these channels. We're always happy to help!
                 </p>
               </div>
 
@@ -139,16 +138,16 @@ export default function Contact() {
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         {info.title}
                       </h3>
-                      <p className="text-brand-bright font-medium mb-1">
+                      <p className="text-gray-600 font-medium">
                         {info.details}
                       </p>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-gray-500 text-sm">
                         {info.description}
                       </p>
                     </div>
                   </motion.div>
                 ))}
-              </motion.div>
+              </div>
 
               {/* Map Placeholder */}
               <div className="mt-8">
@@ -156,12 +155,11 @@ export default function Contact() {
                 <div className="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
                   <div className="text-center">
                     <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500">Interactive Map</p>
                     <p className="text-gray-400 text-sm">123 Business Ave, Harare, Zimbabwe</p>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Contact Form */}
             <motion.div
@@ -209,8 +207,8 @@ export default function Contact() {
                           value={formData.name}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors"
-                          placeholder="Enter your full name"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all"
+                          placeholder="Your full name"
                         />
                       </div>
                       <div>
@@ -224,8 +222,8 @@ export default function Contact() {
                           value={formData.email}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors"
-                          placeholder="Enter your email"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all"
+                          placeholder="your.email@example.com"
                         />
                       </div>
                     </div>
@@ -241,8 +239,8 @@ export default function Contact() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors"
-                          placeholder="Enter your phone number"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all"
+                          placeholder="+263 77 123 4567"
                         />
                       </div>
                       <div>
@@ -255,14 +253,14 @@ export default function Contact() {
                           value={formData.subject}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all"
                         >
                           <option value="">Select a subject</option>
                           <option value="product-inquiry">Product Inquiry</option>
                           <option value="technical-support">Technical Support</option>
-                          <option value="bulk-order">Bulk Order</option>
+                          <option value="order-status">Order Status</option>
                           <option value="partnership">Partnership</option>
-                          <option value="general">General Question</option>
+                          <option value="other">Other</option>
                         </select>
                       </div>
                     </div>
@@ -278,7 +276,7 @@ export default function Contact() {
                         onChange={handleInputChange}
                         required
                         rows={6}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-colors resize-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all resize-none"
                         placeholder="Tell us how we can help you..."
                       />
                     </div>
@@ -286,7 +284,7 @@ export default function Contact() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      className="w-full btn-primary flex items-center justify-center space-x-2 min-h-[48px]"
                     >
                       {isSubmitting ? (
                         <>
@@ -321,28 +319,28 @@ export default function Contact() {
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Find quick answers to common questions about our products and services.
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Find answers to common questions about our products and services.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
               {
-                question: "What makes your engine oils different?",
-                answer: "Our engine oils are formulated with premium synthetic base stocks and advanced additive technology, providing superior protection and performance compared to conventional oils."
+                question: "What types of coolant do you offer?",
+                answer: "We offer a wide range of high-quality coolants including ethylene glycol, propylene glycol, and specialized formulations for different vehicle types and climates."
               },
               {
                 question: "How often should I change my coolant?",
                 answer: "We recommend changing your coolant every 2-3 years or 30,000-50,000 miles, depending on your vehicle and driving conditions."
               },
               {
-                question: "Do you offer bulk pricing for businesses?",
-                answer: "Yes, we offer competitive bulk pricing for automotive businesses, workshops, and fleet operators. Contact us for a custom quote."
+                question: "Do you offer bulk discounts?",
+                answer: "Yes, we offer competitive bulk pricing for commercial customers and fleet operators. Contact us for a custom quote."
               },
               {
-                question: "Can you help me choose the right product?",
-                answer: "Absolutely! Our technical team can help you select the perfect product for your specific vehicle and requirements."
+                question: "What is your return policy?",
+                answer: "We offer a 30-day return policy for unopened products in original packaging. Custom orders may have different terms."
               }
             ].map((faq, index) => (
               <motion.div
@@ -359,9 +357,9 @@ export default function Contact() {
                 <p className="text-gray-600 leading-relaxed">
                   {faq.answer}
                 </p>
-              </div>
+              </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 

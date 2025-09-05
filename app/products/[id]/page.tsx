@@ -302,7 +302,7 @@ export default function ProductDetail() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
                 <div 
                   className="text-gray-600 leading-relaxed whitespace-pre-line"
-                  dangerouslySetInnerHTML={{ __html: product.description1 || '' }}
+                  dangerouslySetInnerHTML={{ __html: product.description || '' }}
                 />
               </div>
 

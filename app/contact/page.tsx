@@ -190,7 +190,7 @@ export default function Contact() {
                   >
                     Send Another Message
                   </button>
-                </div>
+                </motion.div>
               ) : (
                 <>
                   <h2 className="text-3xl font-bold text-gray-900 mb-6">

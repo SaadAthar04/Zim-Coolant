@@ -74,11 +74,11 @@ export default function Footer() {
             <div className="space-y-3 text-center md:text-right">
               <div className="flex items-center space-x-3 md:justify-end">
                 <MapPin className="w-5 h-5 text-brand-bright" />
-                <span className="text-gray-300 text-sm">123 Business Ave, Harare, Zimbabwe</span>
+                <span className="text-gray-300 text-sm">Faisalabad, Pakistan</span>
               </div>
               <div className="flex items-center space-x-3 md:justify-end">
                 <Phone className="w-5 h-5 text-brand-bright" />
-                <span className="text-gray-300 text-sm">+263 123 456 789</span>
+                <span className="text-gray-300 text-sm">+92 326-8871985</span>
               </div>
               <div className="flex items-center space-x-3 md:justify-end">
                 <Mail className="w-5 h-5 text-brand-bright" />
@@ -92,7 +92,7 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
-              © 2024 Zim Coolant. All rights reserved.
+              © 2025 Zim Coolant. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
                              <Link href="/privacy" className="text-gray-400 hover:text-brand-bright transition-colors">

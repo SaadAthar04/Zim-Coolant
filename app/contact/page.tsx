@@ -11,13 +11,13 @@ const contactInfo = [
   {
     icon: MapPin,
     title: 'Visit Us',
-    details: '123 Business Avenue, Harare, Zimbabwe',
-    description: 'Our main office and showroom'
+    details: 'Faisalabad, Pakistan',
+    description: 'Our Factory and Office'
   },
   {
     icon: Phone,
     title: 'Call Us',
-    details: '+263 4 123 4567',
+    details: '+92 326-8871985',
     description: 'Mon-Fri: 8AM-6PM'
   },
   {
@@ -149,15 +149,24 @@ export default function Contact() {
                 ))}
               </div>
 
-              {/* Map Placeholder */}
+              {/* Map */}
               <div className="mt-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Our Location</h3>
-                <div className="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-400 text-sm">123 Business Ave, Harare, Zimbabwe</p>
-                  </div>
+                <div className="w-full h-64 rounded-lg overflow-hidden shadow-lg">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.1234567890123!2d73.12345678901234!3d31.12345678901234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39191a1234567890%3A0x1234567890abcdef!2sFaisalabad%2C%20Pakistan!5e0!3m2!1sen!2sus!4v1618876956475!5m2!1sen!2sus"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Zim Coolant Location - Faisalabad, Pakistan"
+                  ></iframe>
                 </div>
+                <p className="text-gray-500 text-sm mt-2 text-center">
+                  📍 Faisalabad, Punjab, Pakistan
+                </p>
               </div>
             </motion.div>
 
@@ -240,7 +249,7 @@ export default function Contact() {
                           value={formData.phone}
                           onChange={handleInputChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all"
-                          placeholder="+263 77 123 4567"
+                          placeholder="+92 123-4567890"
                         />
                       </div>
                       <div>

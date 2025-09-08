@@ -290,7 +290,7 @@ export default function Cart() {
                             {item.product.description}
                           </p>
                           <div className="flex items-center space-x-4 mt-2">
-                            <span className="text-lg font-bold text-brand-bright">
+                            <span className="text-lg font-bold text-primary-600">
                               Rs. {item.product.price}
                             </span>
                             <span className="text-sm text-gray-500">
@@ -381,7 +381,7 @@ export default function Cart() {
                           type="text"
                           value={customerDetails.name}
                           onChange={(e) => setCustomerDetails(prev => ({ ...prev, name: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                           placeholder="Enter your full name"
                           required
                         />
@@ -394,7 +394,7 @@ export default function Cart() {
                           type="email"
                           value={customerDetails.email}
                           onChange={(e) => setCustomerDetails(prev => ({ ...prev, email: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                           placeholder="Enter your email"
                           required
                         />
@@ -407,7 +407,7 @@ export default function Cart() {
                           type="tel"
                           value={customerDetails.phone}
                           onChange={(e) => setCustomerDetails(prev => ({ ...prev, phone: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                           placeholder="Enter your phone number"
                         />
                       </div>
@@ -418,7 +418,7 @@ export default function Cart() {
                         <textarea
                           value={customerDetails.address}
                           onChange={(e) => setCustomerDetails(prev => ({ ...prev, address: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                           placeholder="Enter your shipping address"
                           rows={3}
                         />
@@ -483,7 +483,7 @@ export default function Cart() {
 
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <Truck className="w-5 h-5 text-brand-bright" />
+                    <Truck className="w-5 h-5 text-primary-600" />
                     <div className="text-sm">
                       <p className="font-medium text-gray-900">Free Shipping</p>
                       <p className="text-gray-600">Orders over Rs. 50</p>

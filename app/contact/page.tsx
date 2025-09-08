@@ -90,7 +90,7 @@ export default function Contact() {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Get in Touch
+              Get in <span className="text-gradient">Touch</span>
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">
               Have questions about our products or need technical support? 
@@ -131,8 +131,8 @@ export default function Contact() {
                     viewport={{ once: true }}
                     className="flex items-start space-x-4"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-brand-light to-brand-bright/30 rounded-xl flex items-center justify-center flex-shrink-0 shadow-glow">
-                      <info.icon className="w-6 h-6 text-brand-dark" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <info.icon className="w-6 h-6 text-primary-700" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -216,7 +216,7 @@ export default function Contact() {
                           value={formData.name}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all"
                           placeholder="Your full name"
                         />
                       </div>
@@ -231,7 +231,7 @@ export default function Contact() {
                           value={formData.email}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all"
                           placeholder="your.email@example.com"
                         />
                       </div>
@@ -248,7 +248,7 @@ export default function Contact() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all"
                           placeholder="+92 123-4567890"
                         />
                       </div>
@@ -262,7 +262,7 @@ export default function Contact() {
                           value={formData.subject}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all"
                         >
                           <option value="">Select a subject</option>
                           <option value="product-inquiry">Product Inquiry</option>
@@ -285,7 +285,7 @@ export default function Contact() {
                         onChange={handleInputChange}
                         required
                         rows={6}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent transition-all resize-none"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all resize-none"
                         placeholder="Tell us how we can help you..."
                       />
                     </div>

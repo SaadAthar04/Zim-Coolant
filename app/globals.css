@@ -14,7 +14,7 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-brand-bright hover:bg-primary-600 text-brand-dark font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-glow hover:shadow-glow-lg border-2 border-brand-bright hover:border-primary-600;
+    @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-primary-600 hover:border-primary-700;
   }
   
   .btn-secondary {
@@ -22,11 +22,11 @@
   }
   
   .btn-outline {
-    @apply border-2 border-brand-bright text-brand-bright hover:bg-brand-bright hover:text-brand-dark font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-glow;
+    @apply border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg;
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-lg hover:shadow-glow transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 hover:border-brand-bright/30;
+    @apply bg-white rounded-xl shadow-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 hover:border-primary-600/30;
   }
   
   .section-padding {
@@ -38,19 +38,19 @@
   }
 
   .navbar-brand {
-    @apply bg-gradient-to-r from-brand-bright to-brand-dark bg-clip-text text-transparent font-bold;
+    @apply bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent font-bold;
   }
 
   .hero-gradient {
-    @apply bg-gradient-to-br from-brand-light via-brand-bright/20 to-brand-dark/10;
+    @apply bg-gradient-to-br from-primary-50 via-primary-100/20 to-primary-200/10;
   }
 
   .text-brand-gradient {
-    @apply bg-gradient-to-r from-brand-bright to-brand-dark bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent;
   }
 
   .border-brand-glow {
-    @apply border-2 border-brand-bright shadow-glow;
+    @apply border-2 border-primary-600 shadow-lg;
   }
 
   .hover-glow {
@@ -60,15 +60,15 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-brand-bright to-brand-dark bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary-500 via-primary-600 to-primary-800 bg-clip-text text-transparent;
   }
   
   .bg-gradient-primary {
-    @apply bg-gradient-to-br from-brand-light via-brand-bright/20 to-brand-dark/10;
+    @apply bg-gradient-to-br from-primary-50 via-primary-100/20 to-primary-200/10;
   }
 
   .bg-gradient-brand {
-    @apply bg-gradient-to-r from-brand-bright to-brand-dark;
+    @apply bg-gradient-to-r from-primary-600 to-primary-700;
   }
 
   .shadow-glow {

@@ -66,7 +66,7 @@ export default function About() {
         <div className="container-custom">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              About <span className="text-brand-gradient">Zim Coolant</span>
+              About <span className="text-gradient">Zim</span>
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">
               We are a leading manufacturer and distributor of premium quality engine oils and coolants, 
@@ -82,7 +82,7 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={stat.label} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-brand-bright mb-2">
+                <div className="text-4xl md:text-5xl font-bold text-primary-600 mb-2">
                   {stat.number}
                 </div>
                 <div className="text-gray-600 font-medium">
@@ -101,7 +101,7 @@ export default function About() {
             <div
               className="space-y-6"
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-brand-bright to-brand-dark rounded-2xl flex items-center justify-center shadow-glow">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg">
                 <Target className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Our Mission</h2>
@@ -115,7 +115,7 @@ export default function About() {
             <div
               className="space-y-6"
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-brand-dark to-brand-bright rounded-2xl flex items-center justify-center shadow-glow">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary-700 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <Award className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Our Vision</h2>
@@ -149,8 +149,8 @@ export default function About() {
                 key={value.title}
                 className="text-center group"
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-brand-light to-brand-bright/30 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-glow hover:shadow-glow-lg">
-                  <value.icon className="w-8 h-8 text-brand-dark" />
+                <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg hover:shadow-xl">
+                  <value.icon className="w-8 h-8 text-primary-700" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {value.title}
@@ -191,7 +191,7 @@ export default function About() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     {member.name}
                   </h3>
-                  <p className="text-brand-bright font-medium mb-3">
+                  <p className="text-primary-600 font-medium mb-3">
                     {member.position}
                   </p>
                   <p className="text-gray-600 leading-relaxed">
@@ -233,9 +233,9 @@ export default function About() {
             <div
               className="relative"
             >
-              <div className="bg-gradient-to-br from-brand-light to-brand-bright/20 rounded-2xl p-8 border border-brand-bright/20">
+              <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200">
                 <div className="space-y-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-brand-bright to-brand-dark rounded-xl flex items-center justify-center shadow-glow p-2">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-xl flex items-center justify-center shadow-lg p-2">
                     <Image
                       src="/logo.png"
                       alt="Zim Coolant Logo"

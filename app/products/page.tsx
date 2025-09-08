@@ -225,25 +225,23 @@ export default function Products() {
               }
             >
               {filteredProducts.map((product, i) => (
-                <div
-                  key={product.id}
-                  className={`card group cursor-pointer ${viewMode === 'list' ? 'flex' : ''
-                    }`}
-                >
+                <div key={product.id} className={viewMode === 'list' ? 'flex space-x-4' : 'space-y-4'}>
                   {/* Grid View */}
                   {viewMode === 'grid' ? (
-                    <div className="p-6">
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-48 object-contain mb-4 rounded-lg"
-                      />
+                    <>
+                      <div className="w-full h-48 bg-black rounded-lg flex items-center justify-center overflow-hidden">
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                       <h3 className="text-lg font-semibold">{product.name}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">
+                      <p className="text-gray-600 text-sm line-clamp-2">
                         {product.description}
                       </p>
-                      <div className="flex items-center justify-between mt-4">
-                        <span className="text-2xl font-bold text-brand-bright">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-primary-600">
                           Rs. {product.price}
                         </span>
                         <Link
@@ -253,22 +251,24 @@ export default function Products() {
                           View Details
                         </Link>
                       </div>
-                    </div>
+                    </>
                   ) : (
                     // List View
                     <>
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-32 h-32 object-contain rounded-lg flex-shrink-0"
-                      />
-                      <div className="flex-1 p-6">
-                        <h3 className="text-xl font-semibold mb-2">
+                      <div className="w-32 h-32 bg-black rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <h3 className="text-xl font-semibold">
                           {product.name}
                         </h3>
-                        <p className="text-gray-600 mb-4">{product.description}</p>
+                        <p className="text-gray-600 text-sm">{product.description}</p>
                         <div className="flex items-center gap-4">
-                          <span className="text-2xl font-bold text-brand-bright">
+                          <span className="text-2xl font-bold text-primary-600">
                             Rs. {product.price}
                           </span>
                           <span className="text-sm text-gray-500">

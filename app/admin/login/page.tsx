@@ -52,7 +52,7 @@ export default function AdminLogin() {
           <div className="max-w-md mx-auto">
             <div className="card p-8">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-brand-bright to-brand-dark rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <Lock className="w-8 h-8 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Admin Access</h1>
@@ -79,7 +79,7 @@ export default function AdminLogin() {
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                      className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="Enter username"
                       required
                     />
@@ -99,7 +99,7 @@ export default function AdminLogin() {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-bright focus:border-transparent"
+                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="Enter password"
                       required
                     />

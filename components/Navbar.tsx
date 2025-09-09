@@ -65,9 +65,9 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="bg-gradient-to-r from-primary-600 to-primary-700 shadow-lg top-0 z-50 border-b border-primary-800/20">
-      <div className="container-custom">
-        <div className="flex justify-between items-center h-16">
+    <nav className="mx-4 mt-4 z-50 bg-gradient-to-r from-primary-600 to-primary-700 shadow-xl rounded-2xl border border-primary-800/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
+      <div className="px-6 py-4">
+        <div className="flex justify-between items-center h-10">
           {/* Desktop Navigation - Left */}
           <div className="hidden md:flex items-center ml-8 space-x-3 flex-1 justify-start">
             {navigation.map((item) => (
@@ -116,7 +116,7 @@ export default function Navbar() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden border-t border-gray-200">
+          <div className="md:hidden border-t border-primary-800/20 mt-4">
             <div className="py-4 space-y-2">
               {navigation.map((item) => (
                 <Link

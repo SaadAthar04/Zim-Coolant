@@ -158,7 +158,7 @@ export default function Cart() {
     return (
       <div className="min-h-screen bg-white">
         <Navbar />
-        <div className="container-custom py-32">
+        <div className="container-custom py-16">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -196,7 +196,7 @@ export default function Cart() {
     return (
       <div className="min-h-screen bg-white">
         <Navbar />
-        <div className="container-custom py-32">
+        <div className="container-custom py-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -224,7 +224,7 @@ export default function Cart() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-primary pt-32 pb-16">
+      <section className="relative bg-gradient-primary pt-16 pb-16">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

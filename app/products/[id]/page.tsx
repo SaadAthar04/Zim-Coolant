@@ -203,7 +203,7 @@ export default function ProductDetail() {
       <Navbar />
       
       {/* Breadcrumb */}
-      <section className="pt-32 pb-8 bg-gray-50">
+      <section className="pt-16 pb-8 bg-gray-50">
         <div className="container-custom">
           <nav className="flex items-center space-x-2 text-sm text-gray-600">
             <Link href="/" className="hover:text-primary-600 transition-colors">

@@ -481,7 +481,7 @@ export default function AdminDashboard() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-primary pt-32 pb-16">
+      <section className="relative bg-gradient-primary pt-16 pb-16">
         <div className="container-custom">
           <div className="flex justify-between items-start mb-8">
             <div></div>

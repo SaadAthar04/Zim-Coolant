@@ -71,7 +71,7 @@ export default function Home() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-primary overflow-hidden">
+      <section className="relative bg-gradient-primary overflow-hidden pt-16">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-secondary-50/50"></div>
         <div className="relative container-custom section-padding">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

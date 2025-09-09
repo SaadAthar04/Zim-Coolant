@@ -107,7 +107,7 @@ export default function Products() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="bg-gradient-primary">
+      <section className="bg-gradient-primary pt-16">
         <div className="container-custom section-padding text-center">
           <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
             Our <span className="text-gradient">Products</span>

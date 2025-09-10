@@ -81,7 +81,7 @@ export default function Contact() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative hero-gradient pt-16 pb-16">
+      <section className="relative hero-gradient pt-24 pb-16">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

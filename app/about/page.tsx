@@ -62,7 +62,7 @@ export default function About() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative hero-gradient pt-16 pb-16">
+      <section className="relative hero-gradient pt-24 pb-16">
         <div className="container-custom">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">

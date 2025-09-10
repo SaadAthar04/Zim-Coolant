@@ -65,7 +65,7 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="mx-4 mt-4 z-50 bg-gradient-to-r from-primary-600 to-primary-700 shadow-xl rounded-2xl border border-primary-800/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary-600 to-primary-700 shadow-xl border-b border-primary-800/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
       <div className="px-6 py-4">
         <div className="flex justify-between items-center h-10">
           {/* Desktop Navigation - Left */}

@@ -43,7 +43,7 @@ export default function Navbar() {
 
     // Listen for custom cart update events
     window.addEventListener('cartUpdated', handleCartUpdate)
-    
+
     // Listen for storage changes (when cart is updated in other tabs)
     window.addEventListener('storage', (e) => {
       if (e.key === 'cart-storage') {
@@ -58,43 +58,45 @@ export default function Navbar() {
   }, [])
 
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
-    { name: 'Products', href: '/products' },
-    { name: 'Contact', href: '/contact' },
+    { name: 'HOME', href: '/' },
+    { name: 'ABOUT', href: '/about' },
+    { name: 'PRODUCTS', href: '/products' },
+    { name: 'CONTACT / BULK ORDERS', href: '/contact' },
   ]
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary-600 to-primary-700 shadow-xl border-b border-primary-800/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
       <div className="px-6 py-4">
         <div className="flex justify-between items-center h-10">
+          {/* Logo - Center */}
+          <div className="flex justify-center ml-10">
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo.png"
+                alt="Zim Coolant Logo"
+                width={300}
+                height={300}
+                sizes="(max-width: 768px) 120px, 150px"
+                className="w-[120px] h-[120px] md:w-[150px] md:h-[150px] object-contain"
+              />
+            </Link>
+          </div>
+
           {/* Desktop Navigation - Left */}
-          <div className="hidden md:flex items-center ml-8 space-x-3 flex-1 justify-start">
+          <div className="hidden md:flex items-center ml-8 space-x-6 flex-1 justify-start">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-white hover:text-primary-100 transition-colors font-medium"
+                className="text-white hover:text-primary-100 transition-colors font-medium tracking-widest"
               >
                 {item.name}
               </Link>
             ))}
           </div>
-          {/* Logo - Center */}
-          <div className="flex justify-center">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/logo.png"
-                alt="Zim Coolant Logo"
-                width={88}
-                height={88}
-                className="w-[92px] h-[90px] object-contain scale-150"
-              />
-            </Link>
-          </div>
 
           {/* Cart + Mobile Menu Button - Right */}
-          <div className="flex items-center space-x-4 flex-1 justify-end">
+          <div className="flex items-center space-x-4 flex-1 justify-end pr-6 md:pr-8">
             <Link href="/cart" className="relative">
               <ShoppingCart className="w-6 h-6 text-white hover:text-primary-100 transition-colors" />
               {mounted && cartItems > 0 && (
@@ -103,6 +105,16 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
+
+            {/* Trademark Icon */}
+            <Image
+              src="/trademark.png"
+              alt="Trademark"
+              width={112}
+              height={112}
+              sizes="56px"
+              className="w-14 h-14 object-contain"
+            />
 
             {/* Mobile Toggle */}
             <button
@@ -122,7 +134,7 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-4 py-2 text-white hover:bg-primary-800/20 hover:text-primary-100 transition-colors"
+                  className="block px-4 py-2 text-white hover:bg-primary-800/20 hover:text-primary-100 transition-colors tracking-wide"
                   onClick={() => setIsOpen(false)}
                 >
                   {item.name}

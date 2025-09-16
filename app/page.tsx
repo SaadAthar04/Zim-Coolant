@@ -179,15 +179,15 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="section-padding bg-white">
+      <section className="section-padding bg-gradient-to-r from-primary-600 to-primary-700">
         <div className="container-custom">
           <div
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-white mb-4">
               Why Choose Zim Coolant?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-primary-100 max-w-3xl mx-auto">
               We provide the highest quality automotive fluids backed by years of expertise
               and commitment to excellence.
             </p>
@@ -202,10 +202,10 @@ export default function Home() {
                 <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <feature.icon className="w-8 h-8 text-primary-700" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-xl font-semibold text-white mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-primary-100 leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -216,22 +216,22 @@ export default function Home() {
 
 
       {/* CTA Section */}
-      <section className="section-padding bg-gradient-to-r from-primary-600 to-primary-700">
+      <section className="section-padding bg-white">
         <div className="container-custom text-center">
           <div
             className="max-w-3xl mx-auto space-y-6"
           >
-            <h2 className="text-4xl font-bold text-white">
+            <h2 className="text-4xl font-bold text-gray-900">
               Ready to Experience Premium Quality?
             </h2>
-            <p className="text-xl text-primary-100">
+            <p className="text-xl text-gray-600">
               Join thousands of satisfied customers who trust Zim Coolant for their vehicle maintenance needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/products" className="btn-secondary">
                 Shop Now
               </Link>
-              <Link href="/contact" className="bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-6 rounded-lg transition-all duration-200">
+              <Link href="/contact" className="btn-outline border-brand-dark text-brand-dark hover:bg-brand-dark hover:text-white">
                 Contact Us
               </Link>
             </div>

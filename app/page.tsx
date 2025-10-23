@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
 import { Product } from '@/lib/supabase'
+import { useNavbar } from '@/lib/navbar-context'
 
 const features = [
   {
@@ -33,6 +34,7 @@ const features = [
 ]
 
 export default function Home() {
+  const { isMobileMenuOpen } = useNavbar()
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -67,18 +69,39 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <Navbar />
 
       {/* Hero Banner Section - Full Width */}
-      <div className="relative w-screen ml-[calc(50%-50vw)] overflow-hidden bg-gray-100">
-        <div className="relative w-full h-[200px] sm:h-[350px] md:h-[500px] lg:h-[600px] xl:h-[700px]">
+      <div className={`relative w-full max-w-full overflow-hidden transition-all duration-300 ${isMobileMenuOpen ? 'pt-48 md:pt-0' : 'pt-0'}`}>
+        <div className="relative w-full h-[650px] sm:h-[400px] md:h-[550px] lg:h-[650px] xl:h-[750px]">
+          {/* Mobile Banner - for screens less than 640px */}
+          <Image
+            src="/forMobile.png"
+            alt="Zim Coolant Premium Banner"
+            fill
+            priority
+            className="object-cover sm:hidden object-[center_40%]"
+            sizes="100vw"
+            quality={90}
+          />
+          {/* Tablet Banner - for screens 640px to 1024px */}
           <Image
             src="/zimBanner2.png"
             alt="Zim Coolant Premium Banner"
             fill
             priority
-            className="object-contain sm:object-cover sm:object-[center_25%] md:object-[center_35%] lg:object-[center_40%] xl:object-[center_45%]"
+            className="hidden sm:block lg:hidden object-contain object-center"
+            sizes="100vw"
+            quality={90}
+          />
+          {/* Desktop Banner - for screens 1024px and above */}
+          <Image
+            src="/zimBanner2.png"
+            alt="Zim Coolant Premium Banner"
+            fill
+            priority
+            className="hidden lg:block object-cover object-[center_25%] xl:object-[center_35%] 2xl:object-[center_45%]"
             sizes="100vw"
             quality={90}
           />
@@ -92,14 +115,14 @@ export default function Home() {
             className="text-center mb-6 sm:mb-8 md:mb-12 lg:mb-16"
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Our Premium Selection of Zim Coolant Products
+              Featured Products
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              Discover our premium selection of engine oils and coolants designed for optimal performance.
+              Our Premium Selection of Zim Products
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {loading ? (
               <p>Loading products...</p>
             ) : featuredProducts.length === 0 ? (
@@ -107,16 +130,23 @@ export default function Home() {
             ) : (
               featuredProducts.map((product, index) => (
                 <div key={product.id} className="space-y-3 sm:space-y-4">
-                  <div className="w-full h-40 sm:h-48 bg-black rounded-lg flex items-center justify-center overflow-hidden">
-                    <img
+                  <div className="w-full h-64 sm:h-68 md:h-72 lg:h-76 xl:h-80 rounded-lg overflow-hidden relative bg-gray-100">
+                    <Image
                       src={product.image_url}
                       alt={product.name}
-                      className="w-full h-full object-contain"
+                      fill
+                      className="object-cover object-center"
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      quality={85}
+                      onError={(e) => {
+                        console.error('Image failed to load:', product.image_url);
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   </div>
-                  <span className="inline-block px-2 sm:px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
+                  {/* <span className="inline-block px-2 sm:px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
                     {product.category}
-                  </span>
+                  </span> */}
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2">
                     {product.name}
                   </h3>

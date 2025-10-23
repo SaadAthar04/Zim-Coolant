@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { NavbarProvider } from '@/lib/navbar-context'
 
 export const metadata: Metadata = {
   title: 'Zim Coolant - Premium Engine Oil & Coolant Solutions',
@@ -20,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans">
-        {children}
+        <NavbarProvider>
+          {children}
+        </NavbarProvider>
       </body>
     </html>
   )

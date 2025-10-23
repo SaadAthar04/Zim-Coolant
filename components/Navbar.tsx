@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCart, Menu, X } from 'lucide-react'
+import { useNavbar } from '@/lib/navbar-context'
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isMobileMenuOpen, setIsMobileMenuOpen } = useNavbar()
   const [mounted, setMounted] = useState(false)
   const [cartItems, setCartItems] = useState(0)
 
@@ -65,7 +66,7 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary-600 to-primary-700 shadow-xl border-b border-primary-800/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
+    <nav className="relative md:fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary-600 to-primary-700 shadow-xl border-b border-primary-800/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-18 lg:h-20">
           {/* Mobile Logo */}
@@ -157,24 +158,24 @@ export default function Navbar() {
 
             {/* Mobile Toggle */}
             <button
-              onClick={() => setIsOpen((prev) => !prev)}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 rounded-md text-white hover:text-primary-100 hover:bg-primary-800/20 transition-colors"
             >
-              {isOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+              {isMobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden border-t border-primary-800/20 mt-2 sm:mt-4">
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-gradient-to-r from-primary-600 to-primary-700 border-t border-primary-800/20 shadow-lg">
             <div className="py-3 sm:py-4 space-y-1 sm:space-y-2">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
                   className="block px-3 sm:px-4 py-2 sm:py-3 text-white hover:bg-primary-800/20 hover:text-primary-100 transition-colors text-sm sm:text-base tracking-wide"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
                 </Link>

@@ -4,7 +4,17 @@ const nextConfig = {
     // appDir: true // This is no longer needed in Next.js 14
   },
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'nvwbxrdbppykdguevacb.supabase.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'nvwbxrdbppykdguevacb.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/sign/**',
+      },
+    ],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   // Increase timeout for chunk loading
   onDemandEntries: {

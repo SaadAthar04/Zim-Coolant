@@ -181,8 +181,8 @@ export default function Home() {
           <div
             className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-4"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-              Ready to Experience Premium Quality?
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-2xl xl:text-3xl font-bold text-gray-900">
+              Ensuring reliable performance and lasting protection
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-600">
               Join thousands of satisfied customers who trust Zim Coolant for their vehicle maintenance needs.

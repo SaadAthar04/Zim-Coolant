@@ -83,22 +83,9 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Layout */}
-          <div className="hidden md:flex items-center w-full">
-            {/* Desktop Navigation - Left */}
-            <div className="flex items-center space-x-6 lg:space-x-8 flex-1">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-white hover:text-primary-100 transition-colors font-medium text-sm lg:text-base tracking-wide"
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-
-            {/* Center Logo - Desktop */}
-            <div className="flex justify-center flex-1">
+          <div className="hidden md:flex items-center justify-between w-full">
+            {/* Desktop Logo - Left */}
+            <div className="flex items-center">
               <Link href="/" className="flex items-center">
                 <Image
                   src="/logo.png"
@@ -111,8 +98,21 @@ export default function Navbar() {
               </Link>
             </div>
 
+            {/* Desktop Navigation - Center */}
+            <div className="flex items-center space-x-6 lg:space-x-8">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-white hover:text-primary-100 transition-colors font-medium text-sm lg:text-base tracking-wide"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+
             {/* Right Side - Cart, Trademark */}
-            <div className="flex items-center space-x-4 lg:space-x-6 flex-1 justify-end">
+            <div className="flex items-center space-x-4 lg:space-x-6">
               <Link href="/cart" className="relative">
                 <ShoppingCart className="w-5 h-5 lg:w-6 lg:h-6 text-white hover:text-primary-100 transition-colors" />
                 {mounted && cartItems > 0 && (

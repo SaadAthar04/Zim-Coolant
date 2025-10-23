@@ -70,104 +70,64 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="relative bg-gradient-primary overflow-hidden pt-24">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-secondary-50/50"></div>
-        <div className="relative container-custom section-padding">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div
-              className="space-y-8"
-            >
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Premium{' '}
-                <span className="text-gradient">Engine Oils</span>
-                {' '}& Coolants
-              </h1>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Discover the perfect blend of performance and protection for your vehicle.
-                Our premium engine oils and coolants ensure optimal performance and longevity.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/products" className="btn-primary inline-flex items-center space-x-2">
-                  <span>Explore Products</span>
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link href="/about" className="btn-outline">
-                  Learn More
-                </Link>
-              </div>
-            </div>
-
-            {/* <div
-              className="relative"
-            >
-              <div className="relative z-10">
-                <div className="bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500 border-brand-glow">
-                  <div className="space-y-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-xl flex items-center justify-center shadow-lg ring-2 ring-primary-600/20">
-                      <Image
-                        src="/logo.png"
-                        alt="Zim Coolant Logo"
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 object-contain"
-                      />
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900">Premium Quality</h3>
-                    <p className="text-gray-600">Engine oils and coolants that exceed industry standards</p>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-primary-600 to-primary-700 rounded-full opacity-20 animate-bounce-gentle"></div>
-              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-br from-primary-700 to-primary-600 rounded-full opacity-20 animate-bounce-gentle" style={{ animationDelay: '1s' }}></div>
-            </div> */}
-          </div>
+      {/* Hero Banner Section - Full Width */}
+      <div className="relative w-screen ml-[calc(50%-50vw)] overflow-hidden bg-gray-100">
+        <div className="relative w-full h-[200px] sm:h-[350px] md:h-[500px] lg:h-[600px] xl:h-[700px]">
+          <Image
+            src="/zimBanner2.png"
+            alt="Zim Coolant Premium Banner"
+            fill
+            priority
+            className="object-contain sm:object-cover sm:object-[center_25%] md:object-[center_35%] lg:object-[center_40%] xl:object-[center_45%]"
+            sizes="100vw"
+            quality={90}
+          />
         </div>
-      </section>
+      </div>
 
       {/* Featured Products Section */}
       <section className="section-padding bg-gray-50">
         <div className="container-custom">
           <div
-            className="text-center mb-16"
+            className="text-center mb-6 sm:mb-8 md:mb-12 lg:mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Featured Products
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+              Our Premium Selection of Zim Coolant Products
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               Discover our premium selection of engine oils and coolants designed for optimal performance.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {loading ? (
               <p>Loading products...</p>
             ) : featuredProducts.length === 0 ? (
               <p>No featured products found.</p>
             ) : (
               featuredProducts.map((product, index) => (
-                <div key={product.id} className="space-y-4">
-                  <div className="w-full h-48 bg-black rounded-lg flex items-center justify-center overflow-hidden">
+                <div key={product.id} className="space-y-3 sm:space-y-4">
+                  <div className="w-full h-40 sm:h-48 bg-black rounded-lg flex items-center justify-center overflow-hidden">
                     <img
                       src={product.image_url}
                       alt={product.name}
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
+                  <span className="inline-block px-2 sm:px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
                     {product.category}
                   </span>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2">
                     {product.name}
                   </h3>
-                  <p className="text-gray-600 text-sm line-clamp-2">
+                  <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
                     {product.description}
                   </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-primary-600">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
                       Rs. {product.price}
                     </span>
-                    <Link href={`/products/${product.id}`} className="btn-primary text-sm py-2 px-4">
+                    <Link href={`/products/${product.id}`} className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 w-full sm:w-auto text-center">
                       View Details
                     </Link>
                   </div>
@@ -179,7 +139,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="section-padding bg-gradient-to-r from-primary-600 to-primary-700">
+      {/* <section className="section-padding bg-gradient-to-r from-primary-600 to-primary-700">
         <div className="container-custom">
           <div
             className="text-center mb-16"
@@ -212,26 +172,26 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
 
       {/* CTA Section */}
       <section className="section-padding bg-white">
         <div className="container-custom text-center">
           <div
-            className="max-w-3xl mx-auto space-y-6"
+            className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-4"
           >
-            <h2 className="text-4xl font-bold text-gray-900">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
               Ready to Experience Premium Quality?
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600">
               Join thousands of satisfied customers who trust Zim Coolant for their vehicle maintenance needs.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/products" className="btn-secondary">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <Link href="/products" className="btn-secondary text-sm sm:text-base py-3 px-6">
                 Shop Now
               </Link>
-              <Link href="/contact" className="btn-outline border-brand-dark text-brand-dark hover:bg-brand-dark hover:text-white">
+              <Link href="/contact" className="btn-outline border-brand-dark text-brand-dark hover:bg-brand-dark hover:text-white text-sm sm:text-base py-3 px-6">
                 Contact Us
               </Link>
             </div>

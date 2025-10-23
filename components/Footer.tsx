@@ -40,7 +40,7 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-3 flex flex-col items-center sm:items-start lg:items-center">
+          <div className="space-y-3 flex flex-col items-center sm:items-start lg:items-center lg:mt-10">
             <h3 className="text-base sm:text-lg font-semibold">Quick Links</h3>
             <ul className="space-y-2 text-center sm:text-left lg:text-center">
               <li>
@@ -67,7 +67,7 @@ export default function Footer() {
           </div>
 
           {/* Contact Info */}
-          <div className="space-y-3 flex flex-col items-center sm:items-start lg:items-end">
+          <div className="space-y-3 flex flex-col items-center sm:items-start lg:items-end lg:mt-10">
             <h3 className="text-base sm:text-lg font-semibold">Contact Info</h3>
             <div className="space-y-3 text-center sm:text-left lg:text-right">
               <div className="flex items-center justify-center sm:justify-start lg:justify-end space-x-3">

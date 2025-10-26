@@ -4,13 +4,18 @@ const nextConfig = {
     // appDir: true // This is no longer needed in Next.js 14
   },
   images: {
-    domains: ['localhost', 'nvwbxrdbppykdguevacb.supabase.co'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'nvwbxrdbppykdguevacb.supabase.co',
         port: '',
         pathname: '/storage/v1/object/sign/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '',
+        pathname: '/**',
       },
     ],
     dangerouslyAllowSVG: true,

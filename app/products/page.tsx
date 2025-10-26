@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, Grid3X3, List, ArrowUpDown } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
@@ -220,71 +221,87 @@ export default function Products() {
             <div
               className={
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'
+                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8'
                   : 'space-y-6'
               }
             >
               {filteredProducts.map((product, i) => (
-                <div key={product.id} className={viewMode === 'list' ? 'flex space-x-4' : 'space-y-4'}>
+                <Link 
+                  key={product.id} 
+                  href={`/products/${product.id}`}
+                  className={`block group cursor-pointer hover:scale-105 transition-transform duration-200 ${
+                    viewMode === 'list' ? 'flex space-x-4' : 'space-y-3 sm:space-y-4'
+                  }`}
+                >
                   {/* Grid View */}
                   {viewMode === 'grid' ? (
                     <>
-                      <div className="w-full h-48 bg-black rounded-lg flex items-center justify-center overflow-hidden">
-                        <img
+                      <div className="w-full h-64 sm:h-68 md:h-72 lg:h-76 xl:h-80 rounded-lg overflow-hidden relative bg-gray-100">
+                        <Image
                           src={product.image_url}
                           alt={product.name}
-                          className="w-full h-full object-contain"
+                          fill
+                          className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          quality={85}
+                          onError={(e) => {
+                            console.error('Image failed to load:', product.image_url);
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                       </div>
-                      <h3 className="text-lg font-semibold">{product.name}</h3>
-                      <p className="text-gray-600 text-sm line-clamp-2">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
                         {product.description}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xl font-bold text-primary-600">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                        <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
                           Rs. {product.price}
                         </span>
-                        <Link
-                          href={`/products/${product.id}`}
-                          className="btn-primary text-sm py-2 px-4"
-                        >
+                        <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 w-full sm:w-auto text-center group-hover:bg-primary-700 transition-colors">
                           View Details
-                        </Link>
+                        </span>
                       </div>
                     </>
                   ) : (
                     // List View
                     <>
-                      <div className="w-32 h-32 bg-black rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                        <img
+                      <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg overflow-hidden relative bg-gray-100 flex-shrink-0">
+                        <Image
                           src={product.image_url}
                           alt={product.name}
-                          className="w-full h-full object-contain"
+                          fill
+                          className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
+                          sizes="(max-width: 640px) 128px, 160px"
+                          quality={85}
+                          onError={(e) => {
+                            console.error('Image failed to load:', product.image_url);
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                       </div>
                       <div className="flex-1 space-y-2">
-                        <h3 className="text-xl font-semibold">
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
                           {product.name}
                         </h3>
-                        <p className="text-gray-600 text-sm">{product.description}</p>
-                        <div className="flex items-center gap-4">
-                          <span className="text-2xl font-bold text-primary-600">
+                        <p className="text-gray-600 text-sm line-clamp-2">{product.description}</p>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                          <span className="text-xl sm:text-2xl font-bold text-primary-600">
                             Rs. {product.price}
                           </span>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-xs sm:text-sm text-gray-500">
                             Stock: {product.stock_quantity}
                           </span>
                         </div>
-                        <Link
-                          href={`/products/${product.id}`}
-                          className="btn-primary mt-4 inline-block"
-                        >
+                        <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 mt-4 inline-block group-hover:bg-primary-700 transition-colors">
                           View Details
-                        </Link>
+                        </span>
                       </div>
                     </>
                   )}
-                </div>
+                </Link>
               ))}
             </div>
           )}

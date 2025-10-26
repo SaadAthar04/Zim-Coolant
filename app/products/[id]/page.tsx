@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ShoppingCart, Star, Truck, Shield, ArrowLeft, Minus, Plus, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
@@ -230,11 +231,19 @@ export default function ProductDetail() {
               transition={{ duration: 0.8 }}
               className="space-y-6"
             >
-              <div className="w-full h-96 bg-black rounded-2xl flex items-center justify-center overflow-hidden">
-                <img 
-                  src={product.image_url} 
+              <div className="w-full h-96 rounded-2xl overflow-hidden relative bg-gray-100">
+                <Image
+                  src={product.image_url}
                   alt={product.name}
-                  className="w-full h-full object-contain"
+                  fill
+                  className="object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  quality={90}
+                  priority
+                  onError={(e) => {
+                    console.error('Image failed to load:', product.image_url);
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               </div>
               
@@ -244,13 +253,24 @@ export default function ProductDetail() {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index - 1)}
-                    className={`w-20 h-20 rounded-lg border-2 transition-colors ${
+                    className={`w-20 h-20 rounded-lg border-2 transition-colors overflow-hidden relative ${
                       selectedImage === index - 1
                         ? 'border-primary-600 bg-primary-50'
                         : 'border-gray-200 bg-gray-100 hover:border-gray-300'
                     }`}
                   >
-                    <span className="text-gray-500 text-xs">Img {index}</span>
+                    <Image
+                      src={product.image_url}
+                      alt={`${product.name} thumbnail ${index}`}
+                      fill
+                      className="object-cover object-center"
+                      sizes="80px"
+                      quality={75}
+                      onError={(e) => {
+                        console.error('Thumbnail image failed to load:', product.image_url);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   </button>
                 ))}
               </div>

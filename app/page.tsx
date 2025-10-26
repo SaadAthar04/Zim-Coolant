@@ -129,13 +129,17 @@ export default function Home() {
               <p>No featured products found.</p>
             ) : (
               featuredProducts.map((product, index) => (
-                <div key={product.id} className="space-y-3 sm:space-y-4">
+                <Link 
+                  key={product.id} 
+                  href={`/products/${product.id}`}
+                  className="block space-y-3 sm:space-y-4 group cursor-pointer hover:scale-105 transition-transform duration-200"
+                >
                   <div className="w-full h-64 sm:h-68 md:h-72 lg:h-76 xl:h-80 rounded-lg overflow-hidden relative bg-gray-100">
                     <Image
                       src={product.image_url}
                       alt={product.name}
                       fill
-                      className="object-cover object-center"
+                      className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       quality={85}
                       onError={(e) => {
@@ -147,7 +151,7 @@ export default function Home() {
                   {/* <span className="inline-block px-2 sm:px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
                     {product.category}
                   </span> */}
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">
                     {product.name}
                   </h3>
                   <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
@@ -157,11 +161,11 @@ export default function Home() {
                     <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
                       Rs. {product.price}
                     </span>
-                    <Link href={`/products/${product.id}`} className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 w-full sm:w-auto text-center">
+                    <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 w-full sm:w-auto text-center group-hover:bg-primary-700 transition-colors">
                       View Details
-                    </Link>
+                    </span>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>

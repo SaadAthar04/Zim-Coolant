@@ -16,7 +16,7 @@ export default function Footer() {
                 width={400}
                 height={400}
                 sizes="(max-width: 640px) 120px, (max-width: 768px) 150px, 200px"
-                className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] md:w-[150px] md:h-[150px] lg:w-[180px] lg:h-[180px] object-contain"
+                className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[120px] md:h-[120px] lg:w-[150px] lg:h-[150px] xl:w-[180px] xl:h-[180px] object-contain"
               />
             </div>
             <p className="text-white text-xs sm:text-sm leading-relaxed text-center sm:text-left">

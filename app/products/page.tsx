@@ -108,12 +108,12 @@ export default function Products() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="bg-gradient-primary pt-16">
-        <div className="container-custom section-padding text-center">
-          <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+      <section className="bg-gradient-primary pt-16 sm:pt-20">
+        <div className="container-custom section-padding text-center px-4 sm:px-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6">
             Our <span className="text-gradient">Products</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-2 sm:px-0">
             Discover our premium selection of engine oils and coolants designed
             for optimal performance and protection of your vehicle.
           </p>
@@ -121,28 +121,28 @@ export default function Products() {
       </section>
 
       {/* Filters + Search */}
-      <section className="section-padding bg-white border-b">
-        <div className="container-custom flex flex-col lg:flex-row gap-6 items-center justify-between">
+      <section className="section-padding bg-white border-b px-4 sm:px-6">
+        <div className="container-custom flex flex-col lg:flex-row gap-4 sm:gap-6 items-center justify-between">
           {/* Search */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <div className="relative flex-1 max-w-md w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
             <input
               type="text"
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm sm:text-base"
             />
           </div>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-4 items-center">
+          <div className="flex flex-wrap gap-2 sm:gap-4 items-center w-full lg:w-auto justify-center lg:justify-end">
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Filter className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-4 sm:h-4" />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white"
+                className="pl-8 sm:pl-10 pr-6 sm:pr-8 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white text-xs sm:text-sm"
               >
                 <option value="all">All Categories</option>
                 {categories.map((c) => (
@@ -155,11 +155,11 @@ export default function Products() {
 
             {/* Sort */}
             <div className="relative">
-              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <ArrowUpDown className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-4 sm:h-4" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white"
+                className="pl-8 sm:pl-10 pr-6 sm:pr-8 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white text-xs sm:text-sm"
               >
                 <option value="name">Sort by Name</option>
                 <option value="price-low">Price: Low to High</option>

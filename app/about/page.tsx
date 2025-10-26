@@ -62,13 +62,13 @@ export default function About() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative hero-gradient pt-24 pb-16">
+      <section className="relative hero-gradient pt-20 sm:pt-24 pb-12 sm:pb-16 px-4 sm:px-6">
         <div className="container-custom">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6">
               About <span className="text-gradient">Zim</span>
             </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed px-2 sm:px-0">
               We are a leading manufacturer and distributor of premium quality engine oils and coolants,
               serving the automotive industry with excellence since 1988.
             </p>
@@ -77,15 +77,15 @@ export default function About() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white">
+      <section className="py-12 sm:py-16 bg-white px-4 sm:px-6">
         <div className="container-custom">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {stats.map((stat, index) => (
               <div key={stat.label} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-primary-600 mb-2">
+                <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-600 mb-1 sm:mb-2">
                   {stat.number}
                 </div>
-                <div className="text-gray-600 font-medium">
+                <div className="text-gray-600 font-medium text-xs sm:text-sm md:text-base">
                   {stat.label}
                 </div>
               </div>

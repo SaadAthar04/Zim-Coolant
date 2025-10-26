@@ -17,13 +17,13 @@ const contactInfo = [
   {
     icon: Phone,
     title: 'Call Us',
-    details: '+92 326-8871985',
+    details: '+92 333-1632138',
     description: 'Mon-Fri: 8AM-6PM'
   },
   {
     icon: Mail,
     title: 'Email Us',
-    details: 'info@zimcoolant.com',
+    details: 'contact@zimchemicals.com',
     description: 'We respond within 24 hours'
   },
   {
@@ -336,20 +336,20 @@ export default function Contact() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
               {
-                question: "What types of coolant do you offer?",
-                answer: "We offer a wide range of high-quality coolants including ethylene glycol, propylene glycol, and specialized formulations for different vehicle types and climates."
+                question: "What types of products do you offer?",
+                answer: "We specialize in high-quality coolants, automatic transmission fluids (ATF), and gear oils designed to protect your vehicle’s systems, improve performance, and extend component life."
               },
               {
-                question: "How often should I change my coolant?",
-                answer: "We recommend changing your coolant every 2-3 years or 30,000-50,000 miles, depending on your vehicle and driving conditions."
+                question: "How do I know which fluid is right for my vehicle?",
+                answer: "Every vehicle has specific requirements. You can check your owner’s manual or contact our support team — we’ll help you choose the right coolant, ATF, or gear oil based on your vehicle’s make and model."
               },
               {
-                question: "Do you offer bulk discounts?",
-                answer: "Yes, we offer competitive bulk pricing for commercial customers and fleet operators. Contact us for a custom quote."
+                question: "Are your products suitable for all vehicle types?",
+                answer: "Yes. Our fluids are formulated for both passenger and commercial vehicles, meeting international quality standards to ensure reliable performance across various driving conditions."
               },
               {
-                question: "What is your return policy?",
-                answer: "We offer a 30-day return policy for unopened products in original packaging. Custom orders may have different terms."
+                question: "Do you offer bulk products?",
+                answer: "Yes, we offer bulk quantities of coolants, ATF, and gear oils for workshops, retailers, and fleet operators. Get in touch with us through our website to discuss your requirements and pricing options."
               }
             ].map((faq, index) => (
               <motion.div

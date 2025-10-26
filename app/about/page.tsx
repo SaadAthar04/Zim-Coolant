@@ -126,7 +126,7 @@ export default function About() {
       </section>
 
       {/* Values Section */}
-      <section className="py-16 bg-white">
+      {/* <section className="py-16 bg-white">
         <div className="container-custom">
           <div
             className="text-center mb-16"
@@ -158,10 +158,10 @@ export default function About() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Team Section */}
-      <section className="py-16 bg-gray-50">
+      {/* <section className="py-16 bg-gray-50">
         <div className="container-custom">
           <div
             className="text-center mb-16"
@@ -198,7 +198,7 @@ export default function About() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Story Section */}
       <section className="py-16 bg-white">

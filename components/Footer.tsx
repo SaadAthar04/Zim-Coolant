@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
+import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -13,28 +13,21 @@ export default function Footer() {
               <Image
                 src="/logo.png"
                 alt="Zim Coolant Logo"
-                width={300}
-                height={300}
-                sizes="(max-width: 640px) 100px, (max-width: 768px) 120px, 150px"
-                className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[120px] md:h-[120px] lg:w-[150px] lg:h-[150px] object-contain"
+                width={400}
+                height={400}
+                sizes="(max-width: 640px) 120px, (max-width: 768px) 150px, 200px"
+                className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] md:w-[150px] md:h-[150px] lg:w-[180px] lg:h-[180px] object-contain"
               />
             </div>
             <p className="text-white text-xs sm:text-sm leading-relaxed text-center sm:text-left">
-              Premium quality engine oils and coolants for optimal vehicle performance.
-              Professional-grade products for automotive excellence.
+              Premium Quality Products. Ensuring optimal performance, longevity and protection, for all kinds of vehicles.
             </p>
             <div className="flex justify-center sm:justify-start space-x-4">
               <a href="#" className="text-white hover:text-primary-400 transition-colors hover:scale-110 transform duration-200">
                 <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
               <a href="#" className="text-white hover:text-primary-400 transition-colors hover:scale-110 transform duration-200">
-                <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
-              </a>
-              <a href="#" className="text-white hover:text-primary-400 transition-colors hover:scale-110 transform duration-200">
                 <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
-              </a>
-              <a href="#" className="text-white hover:text-primary-400 transition-colors hover:scale-110 transform duration-200">
-                <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             </div>
           </div>

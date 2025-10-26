@@ -66,7 +66,7 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="relative md:fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary-600 to-primary-700 shadow-xl border-b border-primary-800/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
+    <nav className="relative md:fixed top-0 left-0 right-0 z-50 shadow-xl border-b border-primary-800/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl" style={{backgroundColor: '#03a700'}}>
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-18 lg:h-20">
           {/* Mobile Logo */}
@@ -112,8 +112,8 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* Right Side - Cart, Trademark */}
-            <div className="flex items-center space-x-4 lg:space-x-6">
+            {/* Right Side - Cart */}
+            <div className="flex items-center">
               <Link href="/cart" className="relative">
                 <ShoppingCart className="w-5 h-5 lg:w-6 lg:h-6 text-white hover:text-primary-100 transition-colors" />
                 {mounted && cartItems > 0 && (
@@ -122,16 +122,6 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
-
-              {/* Trademark Icon */}
-              <Image
-                src="/trademark.png"
-                alt="Trademark"
-                width={80}
-                height={80}
-                sizes="(max-width: 1024px) 50px, 60px"
-                className="w-10 h-10 lg:w-12 lg:h-12 object-contain"
-              />
             </div>
           </div>
 
@@ -146,16 +136,6 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Trademark Icon */}
-            <Image
-              src="/trademark.png"
-              alt="Trademark"
-              width={60}
-              height={60}
-              sizes="50px"
-              className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
-            />
-
             {/* Mobile Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -168,7 +148,7 @@ export default function Navbar() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-gradient-to-r from-primary-600 to-primary-700 border-t border-primary-800/20 shadow-lg">
+          <div className="md:hidden absolute top-full left-0 right-0 border-t border-primary-800/20 shadow-lg" style={{backgroundColor: '#03a700'}}>
             <div className="py-3 sm:py-4 space-y-1 sm:space-y-2">
               {navigation.map((item) => (
                 <Link

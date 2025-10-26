@@ -6,9 +6,9 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
 const stats = [
-  { number: '15+', label: 'Years Experience' },
-  { number: '1000+', label: 'Happy Customers' },
-  { number: '50+', label: 'Product Variants' },
+  { number: '36+', label: 'Years Experience' },
+  { number: '2000+', label: 'Happy Customers' },
+  { number: '10+', label: 'Product Variants' },
   { number: '24/7', label: 'Support Available' }
 ]
 
@@ -60,7 +60,7 @@ export default function About() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative hero-gradient pt-24 pb-16">
         <div className="container-custom">
@@ -69,8 +69,8 @@ export default function About() {
               About <span className="text-gradient">Zim</span>
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">
-              We are a leading manufacturer and distributor of premium quality engine oils and coolants, 
-              serving the automotive industry with excellence since 2009.
+              We are a leading manufacturer and distributor of premium quality engine oils and coolants,
+              serving the automotive industry with excellence since 1988.
             </p>
           </div>
         </div>
@@ -106,9 +106,7 @@ export default function About() {
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Our Mission</h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                To provide the highest quality engine oils and coolants that enhance vehicle performance, 
-                extend engine life, and contribute to environmental sustainability. We strive to be the 
-                trusted partner for automotive professionals and vehicle owners across Zimbabwe and beyond.
+                To provide the highest quality coolants, ATF, and gear oils that enhance vehicle performance, ensure smooth operation, and contribute to environmental sustainability. We strive to be the trusted partner for automotive professionals and vehicle owners across Pakistan.
               </p>
             </div>
 
@@ -120,9 +118,7 @@ export default function About() {
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Our Vision</h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                To become the leading provider of automotive fluids in Southern Africa, recognized for 
-                innovation, quality, and customer service. We envision a future where every vehicle 
-                runs optimally with our products, contributing to safer roads and a cleaner environment.
+                To become the leading provider of coolants, ATF, and gear oils in Pakistan, recognized for innovation, quality, and customer service. We envision a future where every vehicle runs smoothly with our products, contributing to safer roads and a cleaner environment.
               </p>
             </div>
           </div>
@@ -216,16 +212,9 @@ export default function About() {
               </h2>
               <div className="space-y-4 text-gray-600 leading-relaxed">
                 <p>
-                  Founded in 2009, Zim Coolant began as a small family business with a big vision: 
-                  to provide Zimbabwe with the highest quality automotive fluids available anywhere in the world.
-                </p>
-                <p>
-                  What started as a local operation has grown into a trusted name in the automotive industry, 
-                  serving customers across the country with premium engine oils and coolants.
-                </p>
-                <p>
-                  Today, we continue to innovate and expand our product range while maintaining the same 
-                  commitment to quality and customer service that has been our foundation from day one.
+                  Founded in 1988 by Nasta Chemicals, Zim Coolant began as a small business with a big vision: to provide Pakistan with the highest quality automotive fluids.
+                  What started as a local operation has grown into a trusted name in the automotive industry, serving customers across the country with premium coolants, ATF, and gear oils.
+                  Today, we continue to innovate and expand our product range while maintaining the same commitment to quality and customer service that has been our foundation from day one.
                 </p>
               </div>
             </div>
@@ -235,18 +224,18 @@ export default function About() {
             >
               <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200">
                 <div className="space-y-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-xl flex items-center justify-center shadow-lg p-2">
+                  <div className="flex justify-start">
                     <Image
                       src="/logo.png"
                       alt="Zim Coolant Logo"
-                      width={48}
-                      height={48}
-                      className="w-12 h-12 object-contain"
+                      width={160}
+                      height={160}
+                      className="w-36 h-36 object-contain"
                     />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">15 Years of Excellence</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">36+ Years of Excellence</h3>
                   <p className="text-gray-600">
-                    From humble beginnings to industry leadership, our journey continues with every product we create.
+                    From small  beginnings to industry leadership, our journey continues with every product we create.
                   </p>
                 </div>
               </div>

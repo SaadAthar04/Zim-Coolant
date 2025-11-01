@@ -20,7 +20,7 @@ export default function Footer() {
               />
             </div>
             <p className="text-white text-xs sm:text-sm leading-relaxed text-center sm:text-left">
-              Premium Quality Products. Ensuring optimal performance, longevity and protection, for all kinds of vehicles.
+              Premium Automotive Products, Ensuring optimal performance, longevity and protection, for all kinds of vehicles.
             </p>
             <div className="flex justify-center sm:justify-start space-x-4">
               <a href="#" className="text-white hover:text-primary-400 transition-colors hover:scale-110 transform duration-200">
@@ -69,11 +69,11 @@ export default function Footer() {
               </div>
               <div className="flex items-center justify-center sm:justify-start lg:justify-end space-x-3">
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-primary-400" />
-                <span className="text-white text-xs sm:text-sm">+92 326-8871985</span>
+                <span className="text-white text-xs sm:text-sm">+92 333-1632138</span>
               </div>
               <div className="flex items-center justify-center sm:justify-start lg:justify-end space-x-3">
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-primary-400" />
-                <span className="text-white text-xs sm:text-sm">info@zimcoolant.com</span>
+                <span className="text-white text-xs sm:text-sm">contact@zimchemicals.com</span>
               </div>
             </div>
           </div>
@@ -84,7 +84,7 @@ export default function Footer() {
           <div className="h-[1px] sm:h-[2px] bg-gradient-to-r from-gray-700 via-gray-800 to-black rounded-full opacity-90"></div>
           <div className="pt-4 sm:pt-6 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
             <p className="text-white text-xs sm:text-sm text-center sm:text-left">
-              © 2025 Zim. All rights reserved.
+              © 2025 Zim Chemicals. All rights reserved.
             </p>
             <div className="flex space-x-4 sm:space-x-6 text-xs sm:text-sm">
               <Link href="/privacy" className="text-white hover:text-primary-400 transition-colors">

@@ -106,3 +106,22 @@
     animation: pulseGreen 2s infinite;
   }
 }
+
+@keyframes zoomOutSlow {
+  from {
+    transform: scale(1.10);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.hero-zoom {
+  animation: zoomOutSlow 4s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-down { animation: slideDown .22s ease-out both; }

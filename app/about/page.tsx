@@ -8,7 +8,6 @@ import Footer from '@/components/Footer'
 const stats = [
   { number: '36+', label: 'Years Experience' },
   { number: '2000+', label: 'Happy Customers' },
-  { number: '10+', label: 'Product Variants' },
   { number: '24/7', label: 'Support Available' }
 ]
 
@@ -62,19 +61,31 @@ export default function About() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative hero-gradient pt-20 sm:pt-24 pb-12 sm:pb-16 px-4 sm:px-6">
-        <div className="container-custom">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6">
-              About <span className="text-gradient">Zim</span>
+      <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 px-4 sm:px-6 overflow-hidden">
+          {/* Background Image */}
+          <div>
+            <Image
+              src="/about-bg.jpg"
+              alt="About Zim Background"
+              fill
+              priority
+              quality={90}
+              className="object-cover object-center scale-105 brightness-[0.5] blur-[4px]"
+            />
+            {/* Soft dark tint for contrast */}
+            <div className="absolute inset-0 bg-black/40"></div>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 max-w-4xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+              About <span className="text-green-500">Zim</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed px-2 sm:px-0">
-              We are a leading manufacturer and distributor of premium quality engine oils and coolants,
-              serving the automotive industry with excellence since 1988.
+            <p className="text-base sm:text-lg md:text-xl text-gray-100 leading-relaxed px-2 sm:px-0">
+              We are a leading manufacturer and distributor of premium-quality coolants and automotive fluids, serving the automotive industry with excellence since 1988.
             </p>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* Stats Section */}
       <section className="py-12 sm:py-16 bg-white px-4 sm:px-6">

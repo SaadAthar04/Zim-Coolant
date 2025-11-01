@@ -20,11 +20,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-sans">
-        <NavbarProvider>
-          {children}
-        </NavbarProvider>
-      </body>
-    </html>
+  <body>
+    <NavbarProvider>
+      {children}
+    </NavbarProvider>
+  </body>
+</html>
+
   )
 }

@@ -1,169 +1,289 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShoppingCart, Menu, X } from 'lucide-react'
-import { useNavbar } from '@/lib/navbar-context'
+import { ShoppingCart, Menu, X, Search as SearchIcon } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+
+type ProductSuggest = {
+  id: string
+  name: string
+  image_url: string | null
+  description?: string | null
+  category?: string | null
+}
+
+const NAV_ITEMS = [
+  { name: 'HOME', href: '/' },
+  { name: 'ABOUT', href: '/about' },
+  { name: 'PRODUCTS', href: '/products' },
+  { name: 'CONTACT / BULK ORDERS', href: '/contact' },
+]
 
 export default function Navbar() {
-  const { isMobileMenuOpen, setIsMobileMenuOpen } = useNavbar()
+  // cart badge (desktop)
   const [mounted, setMounted] = useState(false)
   const [cartItems, setCartItems] = useState(0)
 
-  const updateCartCount = () => {
-    if (typeof window !== 'undefined') {
+  // mobile toggles
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+
+  // search state (mobile live search + desktop can reuse later)
+  const [query, setQuery] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [results, setResults] = useState<ProductSuggest[]>([])
+  const searchRef = useRef<HTMLDivElement | null>(null)
+
+  // ── cart count from localStorage
+  useEffect(() => {
+    setMounted(true)
+    const update = () => {
       try {
-        const storedCart = localStorage.getItem('cart-storage')
-        if (storedCart) {
-          const cartData = JSON.parse(storedCart)
-          const total =
-            cartData.state?.items?.reduce(
-              (sum: number, item: any) => sum + (item.quantity || 0),
-              0
-            ) || 0
-          setCartItems(total)
-        } else {
-          setCartItems(0)
-        }
-      } catch (error) {
-        console.error('Error reading cart from localStorage:', error)
+        const stored = localStorage.getItem('cart-storage')
+        if (!stored) return setCartItems(0)
+        const data = JSON.parse(stored)
+        const total =
+          data.state?.items?.reduce(
+            (sum: number, it: any) => sum + (it.quantity || 0),
+            0
+          ) || 0
+        setCartItems(total)
+      } catch {
         setCartItems(0)
       }
     }
-  }
-
-  useEffect(() => {
-    setMounted(true)
-    updateCartCount()
-
-    // Listen for cart updates from other components
-    const handleCartUpdate = () => {
-      updateCartCount()
-    }
-
-    // Listen for custom cart update events
-    window.addEventListener('cartUpdated', handleCartUpdate)
-
-    // Listen for storage changes (when cart is updated in other tabs)
+    update()
+    const onCartUpdated = () => update()
+    window.addEventListener('cartUpdated', onCartUpdated)
     window.addEventListener('storage', (e) => {
-      if (e.key === 'cart-storage') {
-        updateCartCount()
-      }
+      if (e.key === 'cart-storage') update()
     })
-
     return () => {
-      window.removeEventListener('cartUpdated', handleCartUpdate)
-      window.removeEventListener('storage', updateCartCount)
+      window.removeEventListener('cartUpdated', onCartUpdated)
+      window.removeEventListener('storage', update as any)
     }
   }, [])
 
-  const navigation = [
-    { name: 'HOME', href: '/' },
-    { name: 'ABOUT', href: '/about' },
-    { name: 'PRODUCTS', href: '/products' },
-    { name: 'CONTACT / BULK ORDERS', href: '/contact' },
-  ]
+  // ── mobile: click outside to close search dropdown
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!searchRef.current) return
+      if (!searchRef.current.contains(e.target as Node)) setSearchOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [])
+
+  // ── mobile: debounced live search
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      setResults([])
+      setLoading(false)
+      return
+    }
+    let active = true
+    setLoading(true)
+    const h = setTimeout(async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id,name,image_url,description,category')
+        .ilike('name', `%${query.trim()}%`)
+        .limit(5)
+      if (!active) return
+      setResults((!error && (data as ProductSuggest[])) || [])
+      setLoading(false)
+    }, 250)
+    return () => {
+      active = false
+      clearTimeout(h)
+    }
+  }, [query])
 
   return (
-    <nav className="relative md:fixed top-0 left-0 right-0 z-50 shadow-xl border-b border-primary-800/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl" style={{backgroundColor: '#03a700'}}>
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 sm:h-18 lg:h-20">
-          {/* Mobile Logo */}
-          <div className="flex items-center md:hidden">
-            <Link href="/" className="flex items-center">
+    <header
+      className="absolute top-0 left-0 w-full z-50 shadow-md"
+      style={{ backgroundColor: '#025b00' }}
+    >
+      {/* ───────────────── Desktop header (unchanged layout) */}
+      <div className="hidden md:grid grid-cols-3 items-center gap-2 px-6 lg:px-16 py-2">
+        {/* Left: (placeholder search — keep or wire later) */}
+        <div className="justify-self-start w-full max-w-sm">
+          <div className="relative">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+            <input
+              placeholder="Search products..."
+              className="w-full bg-white text-gray-900 rounded-full pl-9 pr-3 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-green-500/70"
+            />
+          </div>
+        </div>
+
+        {/* Center: Logo */}
+        <div className="justify-self-center">
+          <Link href="/" className="block">
+            <Image
+              src="/logo.png"
+              alt="Zim Coolant Logo"
+              width={160}
+              height={80}
+              className="object-contain w-20 lg:w-36 h-auto"
+              priority
+            />
+          </Link>
+        </div>
+
+        {/* Right: Cart */}
+        <div className="justify-self-end">
+          <Link href="/cart" className="relative inline-flex">
+            <ShoppingCart className="w-6 h-6 text-white hover:text-green-100 transition-colors" />
+            {mounted && cartItems > 0 && (
+              <span className="absolute -top-2 -right-2 bg-white text-green-700 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow">
+                {cartItems}
+              </span>
+            )}
+          </Link>
+        </div>
+      </div>
+
+      {/* Inline nav (desktop) */}
+      <div className="hidden md:block">
+        <nav className="flex items-center justify-center gap-6 py-2 px-4">
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="text-white/90 hover:text-white transition-colors font-medium text-sm tracking-wide"
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+      </div>
+
+      {/* ───────────────── Mobile header */}
+      <div className="md:hidden px-4 py-2">
+        {/* Top row: search toggle • logo • burger */}
+        <div className="grid grid-cols-3 items-center">
+          {/* Left: search icon */}
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false)
+              setSearchOpen((s) => !s)
+            }}
+            className="justify-self-start text-white"
+            aria-label="Open search"
+          >
+            <SearchIcon className="w-6 h-6" />
+          </button>
+
+          {/* Center: logo */}
+          <div className="justify-self-center">
+            <Link href="/" className="block">
               <Image
                 src="/logo.png"
                 alt="Zim Coolant Logo"
-                width={60}
-                height={60}
-                sizes="60px"
-                className="w-12 h-12 sm:w-14 sm:h-14 object-contain"
+                width={140}
+                height={70}
+                className="object-contain w-28 h-auto"
+                priority
               />
             </Link>
           </div>
 
-          {/* Desktop Layout */}
-          <div className="hidden md:flex items-center justify-between w-full">
-            {/* Desktop Logo - Left */}
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <Image
-                  src="/logo.png"
-                  alt="Zim Coolant Logo"
-                  width={200}
-                  height={200}
-                  sizes="(max-width: 1024px) 100px, 120px"
-                  className="w-[80px] h-[80px] lg:w-[100px] lg:h-[100px] xl:w-[120px] xl:h-[120px] object-contain"
-                />
-              </Link>
-            </div>
-
-            {/* Desktop Navigation - Center */}
-            <div className="flex items-center space-x-6 lg:space-x-8">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-white hover:text-primary-100 transition-colors font-medium text-sm lg:text-base tracking-wide"
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-
-            {/* Right Side - Cart */}
-            <div className="flex items-center">
-              <Link href="/cart" className="relative">
-                <ShoppingCart className="w-5 h-5 lg:w-6 lg:h-6 text-white hover:text-primary-100 transition-colors" />
-                {mounted && cartItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-white text-primary-600 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-lg">
-                    {cartItems}
-                  </span>
-                )}
-              </Link>
-            </div>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-3">
-            <Link href="/cart" className="relative">
-              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white hover:text-primary-100 transition-colors" />
-              {mounted && cartItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-white text-primary-600 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-lg">
-                  {cartItems}
-                </span>
-              )}
-            </Link>
-
-            {/* Mobile Toggle */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-md text-white hover:text-primary-100 hover:bg-primary-800/20 transition-colors"
-            >
-              {isMobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
-            </button>
-          </div>
+          {/* Right: hamburger */}
+          <button
+            onClick={() => {
+              setSearchOpen(false)
+              setIsMobileMenuOpen((o) => !o)
+            }}
+            className="justify-self-end text-white"
+            aria-label="Open menu"
+          >
+            {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+          </button>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 border-t border-primary-800/20 shadow-lg" style={{backgroundColor: '#03a700'}}>
-            <div className="py-3 sm:py-4 space-y-1 sm:space-y-2">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block px-3 sm:px-4 py-2 sm:py-3 text-white hover:bg-primary-800/20 hover:text-primary-100 transition-colors text-sm sm:text-base tracking-wide"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+        {/* Slide-down search */}
+        {searchOpen && (
+          <div ref={searchRef} className="mt-2 bg-white rounded-md p-3 shadow-lg animate-slide-down">
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                autoFocus
+                placeholder="Search products..."
+                className="w-full rounded-md border border-gray-300 pl-9 pr-8 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-green-600 focus:border-transparent"
+              />
+              {loading && (
+  <div
+    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-[2px] border-green-400 border-t-transparent rounded-full animate-spin z-20"
+    style={{
+      display: 'block',
+      pointerEvents: 'none',
+    }}
+  ></div>
+)}
+
+
             </div>
+
+            {/* results */}
+            {results.length > 0 && (
+              <div className="mt-2 border border-gray-200 rounded-md overflow-hidden max-h-64 overflow-y-auto">
+                {results.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/products/${p.id}`}
+                    className="flex items-center gap-3 px-3 py-2 bg-white hover:bg-gray-50 transition-colors"
+                    onClick={() => setSearchOpen(false)}
+                  >
+                    <div className="relative w-10 h-10 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                      {p.image_url ? (
+                        <Image src={p.image_url} alt={p.name} fill className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
+                      {p.category && (
+                        <p className="text-xs text-gray-500 truncate">{p.category}</p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {!loading && query.trim().length >= 2 && results.length === 0 && (
+              <div className="mt-2 text-sm text-gray-600">No results for “{query}”.</div>
+            )}
+          </div>
+        )}
+
+        {/* Slide-down mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="mt-2 rounded-md overflow-hidden shadow-lg animate-slide-down" style={{ backgroundColor: '#014a00' }}>
+            <nav>
+              <ul className="flex flex-col text-white text-sm font-medium">
+                {NAV_ITEMS.map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className="block px-5 py-3 hover:bg-green-900/60 transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
         )}
       </div>
-    </nav>
+    </header>
   )
 }

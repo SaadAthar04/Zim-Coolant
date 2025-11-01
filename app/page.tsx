@@ -74,37 +74,41 @@ export default function Home() {
 
       {/* Hero Banner Section - Full Width */}
       <div className={`relative w-full max-w-full overflow-hidden transition-all duration-300 ${isMobileMenuOpen ? 'pt-48 md:pt-0' : 'pt-0'}`}>
-        <div className="relative w-full h-[650px] sm:h-[400px] md:h-[550px] lg:h-[650px] xl:h-[750px]">
+        <div className="relative w-full overflow-hidden">
           {/* Mobile Banner - for screens less than 640px */}
           <Image
             src="/forMobile.png"
             alt="Zim Coolant Premium Banner"
-            fill
+            width={1920}
+            height={800}
             priority
-            className="object-cover sm:hidden object-[center_40%]"
+            className="object-cover sm:hidden object-[center_40%] hero-zoom"
             sizes="100vw"
             quality={90}
           />
           {/* Tablet Banner - for screens 640px to 1024px */}
           <Image
-            src="/zimBanner2.png"
+            src="/ZimBanner_3.png"
             alt="Zim Coolant Premium Banner"
-            fill
+            width={1920}
+            height={800}
             priority
-            className="hidden sm:block lg:hidden object-contain object-center"
+            className="hidden sm:block lg:hidden object-contain object-center hero-zoom"
             sizes="100vw"
             quality={90}
           />
           {/* Desktop Banner - for screens 1024px and above */}
           <Image
-            src="/zimBanner2.png"
+            src="/ZimBanner_3.png"
             alt="Zim Coolant Premium Banner"
-            fill
+            width={1920}
+            height={800}
             priority
-            className="hidden lg:block object-cover object-[center_25%] xl:object-[center_35%] 2xl:object-[center_45%]"
+            className="hidden lg:block object-cover object-[center_25%] xl:object-[center_35%] 2xl:object-[center_45%] hero-zoom"
             sizes="100vw"
             quality={90}
           />
+          <div className="absolute inset-0 bg-black/5 mix-blend-multiply"></div>
         </div>
       </div>
 
@@ -209,29 +213,49 @@ export default function Home() {
       </section> */}
 
 
-      {/* CTA Section */}
-      <section className="section-padding bg-white">
-        <div className="container-custom text-center">
-          <div
-            className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-4"
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-2xl xl:text-3xl font-bold text-gray-900">
-              Ensuring reliable performance and lasting protection
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600">
-              Join thousands of satisfied customers who trust Zim Coolant for their vehicle maintenance needs.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <Link href="/products" className="btn-secondary text-sm sm:text-base py-3 px-6">
-                Shop Now
-              </Link>
-              <Link href="/contact" className="btn-outline border-brand-dark text-brand-dark hover:bg-brand-dark hover:text-white text-sm sm:text-base py-3 px-6">
-                Contact Us
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+{/* CTA Section */}
+<section className="relative section-padding bg-white overflow-hidden">
+  {/* Background Image */}
+  <div className="absolute inset-0 z-0">
+    <Image
+      src="/cta-bg.jpg" // ← update with your actual path
+      alt="Zim Coolant car driving performance background"
+      fill
+      className="object-cover object-center brightness-[0.45] blur-[1px]"
+      priority
+    />
+  </div>
+
+  {/* Overlay Content */}
+  <div className="relative z-10 container-custom text-center text-white">
+    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-4">
+      <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-2xl xl:text-3xl font-bold text-white sm:whitespace-nowrap">
+  Performance You Can Feel, Protection You Can Trust.
+</h2>
+
+      <p className="text-base sm:text-lg md:text-xl text-gray-100">
+        Join thousands of satisfied customers who trust Zim for their vehicle needs.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+        <Link
+          href="/products"
+          className="bg-white text-brand-dark font-semibold text-sm sm:text-base py-3 px-6 rounded-md shadow-md hover:bg-gray-100 transition"
+        >
+          Shop Now
+        </Link>
+        <Link
+          href="/contact"
+          className="border border-white text-white font-semibold text-sm sm:text-base py-3 px-6 rounded-md hover:bg-white hover:text-brand-dark transition"
+        >
+          Contact Us
+        </Link>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
 
       <Footer />
     </div>

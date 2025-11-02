@@ -108,17 +108,32 @@ export default function Products() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="bg-gradient-primary pt-16 sm:pt-20">
-        <div className="container-custom section-padding text-center px-4 sm:px-6">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6">
-            Our <span className="text-gradient">Products</span>
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-2 sm:px-0">
-            Discover our premium selection of engine oils and coolants designed
-            for optimal performance and protection of your vehicle.
-          </p>
-        </div>
-      </section>
+        <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 px-4 sm:px-6 overflow-hidden">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="/product-bg.jpg" // <-- put your image in /public folder
+              alt="Zim Coolant Products Background"
+              fill
+              priority
+              quality={90}
+              className="object-cover object-center scale-105 brightness-[0.6] blur-[2px]"
+            />
+            <div className="absolute inset-0 bg-black/30"></div>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 container-custom">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+              Our <span className="text-green-500">Products</span>
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-100 leading-relaxed max-w-3xl mx-auto">
+              Discover our premium selection of coolants, ATF, and gear oils — engineered for
+              optimal performance and long-lasting protection.
+            </p>
+          </div>
+        </section>
+
 
       {/* Filters + Search */}
       <section className="section-padding bg-white border-b px-4 sm:px-6">

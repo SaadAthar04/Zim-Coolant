@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShoppingCart, Menu, X, Search as SearchIcon } from 'lucide-react'
+import { ShoppingCart, Menu, X, Search as SearchIcon, MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 type ProductSuggest = {
@@ -22,9 +22,9 @@ const NAV_ITEMS = [
 ]
 
 export default function Navbar() {
-  // cart badge (desktop)
-  const [mounted, setMounted] = useState(false)
-  const [cartItems, setCartItems] = useState(0)
+  // cart badge (desktop) - COMMENTED OUT FOR NOW
+  // const [mounted, setMounted] = useState(false)
+  // const [cartItems, setCartItems] = useState(0)
 
   // mobile toggles
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -36,35 +36,39 @@ export default function Navbar() {
   const [results, setResults] = useState<ProductSuggest[]>([])
   const searchRef = useRef<HTMLDivElement | null>(null)
 
-  // ── cart count from localStorage
-  useEffect(() => {
-    setMounted(true)
-    const update = () => {
-      try {
-        const stored = localStorage.getItem('cart-storage')
-        if (!stored) return setCartItems(0)
-        const data = JSON.parse(stored)
-        const total =
-          data.state?.items?.reduce(
-            (sum: number, it: any) => sum + (it.quantity || 0),
-            0
-          ) || 0
-        setCartItems(total)
-      } catch {
-        setCartItems(0)
-      }
-    }
-    update()
-    const onCartUpdated = () => update()
-    window.addEventListener('cartUpdated', onCartUpdated)
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'cart-storage') update()
-    })
-    return () => {
-      window.removeEventListener('cartUpdated', onCartUpdated)
-      window.removeEventListener('storage', update as any)
-    }
-  }, [])
+  // WhatsApp contact link
+  const whatsappNumber = '923331632138' // +92 333-1632138 formatted for WhatsApp
+  const whatsappUrl = `https://wa.me/${whatsappNumber}`
+
+  // ── cart count from localStorage - COMMENTED OUT FOR NOW
+  // useEffect(() => {
+  //   setMounted(true)
+  //   const update = () => {
+  //     try {
+  //       const stored = localStorage.getItem('cart-storage')
+  //       if (!stored) return setCartItems(0)
+  //       const data = JSON.parse(stored)
+  //       const total =
+  //         data.state?.items?.reduce(
+  //           (sum: number, it: any) => sum + (it.quantity || 0),
+  //           0
+  //         ) || 0
+  //       setCartItems(total)
+  //     } catch {
+  //       setCartItems(0)
+  //     }
+  //   }
+  //   update()
+  //   const onCartUpdated = () => update()
+  //   window.addEventListener('cartUpdated', onCartUpdated)
+  //   window.addEventListener('storage', (e) => {
+  //     if (e.key === 'cart-storage') update()
+  //   })
+  //   return () => {
+  //     window.removeEventListener('cartUpdated', onCartUpdated)
+  //     window.removeEventListener('storage', update as any)
+  //   }
+  // }, [])
 
   // ── mobile: click outside to close search dropdown
   useEffect(() => {
@@ -133,8 +137,21 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Right: Cart */}
+        {/* Right: Contact Button (WhatsApp) */}
         <div className="justify-self-end">
+          <a 
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full transition-colors font-medium text-sm"
+          >
+            <MessageCircle className="w-5 h-5" />
+            <span>Contact</span>
+          </a>
+        </div>
+
+        {/* Right: Cart - COMMENTED OUT FOR NOW */}
+        {/* <div className="justify-self-end">
           <Link href="/cart" className="relative inline-flex">
             <ShoppingCart className="w-6 h-6 text-white hover:text-green-100 transition-colors" />
             {mounted && cartItems > 0 && (
@@ -143,7 +160,7 @@ export default function Navbar() {
               </span>
             )}
           </Link>
-        </div>
+        </div> */}
       </div>
 
       {/* Inline nav (desktop) */}

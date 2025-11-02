@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ShoppingCart, Star, Truck, Shield, ArrowLeft, Minus, Plus, CheckCircle } from 'lucide-react'
+import { ShoppingCart, Star, Truck, Shield, ArrowLeft, Minus, Plus, CheckCircle, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
@@ -21,8 +21,13 @@ export default function ProductDetail() {
   const [mounted, setMounted] = useState(false)
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
   const [relatedLoading, setRelatedLoading] = useState(false)
-  const [addingToCart, setAddingToCart] = useState(false)
-  const [cartSuccess, setCartSuccess] = useState(false)
+  // COMMENTED OUT FOR NOW - Add to cart functionality
+  // const [addingToCart, setAddingToCart] = useState(false)
+  // const [cartSuccess, setCartSuccess] = useState(false)
+
+  // WhatsApp contact link
+  const whatsappNumber = '923331632138' // +92 333-1632138 formatted for WhatsApp
+  const whatsappUrl = `https://wa.me/${whatsappNumber}`
 
   useEffect(() => {
     setMounted(true)
@@ -111,56 +116,57 @@ export default function ProductDetail() {
     }
   }
 
-  const handleAddToCart = async () => {
-    if (product && mounted && !addingToCart) {
-      setAddingToCart(true)
-      
-      try {
-        // Simulate a brief loading state for better UX
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        // Access cart store only after mounting
-        const storedCart = localStorage.getItem('cart-storage')
-        let cartData: { state: { items: Array<{ product: Product; quantity: number }> } } = { state: { items: [] } }
-        
-        if (storedCart) {
-          cartData = JSON.parse(storedCart)
-        }
-        
-        // Check if product already exists in cart
-        const existingItemIndex = cartData.state.items.findIndex((item) => item.product.id === product.id)
-        
-        if (existingItemIndex >= 0) {
-          // Update existing item quantity
-          cartData.state.items[existingItemIndex].quantity += quantity
-        } else {
-          // Add new item
-          cartData.state.items.push({ product, quantity })
-        }
-        
-        // Save back to localStorage
-        localStorage.setItem('cart-storage', JSON.stringify(cartData))
-        
-        // Dispatch cart update event to sync navbar
-        window.dispatchEvent(new CustomEvent('cartUpdated'))
-        
-        // Show success feedback
-        setCartSuccess(true)
-        toast.success(`${quantity} ${product.name} added to cart!`)
-        
-        // Reset success state after 2 seconds
-        setTimeout(() => {
-          setCartSuccess(false)
-        }, 2000)
-        
-      } catch (error) {
-        console.error('Error adding to cart:', error)
-        toast.error('Failed to add to cart')
-      } finally {
-        setAddingToCart(false)
-      }
-    }
-  }
+  // COMMENTED OUT FOR NOW - Add to cart functionality
+  // const handleAddToCart = async () => {
+  //   if (product && mounted && !addingToCart) {
+  //     setAddingToCart(true)
+  //     
+  //     try {
+  //       // Simulate a brief loading state for better UX
+  //       await new Promise(resolve => setTimeout(resolve, 500))
+  //       
+  //       // Access cart store only after mounting
+  //       const storedCart = localStorage.getItem('cart-storage')
+  //       let cartData: { state: { items: Array<{ product: Product; quantity: number }> } } = { state: { items: [] } }
+  //       
+  //       if (storedCart) {
+  //         cartData = JSON.parse(storedCart)
+  //       }
+  //       
+  //       // Check if product already exists in cart
+  //       const existingItemIndex = cartData.state.items.findIndex((item) => item.product.id === product.id)
+  //       
+  //       if (existingItemIndex >= 0) {
+  //         // Update existing item quantity
+  //         cartData.state.items[existingItemIndex].quantity += quantity
+  //       } else {
+  //         // Add new item
+  //         cartData.state.items.push({ product, quantity })
+  //       }
+  //       
+  //       // Save back to localStorage
+  //       localStorage.setItem('cart-storage', JSON.stringify(cartData))
+  //       
+  //       // Dispatch cart update event to sync navbar
+  //       window.dispatchEvent(new CustomEvent('cartUpdated'))
+  //       
+  //       // Show success feedback
+  //       setCartSuccess(true)
+  //       toast.success(`${quantity} ${product.name} added to cart!`)
+  //       
+  //       // Reset success state after 2 seconds
+  //       setTimeout(() => {
+  //         setCartSuccess(false)
+  //       }, 2000)
+  //       
+  //     } catch (error) {
+  //       console.error('Error adding to cart:', error)
+  //       toast.error('Failed to add to cart')
+  //     } finally {
+  //       setAddingToCart(false)
+  //     }
+  //   }
+  // }
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= (product?.stock_quantity || 1)) {
@@ -344,9 +350,10 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              {/* Add to Cart */}
+              {/* Contact Button (WhatsApp) */}
               <div className="space-y-6">
-                <div className="flex items-center space-x-4">
+                {/* COMMENTED OUT FOR NOW - Quantity selector */}
+                {/* <div className="flex items-center space-x-4">
                   <label className="text-sm font-medium text-gray-700">Quantity:</label>
                   <div className="flex items-center border border-gray-300 rounded-lg">
                     <button
@@ -367,9 +374,10 @@ export default function ProductDetail() {
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
-                </div>
+                </div> */}
 
-                <button
+                {/* COMMENTED OUT FOR NOW - Add to Cart button */}
+                {/* <button
                   onClick={handleAddToCart}
                   disabled={product.stock_quantity === 0 || !mounted || addingToCart}
                   className={`w-full min-h-[48px] flex items-center justify-center space-x-2 transition-all duration-300 ${
@@ -398,7 +406,18 @@ export default function ProductDetail() {
                       </span>
                     </>
                   )}
-                </button>
+                </button> */}
+
+                {/* Contact Button - Links to WhatsApp */}
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full min-h-[48px] flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 font-medium"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span className="whitespace-nowrap">Contact via WhatsApp</span>
+                </a>
               </div>
 
               {/* Features */}

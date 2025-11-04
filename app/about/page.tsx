@@ -90,7 +90,7 @@ export default function About() {
       {/* Stats Section */}
       <section className="py-12 sm:py-16 bg-white px-4 sm:px-6">
         <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+          <div className="flex flex-wrap justify-center items-center gap-16 sm:gap-24 md:gap-32 lg:gap-40 xl:gap-48">
             {stats.map((stat, index) => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-600 mb-1 sm:mb-2">
@@ -233,9 +233,9 @@ export default function About() {
             <div
               className="relative"
             >
-              <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200">
-                <div className="space-y-4">
-                  <div className="flex justify-start">
+              <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl px-8 pt-3 pb-3 border border-primary-200">
+                <div className="flex flex-col">
+                  <div className="flex justify-start -mt-8">
                     <Image
                       src="/logo.png"
                       alt="Zim Coolant Logo"
@@ -244,8 +244,8 @@ export default function About() {
                       className="w-36 h-36 object-contain"
                     />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">36+ Years of Excellence</h3>
-                  <p className="text-gray-600">
+                  <h3 className="text-2xl font-bold text-gray-900 -mt-5">36+ Years of Excellence</h3>
+                  <p className="text-gray-600 mt-2">
                     From small  beginnings to industry leadership, our journey continues with every product we create.
                   </p>
                 </div>

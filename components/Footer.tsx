@@ -5,11 +5,11 @@ import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react'
 export default function Footer() {
   return (
     <footer className="bg-gradient-to-r from-primary-800 to-primary-900 text-white">
-      <div className="container-custom pt-6 sm:pt-8 pb-4 px-4 sm:px-6 md:px-8 lg:px-4">
+      <div className="container-custom pt-3 sm:pt-4 pb-4 px-4 sm:px-6 md:px-8 lg:px-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
           {/* Company Info */}
-          <div className="space-y-3 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center justify-center sm:justify-start space-x-3">
+          <div className="flex flex-col sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center justify-center sm:justify-start space-x-3 -mt-6">
               <Image
                 src="/logo.png"
                 alt="Zim Coolant Logo"
@@ -19,10 +19,10 @@ export default function Footer() {
                 className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[120px] md:h-[120px] lg:w-[150px] lg:h-[150px] xl:w-[180px] xl:h-[180px] object-contain"
               />
             </div>
-            <p className="text-white text-xs sm:text-sm leading-relaxed text-center sm:text-left">
+            <p className="text-white text-xs sm:text-sm leading-relaxed text-center sm:text-left -mt-6">
               Premium Automotive Products, Ensuring optimal performance, longevity and protection, for all kinds of vehicles.
             </p>
-            <div className="flex justify-center sm:justify-start space-x-4">
+            <div className="flex justify-center sm:justify-start space-x-4 mt-2">
               <a href="#" className="text-white hover:text-primary-400 transition-colors hover:scale-110 transform duration-200">
                 <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>

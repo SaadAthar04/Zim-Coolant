@@ -61,7 +61,7 @@ export default function Contact() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 px-4 sm:px-6 overflow-hidden">
+      <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -83,10 +83,10 @@ export default function Contact() {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
               Get in <span className="text-green-500">Touch</span>
             </h1>
-            <p className="text-lg sm:text-xl text-gray-100 leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 leading-relaxed">
               Have questions about our products or need technical support? 
               We're here to help you find the perfect solution for your vehicle.
             </p>
@@ -107,8 +107,8 @@ export default function Contact() {
               className="space-y-8"
             >
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">Contact Information</h2>
-                <p className="text-lg text-gray-600 leading-relaxed mb-8">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-6">Contact Information</h2>
+                <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed mb-8">
                   Reach out to us through any of these channels. We're always happy to help!
                 </p>
               </div>
@@ -169,7 +169,7 @@ export default function Contact() {
                   className="text-center py-12"
                 >
                   <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Message Sent Successfully!</h3>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2">Message Sent Successfully!</h3>
                   <p className="text-gray-600 mb-6">
                     Thank you for contacting us. We'll get back to you within 24 hours.
                   </p>
@@ -179,7 +179,7 @@ export default function Contact() {
                 </motion.div>
               ) : (
                 <>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-6">Send us a Message</h2>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-6">Send us a Message</h2>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Inputs */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -293,8 +293,8 @@ export default function Contact() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto">
               Find answers to common questions about our products and services.
             </p>
           </motion.div>

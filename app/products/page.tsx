@@ -108,7 +108,7 @@ export default function Products() {
       <Navbar />
 
       {/* Hero Section */}
-        <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 px-4 sm:px-6 overflow-hidden">
+        <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 overflow-hidden">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -124,10 +124,10 @@ export default function Products() {
 
           {/* Content */}
           <div className="relative z-10 container-custom">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
               Our <span className="text-green-500">Products</span>
             </h1>
-            <p className="text-lg sm:text-xl text-gray-100 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 leading-relaxed max-w-3xl mx-auto">
               Discover our premium selection of coolants, ATF, and gear oils — engineered for
               optimal performance and long-lasting protection.
             </p>
@@ -136,7 +136,7 @@ export default function Products() {
 
 
       {/* Filters + Search */}
-      <section className="section-padding bg-white border-b px-4 sm:px-6">
+      <section className="section-padding bg-white border-b">
         <div className="container-custom flex flex-col lg:flex-row gap-4 sm:gap-6 items-center justify-between">
           {/* Search */}
           <div className="relative flex-1 max-w-md w-full">
@@ -225,7 +225,7 @@ export default function Products() {
 
           {filteredProducts.length === 0 ? (
             <div className="text-center py-16">
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-2">
                 No products found
               </h3>
               <button onClick={resetAllFilters} className="btn-primary animate-pulse-green">

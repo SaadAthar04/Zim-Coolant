@@ -61,7 +61,7 @@ export default function About() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 px-4 sm:px-6 overflow-hidden">
+      <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 overflow-hidden">
           {/* Background Image */}
           <div>
             <Image
@@ -78,17 +78,17 @@ export default function About() {
 
           {/* Content */}
           <div className="relative z-10 max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6">
               About <span className="text-green-500">Zim</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-100 leading-relaxed px-2 sm:px-0">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 leading-relaxed px-2 sm:px-0">
               We are a leading manufacturer and distributor of premium-quality coolants and automotive fluids, serving the automotive industry with excellence since 1988.
             </p>
           </div>
         </section>
 
       {/* Stats Section */}
-      <section className="py-12 sm:py-16 bg-white px-4 sm:px-6">
+      <section className="py-12 sm:py-16 bg-white">
         <div className="container-custom">
           <div className="flex flex-wrap justify-center items-center gap-16 sm:gap-24 md:gap-32 lg:gap-40 xl:gap-48">
             {stats.map((stat, index) => (
@@ -115,8 +115,8 @@ export default function About() {
               <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg">
                 <Target className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900">Our Mission</h2>
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Our Mission</h2>
+              <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed">
                 To provide the highest quality coolants, ATF, and gear oils that enhance vehicle performance, ensure smooth operation, and contribute to environmental sustainability. We strive to be the trusted partner for automotive professionals and vehicle owners across Pakistan.
               </p>
             </div>
@@ -127,8 +127,8 @@ export default function About() {
               <div className="w-16 h-16 bg-gradient-to-br from-primary-700 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <Award className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900">Our Vision</h2>
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Our Vision</h2>
+              <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed">
                 To become the leading provider of coolants, ATF, and gear oils in Pakistan, recognized for innovation, quality, and customer service. We envision a future where every vehicle runs smoothly with our products, contributing to safer roads and a cleaner environment.
               </p>
             </div>
@@ -218,7 +218,7 @@ export default function About() {
             <div
               className="space-y-6"
             >
-              <h2 className="text-4xl font-bold text-gray-900">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
                 Our Story
               </h2>
               <div className="space-y-4 text-gray-600 leading-relaxed">
@@ -244,8 +244,8 @@ export default function About() {
                       className="w-36 h-36 object-contain"
                     />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 -mt-5">36+ Years of Excellence</h3>
-                  <p className="text-gray-600 mt-2">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 -mt-5">36+ Years of Excellence</h3>
+                  <p className="text-sm sm:text-base text-gray-600 mt-2">
                     From small  beginnings to industry leadership, our journey continues with every product we create.
                   </p>
                 </div>

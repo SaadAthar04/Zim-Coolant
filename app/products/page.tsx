@@ -273,7 +273,7 @@ export default function Products() {
                       </p>
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
                         <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
-                          Rs. {product.price}
+                          Rs. {product.price}/-
                         </span>
                         <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 w-full sm:w-auto text-center group-hover:bg-primary-700 transition-colors">
                           View Details
@@ -306,9 +306,9 @@ export default function Products() {
                           <span className="text-xl sm:text-2xl font-bold text-primary-600">
                             Rs. {product.price}
                           </span>
-                          <span className="text-xs sm:text-sm text-gray-500">
+                          {/* <span className="text-xs sm:text-sm text-gray-500">
                             Stock: {product.stock_quantity}
-                          </span>
+                          </span> */}
                         </div>
                         <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 mt-4 inline-block group-hover:bg-primary-700 transition-colors">
                           View Details

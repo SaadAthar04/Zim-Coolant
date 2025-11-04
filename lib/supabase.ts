@@ -13,8 +13,10 @@ export interface Product {
   price: number
   category: string
   image_url: string
+  red_image_url?: string
   stock_quantity: number
   specifications?: any
+  directionsForUse?: string
   created_at: string
   updated_at: string
 }

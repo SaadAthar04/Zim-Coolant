@@ -16,7 +16,7 @@ export default function ProductDetail() {
   const productId = params.id as string
   const [product, setProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState(1)
-  const [selectedImage, setSelectedImage] = useState(0)
+  const [selectedColor, setSelectedColor] = useState<'green' | 'red'>('green')
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
@@ -37,6 +37,7 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product) {
       fetchRelatedProducts()
+      setSelectedColor('green') // Reset to green when product changes
     }
   }, [product])
 
@@ -239,46 +240,19 @@ export default function ProductDetail() {
             >
               <div className="w-full h-96 rounded-2xl overflow-hidden relative bg-gray-100">
                 <Image
-                  src={product.image_url}
+                  src={selectedColor === 'green' ? product.image_url : (product.red_image_url || product.image_url)}
                   alt={product.name}
                   fill
                   className="object-cover object-center"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   quality={90}
                   priority
+                  key={selectedColor}
                   onError={(e) => {
-                    console.error('Image failed to load:', product.image_url);
+                    console.error('Image failed to load:', selectedColor === 'green' ? product.image_url : product.red_image_url);
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-              </div>
-              
-              {/* Thumbnail Images */}
-              <div className="flex space-x-4">
-                {[1, 2, 3, 4].map((index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index - 1)}
-                    className={`w-20 h-20 rounded-lg border-2 transition-colors overflow-hidden relative ${
-                      selectedImage === index - 1
-                        ? 'border-primary-600 bg-primary-50'
-                        : 'border-gray-200 bg-gray-100 hover:border-gray-300'
-                    }`}
-                  >
-                    <Image
-                      src={product.image_url}
-                      alt={`${product.name} thumbnail ${index}`}
-                      fill
-                      className="object-cover object-center"
-                      sizes="80px"
-                      quality={75}
-                      onError={(e) => {
-                        console.error('Thumbnail image failed to load:', product.image_url);
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  </button>
-                ))}
               </div>
             </motion.div>
 
@@ -312,15 +286,38 @@ export default function ProductDetail() {
                 </h1>
                 <div className="flex items-baseline space-x-4">
                   <span className="text-4xl font-bold text-primary-600">
-                    Rs. {product.price}
-                  </span>
-                  <span className="text-lg text-gray-500 line-through">
-                    Rs. {(product.price * 1.2).toFixed(2)}
-                  </span>
-                  <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-medium rounded-full">
-                    Save 20%
+                    Rs. {product.price}/-
                   </span>
                 </div>
+                
+                {/* Color Selection - Show only if product has red_image_url */}
+                {product.red_image_url && (
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xs font-medium text-gray-600">Color:</span>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => setSelectedColor('green')}
+                        className={`w-7 h-7 rounded-full border-2 transition-all ${
+                          selectedColor === 'green'
+                            ? 'border-primary-600 ring-1 ring-primary-200'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                        style={{ backgroundColor: '#22c55e' }}
+                        aria-label="Select green color"
+                      />
+                      <button
+                        onClick={() => setSelectedColor('red')}
+                        className={`w-7 h-7 rounded-full border-2 transition-all ${
+                          selectedColor === 'red'
+                            ? 'border-primary-600 ring-1 ring-primary-200'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                        style={{ backgroundColor: '#ef4444' }}
+                        aria-label="Select red color"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Description */}
@@ -332,15 +329,26 @@ export default function ProductDetail() {
                 />
               </div>
 
+              {/* Directions for Use */}
+              {product.directionsForUse && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Directions for Use</h3>
+                  <div 
+                    className="text-gray-600 leading-relaxed whitespace-pre-line"
+                    dangerouslySetInnerHTML={{ __html: product.directionsForUse || '' }}
+                  />
+                </div>
+              )}
+
               {/* Specifications */}
-              <div>
+              {/* <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Specifications</h3>
                 <p className="text-gray-600">
                   {product.specifications}
                 </p>
-              </div>
+              </div> */}
 
-              {/* Stock Status */}
+              {/* Stock Status
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <div className={`w-3 h-3 rounded-full ${product.stock_quantity > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -348,7 +356,7 @@ export default function ProductDetail() {
                     {product.stock_quantity > 0 ? `${product.stock_quantity} units in stock` : 'Out of stock'}
                   </span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Contact Button (WhatsApp) */}
               <div className="space-y-6">
@@ -424,7 +432,7 @@ export default function ProductDetail() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-200">
                 <div className="text-center">
                   <Truck className="w-8 h-8 text-primary-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Free Shipping</p>
+                  <p className="text-sm text-gray-600">Free shipping above Rs. 1,499</p>
                 </div>
                 <div className="text-center">
                   <Shield className="w-8 h-8 text-primary-600 mx-auto mb-2" />
@@ -471,11 +479,18 @@ export default function ProductDetail() {
                 >
                   <Link href={`/products/${relatedProduct.id}`}>
                     <div className="p-6">
-                      <div className="w-full h-48 bg-black rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                        <img 
-                          src={relatedProduct.image_url} 
+                      <div className="w-full h-48 rounded-lg mb-4 overflow-hidden relative bg-gray-100">
+                        <Image
+                          src={relatedProduct.image_url}
                           alt={relatedProduct.name}
-                          className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
+                          fill
+                          className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
+                          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          quality={85}
+                          onError={(e) => {
+                            console.error('Image failed to load:', relatedProduct.image_url);
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                       </div>
                       <div className="space-y-3">
@@ -490,11 +505,11 @@ export default function ProductDetail() {
                         </p>
                         <div className="flex items-center justify-between">
                           <span className="text-2xl font-bold text-primary-600">
-                            Rs. {relatedProduct.price}
+                            Rs. {relatedProduct.price}/-
                           </span>
-                          <span className="text-sm text-gray-500">
+                          {/* <span className="text-sm text-gray-500">
                             Stock: {relatedProduct.stock_quantity}
-                          </span>
+                          </span> */}
                         </div>
                       </div>
                     </div>

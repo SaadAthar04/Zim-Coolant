@@ -15,8 +15,8 @@ export default function Footer() {
                 alt="Zim Coolant Logo"
                 width={400}
                 height={400}
-                sizes="(max-width: 640px) 120px, (max-width: 768px) 150px, 200px"
-                className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[120px] md:h-[120px] lg:w-[150px] lg:h-[150px] xl:w-[180px] xl:h-[180px] object-contain"
+                sizes="(max-width: 640px) 150px, (max-width: 768px) 190px, 250px"
+                className="w-[100px] h-[100px] sm:w-[125px] sm:h-[125px] md:w-[150px] md:h-[150px] lg:w-[190px] lg:h-[190px] xl:w-[220px] xl:h-[220px] object-contain"
               />
             </div>
             <p className="text-white text-xs sm:text-sm leading-relaxed text-center sm:text-left -mt-6">

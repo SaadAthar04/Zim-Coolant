@@ -3,13 +3,20 @@ import './globals.css'
 import { NavbarProvider } from '@/lib/navbar-context'
 
 export const metadata: Metadata = {
-  title: 'Zim Coolant - Premium Engine Oil & Coolant Solutions',
+  title: 'Zim Chemicals - Premium Automotive Products',
   description: 'Discover premium quality engine oils and coolants for optimal vehicle performance. Professional-grade products for automotive excellence.',
   keywords: 'coolant, engine oil, automotive, vehicle maintenance, premium oil, coolant solutions',
   icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    icon: [
+      { url: '/FavIcon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/FavIcon.png', sizes: '16x16', type: 'image/png' },
+      { url: '/FavIcon.png', sizes: '192x192', type: 'image/png' },
+      { url: '/FavIcon.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/FavIcon.png',
+    apple: [
+      { url: '/FavIcon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 }
 
@@ -20,12 +27,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-  <body>
-    <NavbarProvider>
-      {children}
-    </NavbarProvider>
-  </body>
-</html>
-
+      <body>
+        <NavbarProvider>
+          {children}
+        </NavbarProvider>
+      </body>
+    </html>
   )
 }

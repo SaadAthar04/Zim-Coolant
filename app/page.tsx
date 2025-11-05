@@ -135,7 +135,7 @@ export default function Home() {
               featuredProducts.map((product, index) => (
                 <Link 
                   key={product.id} 
-                  href={`/products/${product.id}`}
+                  href={`/products/${product.slug}`}
                   className="block space-y-3 sm:space-y-4 group cursor-pointer hover:scale-105 transition-transform duration-200"
                 >
                   <div className="w-full h-64 sm:h-68 md:h-72 lg:h-76 xl:h-80 rounded-lg overflow-hidden relative bg-gray-100">

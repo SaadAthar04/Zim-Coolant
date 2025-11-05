@@ -2,37 +2,30 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ShoppingCart, Star, Truck, Shield, ArrowLeft, Minus, Plus, CheckCircle, MessageCircle } from 'lucide-react'
+import { Star, Truck, Shield, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
-import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Product, supabase } from '@/lib/supabase'
 
 export default function ProductDetail() {
   const params = useParams()
-  const productId = params.id as string
+  const productSlugParam = params.slug as string
   const [product, setProduct] = useState<Product | null>(null)
-  const [quantity, setQuantity] = useState(1)
   const [selectedColor, setSelectedColor] = useState<'green' | 'red'>('green')
   const [loading, setLoading] = useState(true)
-  const [mounted, setMounted] = useState(false)
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
   const [relatedLoading, setRelatedLoading] = useState(false)
-  // COMMENTED OUT FOR NOW - Add to cart functionality
-  // const [addingToCart, setAddingToCart] = useState(false)
-  // const [cartSuccess, setCartSuccess] = useState(false)
 
   // WhatsApp contact link
   const whatsappNumber = '923331632138' // +92 333-1632138 formatted for WhatsApp
   const whatsappUrl = `https://wa.me/${whatsappNumber}`
 
   useEffect(() => {
-    setMounted(true)
     fetchProduct()
-  }, [productId])
+  }, [productSlugParam])
 
   useEffect(() => {
     if (product) {
@@ -45,43 +38,22 @@ export default function ProductDetail() {
     try {
       setLoading(true)
       
-      // First try to fetch by ID
-      let { data, error } = await supabase
+      // Fetch product directly by slug
+      const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('id', productId)
+        .eq('slug', productSlugParam)
         .single()
-
-      // If no product found by ID, try to fetch by name (fallback)
-      if (error && error.code === 'PGRST116') {
-        const { data: allProducts, error: allError } = await supabase
-          .from('products')
-          .select('*')
-        
-        if (!allError && allProducts) {
-          // Try to find by name or description
-          const foundProduct = allProducts.find(p => 
-            p.name.toLowerCase().includes(productId.toLowerCase()) ||
-            p.description.toLowerCase().includes(productId.toLowerCase())
-          )
-          if (foundProduct) {
-            setProduct(foundProduct)
-            setLoading(false)
-            return
-          }
-        }
-      }
-
+      
       if (error) {
-        console.error('Error fetching product:', error)
         return
       }
 
       if (data) {
         setProduct(data)
       }
-    } catch (error) {
-      console.error('Error:', error)
+    } catch {
+      // Error handled silently
     } finally {
       setLoading(false)
     }
@@ -103,75 +75,16 @@ export default function ProductDetail() {
         .order('created_at', { ascending: false })
       
       if (error) {
-        console.error('Error fetching related products:', error)
         return
       }
 
       if (data) {
         setRelatedProducts(data)
       }
-    } catch (error) {
-      console.error('Error:', error)
+    } catch {
+      // Error handled silently
     } finally {
       setRelatedLoading(false)
-    }
-  }
-
-  // COMMENTED OUT FOR NOW - Add to cart functionality
-  // const handleAddToCart = async () => {
-  //   if (product && mounted && !addingToCart) {
-  //     setAddingToCart(true)
-  //     
-  //     try {
-  //       // Simulate a brief loading state for better UX
-  //       await new Promise(resolve => setTimeout(resolve, 500))
-  //       
-  //       // Access cart store only after mounting
-  //       const storedCart = localStorage.getItem('cart-storage')
-  //       let cartData: { state: { items: Array<{ product: Product; quantity: number }> } } = { state: { items: [] } }
-  //       
-  //       if (storedCart) {
-  //         cartData = JSON.parse(storedCart)
-  //       }
-  //       
-  //       // Check if product already exists in cart
-  //       const existingItemIndex = cartData.state.items.findIndex((item) => item.product.id === product.id)
-  //       
-  //       if (existingItemIndex >= 0) {
-  //         // Update existing item quantity
-  //         cartData.state.items[existingItemIndex].quantity += quantity
-  //       } else {
-  //         // Add new item
-  //         cartData.state.items.push({ product, quantity })
-  //       }
-  //       
-  //       // Save back to localStorage
-  //       localStorage.setItem('cart-storage', JSON.stringify(cartData))
-  //       
-  //       // Dispatch cart update event to sync navbar
-  //       window.dispatchEvent(new CustomEvent('cartUpdated'))
-  //       
-  //       // Show success feedback
-  //       setCartSuccess(true)
-  //       toast.success(`${quantity} ${product.name} added to cart!`)
-  //       
-  //       // Reset success state after 2 seconds
-  //       setTimeout(() => {
-  //         setCartSuccess(false)
-  //       }, 2000)
-  //       
-  //     } catch (error) {
-  //       console.error('Error adding to cart:', error)
-  //       toast.error('Failed to add to cart')
-  //     } finally {
-  //       setAddingToCart(false)
-  //     }
-  //   }
-  // }
-
-  const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity >= 1 && newQuantity <= (product?.stock_quantity || 1)) {
-      setQuantity(newQuantity)
     }
   }
 
@@ -210,25 +123,8 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Breadcrumb */}
-      <section className="pt-16 pb-8 bg-gray-50">
-        <div className="container-custom">
-          <nav className="flex items-center space-x-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-primary-600 transition-colors">
-              Home
-            </Link>
-            <span>/</span>
-            <Link href="/products" className="hover:text-primary-600 transition-colors">
-              Products
-            </Link>
-            <span>/</span>
-            <span className="text-gray-900">{product.name}</span>
-          </nav>
-        </div>
-      </section>
-
       {/* Product Details */}
-      <section className="py-16 bg-white">
+      <section className="pt-28 sm:pt-32 md:pt-36 pb-16 bg-white">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Product Images */}
@@ -238,7 +134,7 @@ export default function ProductDetail() {
               transition={{ duration: 0.8 }}
               className="space-y-6"
             >
-              <div className="w-full h-96 rounded-2xl overflow-hidden relative bg-gray-100">
+              <div className="w-full h-[500px] lg:h-[600px] rounded-2xl overflow-hidden relative bg-gray-100">
                 <Image
                   src={selectedColor === 'green' ? product.image_url : (product.red_image_url || product.image_url)}
                   alt={product.name}
@@ -249,7 +145,6 @@ export default function ProductDetail() {
                   priority
                   key={selectedColor}
                   onError={(e) => {
-                    console.error('Image failed to load:', selectedColor === 'green' ? product.image_url : product.red_image_url);
                     e.currentTarget.style.display = 'none';
                   }}
                 />
@@ -268,15 +163,6 @@ export default function ProductDetail() {
                 <span className="inline-block px-4 py-2 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">
                   {product.category}
                 </span>
-                
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star key={star} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <span className="text-gray-600 text-sm">(24 reviews)</span>
-                </div>
               </div>
 
               {/* Product Name and Price */}
@@ -340,82 +226,8 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* Specifications */}
-              {/* <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Specifications</h3>
-                <p className="text-gray-600">
-                  {product.specifications}
-                </p>
-              </div> */}
-
-              {/* Stock Status
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className={`w-3 h-3 rounded-full ${product.stock_quantity > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                  <span className="text-sm text-gray-600">
-                    {product.stock_quantity > 0 ? `${product.stock_quantity} units in stock` : 'Out of stock'}
-                  </span>
-                </div>
-              </div> */}
-
               {/* Contact Button (WhatsApp) */}
               <div className="space-y-6">
-                {/* COMMENTED OUT FOR NOW - Quantity selector */}
-                {/* <div className="flex items-center space-x-4">
-                  <label className="text-sm font-medium text-gray-700">Quantity:</label>
-                  <div className="flex items-center border border-gray-300 rounded-lg">
-                    <button
-                      onClick={() => handleQuantityChange(quantity - 1)}
-                      disabled={quantity <= 1}
-                      className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="px-4 py-2 min-w-[3rem] text-center">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() => handleQuantityChange(quantity + 1)}
-                      disabled={quantity >= product.stock_quantity}
-                      className="p-2 hover:bg-gray-50 disabled:cursor-not-allowed"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div> */}
-
-                {/* COMMENTED OUT FOR NOW - Add to Cart button */}
-                {/* <button
-                  onClick={handleAddToCart}
-                  disabled={product.stock_quantity === 0 || !mounted || addingToCart}
-                  className={`w-full min-h-[48px] flex items-center justify-center space-x-2 transition-all duration-300 ${
-                    cartSuccess 
-                      ? 'bg-green-600 hover:bg-green-700 text-white' 
-                      : addingToCart 
-                        ? 'bg-gray-400 cursor-not-allowed text-white' 
-                        : 'btn-primary'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {addingToCart ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span className="whitespace-nowrap">Adding...</span>
-                    </>
-                  ) : cartSuccess ? (
-                    <>
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="whitespace-nowrap">Added to Cart!</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="w-5 h-5" />
-                      <span className="whitespace-nowrap">
-                        {product.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}
-                      </span>
-                    </>
-                  )}
-                </button> */}
-
                 {/* Contact Button - Links to WhatsApp */}
                 <a
                   href={whatsappUrl}
@@ -477,7 +289,7 @@ export default function ProductDetail() {
                   viewport={{ once: true }}
                   className="card group cursor-pointer"
                 >
-                  <Link href={`/products/${relatedProduct.id}`}>
+                  <Link href={`/products/${relatedProduct.slug}`}>
                     <div className="p-6">
                       <div className="w-full h-48 rounded-lg mb-4 overflow-hidden relative bg-gray-100">
                         <Image
@@ -488,7 +300,6 @@ export default function ProductDetail() {
                           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           quality={85}
                           onError={(e) => {
-                            console.error('Image failed to load:', relatedProduct.image_url);
                             e.currentTarget.style.display = 'none';
                           }}
                         />
@@ -507,9 +318,6 @@ export default function ProductDetail() {
                           <span className="text-2xl font-bold text-primary-600">
                             Rs. {relatedProduct.price}/-
                           </span>
-                          {/* <span className="text-sm text-gray-500">
-                            Stock: {relatedProduct.stock_quantity}
-                          </span> */}
                         </div>
                       </div>
                     </div>
@@ -524,3 +332,4 @@ export default function ProductDetail() {
     </div>
   )
 }
+

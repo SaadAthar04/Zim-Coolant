@@ -243,7 +243,7 @@ export default function Products() {
               {filteredProducts.map((product, i) => (
                 <Link 
                   key={product.id} 
-                  href={`/products/${product.id}`}
+                  href={`/products/${product.slug}`}
                   className={`block group cursor-pointer hover:scale-105 transition-transform duration-200 ${
                     viewMode === 'list' ? 'flex space-x-4' : 'space-y-3 sm:space-y-4'
                   }`}

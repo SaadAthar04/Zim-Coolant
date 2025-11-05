@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 type ProductSuggest = {
   id: string
   name: string
+  slug: string
   image_url: string | null
   description?: string | null
   category?: string | null
@@ -70,17 +71,23 @@ export default function Navbar() {
   //   }
   // }, [])
 
-  // ── mobile: click outside to close search dropdown
+  // ── click outside to close search dropdown (mobile) and clear query (desktop)
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
       if (!searchRef.current) return
-      if (!searchRef.current.contains(e.target as Node)) setSearchOpen(false)
+      if (!searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false)
+        // Clear query on desktop when clicking outside
+        if (window.innerWidth >= 768) {
+          setQuery('')
+        }
+      }
     }
     document.addEventListener('mousedown', onDocClick)
     return () => document.removeEventListener('mousedown', onDocClick)
   }, [])
 
-  // ── mobile: debounced live search
+  // ── debounced live search (mobile & desktop)
   useEffect(() => {
     if (query.trim().length < 2) {
       setResults([])
@@ -92,7 +99,7 @@ export default function Navbar() {
     const h = setTimeout(async () => {
       const { data, error } = await supabase
         .from('products')
-        .select('id,name,image_url,description,category')
+        .select('id,name,slug,image_url,description,category')
         .ilike('name', `%${query.trim()}%`)
         .limit(5)
       if (!active) return
@@ -112,15 +119,54 @@ export default function Navbar() {
     >
       {/* ───────────────── Desktop header (unchanged layout) */}
       <div className="hidden md:grid grid-cols-3 items-center gap-2 px-6 lg:px-16 py-2">
-        {/* Left: (placeholder search — keep or wire later) */}
-        <div className="justify-self-start w-full max-w-sm">
+        {/* Left: Search */}
+        <div className="justify-self-start w-full max-w-sm relative" ref={searchRef}>
           <div className="relative">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
             <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               placeholder="Search products..."
-              className="w-full bg-white text-gray-900 rounded-full pl-9 pr-3 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-green-500/70"
+              className="w-full bg-white text-gray-900 rounded-full pl-9 pr-8 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-green-500/70"
             />
+            {loading && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-[2px] border-green-400 border-t-transparent rounded-full animate-spin"></div>
+            )}
           </div>
+          
+          {/* Desktop search results dropdown */}
+          {query.trim().length >= 2 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-md shadow-lg border border-gray-200 max-h-64 overflow-y-auto z-50">
+              {loading ? (
+                <div className="p-4 text-center text-sm text-gray-500">Searching...</div>
+              ) : results.length > 0 ? (
+                results.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/products/${p.slug}`}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    onClick={() => setQuery('')}
+                  >
+                    <div className="relative w-10 h-10 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                      {p.image_url ? (
+                        <Image src={p.image_url} alt={p.name} fill className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
+                      {p.category && (
+                        <p className="text-xs text-gray-500 truncate">{p.category}</p>
+                      )}
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="p-4 text-sm text-gray-600">No results for "{query}".</div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Center: Logo */}
@@ -252,7 +298,7 @@ export default function Navbar() {
                 {results.map((p) => (
                   <Link
                     key={p.id}
-                    href={`/products/${p.id}`}
+                    href={`/products/${p.slug}`}
                     className="flex items-center gap-3 px-3 py-2 bg-white hover:bg-gray-50 transition-colors"
                     onClick={() => setSearchOpen(false)}
                   >

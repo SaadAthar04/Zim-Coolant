@@ -147,14 +147,10 @@ export default function Home() {
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       quality={85}
                       onError={(e) => {
-                        console.error('Image failed to load:', product.image_url);
                         e.currentTarget.style.display = 'none';
                       }}
                     />
                   </div>
-                  {/* <span className="inline-block px-2 sm:px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
-                    {product.category}
-                  </span> */}
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">
                     {product.name}
                   </h3>
@@ -175,43 +171,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Features Section */}
-      {/* <section className="section-padding bg-gradient-to-r from-primary-600 to-primary-700">
-        <div className="container-custom">
-          <div
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Why Choose Zim Coolant?
-            </h2>
-            <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-              We provide the highest quality automotive fluids backed by years of expertise
-              and commitment to excellence.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div
-                key={feature.title}
-                className="text-center group"
-              >
-                <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <feature.icon className="w-8 h-8 text-primary-700" />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-primary-100 leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section> */}
-
 
 {/* CTA Section */}
 <section className="relative section-padding bg-white overflow-hidden">
@@ -253,7 +212,6 @@ export default function Home() {
     </div>
   </div>
 </section>
-
 
 
 

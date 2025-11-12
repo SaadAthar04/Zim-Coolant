@@ -20,7 +20,7 @@ export default function ProductDetail() {
   const [relatedLoading, setRelatedLoading] = useState(false)
 
   // WhatsApp contact link
-  const whatsappNumber = '923331632138' // +92 333-1632138 formatted for WhatsApp
+  const whatsappNumber = '923268871985' // +92 326-8871985 formatted for WhatsApp
   const whatsappUrl = `https://wa.me/${whatsappNumber}`
 
   useEffect(() => {

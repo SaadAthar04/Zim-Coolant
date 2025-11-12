@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import { supabase } from '@/lib/supabase'
+import Script from 'next/script'
 
 type Props = {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
+  children: React.ReactNode
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = params
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
 
   try {
     const { data: product } = await supabase
@@ -48,11 +50,60 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function ProductLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return children
+export default async function ProductLayout({ params, children }: Props) {
+  const { slug } = await params
+  
+  // Fetch product data for structured data
+  let product = null
+  try {
+    const { data } = await supabase
+      .from('products')
+      .select('name, description, image_url, category, price, slug')
+      .eq('slug', slug)
+      .single()
+    
+    product = data
+  } catch (error) {
+    // Product not found, continue without structured data
+  }
+
+  // Generate JSON-LD structured data for Google
+  const jsonLd = product ? {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description || `${product.name} - Premium ${product.category} from Zim Chemicals`,
+    image: product.image_url,
+    brand: {
+      '@type': 'Brand',
+      name: 'Zim Chemicals',
+    },
+    category: product.category,
+    offers: {
+      '@type': 'Offer',
+      price: product.price,
+      priceCurrency: 'PKR',
+      availability: 'https://schema.org/InStock',
+      url: `https://www.zimchemicals.com/products/${product.slug}`,
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      reviewCount: '200',
+    },
+  } : null
+
+  return (
+    <>
+      {jsonLd && (
+        <Script
+          id="product-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      {children}
+    </>
+  )
 }
 

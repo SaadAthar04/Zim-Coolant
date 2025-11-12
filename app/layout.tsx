@@ -18,6 +18,42 @@ export const metadata: Metadata = {
       { url: '/FavIcon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
+  openGraph: {
+    title: 'Zim Chemicals - Premium Automotive Products',
+    description: 'Discover premium quality engine oils and coolants for optimal vehicle performance. Professional-grade products for automotive excellence.',
+    url: 'https://www.zimchemicals.com',
+    siteName: 'Zim Chemicals',
+    images: [
+      {
+        url: '/FavIcon.png',
+        width: 512,
+        height: 512,
+        alt: 'Zim Chemicals Logo',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Zim Chemicals - Premium Automotive Products',
+    description: 'Discover premium quality engine oils and coolants for optimal vehicle performance.',
+    images: ['/FavIcon.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'az65QdQ6oUGcPsorIheyPMLrHjqIWyfLhPxiO2Mjg3Y',
+  },
 }
 
 export default function RootLayout({

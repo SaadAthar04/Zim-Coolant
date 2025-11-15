@@ -170,11 +170,12 @@ export default function ProductDetail() {
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
                   {product.name}
                 </h1>
-                <div className="flex items-baseline space-x-4">
+                {/* Price hidden temporarily */}
+                {/* <div className="flex items-baseline space-x-4">
                   <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-600">
                     Rs. {product.price}/-
                   </span>
-                </div>
+                </div> */}
                 
                 {/* Color Selection - Show only if product has red_image_url */}
                 {product.red_image_url && (
@@ -314,11 +315,12 @@ export default function ProductDetail() {
                         <p className="text-gray-600 text-sm line-clamp-2">
                           {relatedProduct.description}
                         </p>
-                        <div className="flex items-center justify-between">
+                        {/* Price hidden temporarily */}
+                        {/* <div className="flex items-center justify-between">
                           <span className="text-2xl font-bold text-primary-600">
                             Rs. {relatedProduct.price}/-
                           </span>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </Link>

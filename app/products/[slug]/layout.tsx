@@ -81,8 +81,9 @@ export default async function ProductLayout({ params, children }: Props) {
     category: product.category,
     offers: {
       '@type': 'Offer',
-      price: product.price,
-      priceCurrency: 'PKR',
+      // Price hidden temporarily
+      // price: product.price,
+      // priceCurrency: 'PKR',
       availability: 'https://schema.org/InStock',
       url: `https://www.zimchemicals.com/products/${product.slug}`,
     },

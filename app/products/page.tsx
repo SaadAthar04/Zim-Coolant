@@ -177,8 +177,9 @@ export default function Products() {
                 className="pl-8 sm:pl-10 pr-6 sm:pr-8 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white text-xs sm:text-sm"
               >
                 <option value="name">Sort by Name</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
+                {/* Price sorting options hidden temporarily */}
+                {/* <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option> */}
                 <option value="category">Sort by Category</option>
               </select>
             </div>
@@ -272,9 +273,10 @@ export default function Products() {
                         {product.description}
                       </p>
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-                        <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
+                        {/* Price hidden temporarily */}
+                        {/* <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
                           Rs. {product.price}/-
-                        </span>
+                        </span> */}
                         <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 w-full sm:w-auto text-center group-hover:bg-primary-700 transition-colors">
                           View Details
                         </span>
@@ -303,9 +305,10 @@ export default function Products() {
                         </h3>
                         <p className="text-gray-600 text-sm line-clamp-2">{product.description}</p>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                          <span className="text-xl sm:text-2xl font-bold text-primary-600">
+                          {/* Price hidden temporarily */}
+                          {/* <span className="text-xl sm:text-2xl font-bold text-primary-600">
                             Rs. {product.price}
-                          </span>
+                          </span> */}
                           {/* <span className="text-xs sm:text-sm text-gray-500">
                             Stock: {product.stock_quantity}
                           </span> */}

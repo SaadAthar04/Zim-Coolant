@@ -42,5 +42,10 @@ next-env.d.ts
 # OS
 Thumbs.db
 
-# Documentation
-DEPLOYMENT.md
+# SQLite WAL files (temporary, not needed in git)
+database/*.db-shm
+database/*.db-wal
+
+# Export/migration scripts data
+scripts/supabase-export.json
+scripts/supabase-products.json

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCart, Menu, X, Search as SearchIcon, MessageCircle } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { productsApi } from '@/lib/api-client'
 
 type ProductSuggest = {
   id: string
@@ -97,13 +97,25 @@ export default function Navbar() {
     let active = true
     setLoading(true)
     const h = setTimeout(async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('id,name,slug,image_url,description,category')
-        .ilike('name', `%${query.trim()}%`)
-        .limit(5)
+      const { data, error } = await productsApi.getAll()
       if (!active) return
-      setResults((!error && (data as ProductSuggest[])) || [])
+      if (!error && data) {
+        // Filter products by name matching query
+        const filtered = data
+          .filter(p => p.name.toLowerCase().includes(query.trim().toLowerCase()))
+          .slice(0, 5)
+          .map(p => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            image_url: p.image_url,
+            description: p.description,
+            category: p.category
+          }))
+        setResults(filtered)
+      } else {
+        setResults([])
+      }
       setLoading(false)
     }, 250)
     return () => {

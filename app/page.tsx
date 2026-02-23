@@ -6,8 +6,7 @@ import { ArrowRight, Shield, Zap, Users, Award } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { supabase } from '@/lib/supabase'
-import { Product } from '@/lib/supabase'
+import { productsApi, Product } from '@/lib/api-client'
 import { useNavbar } from '@/lib/navbar-context'
 
 const features = [
@@ -46,12 +45,8 @@ export default function Home() {
     try {
       setLoading(true)
 
-      // Fetch first 4 products from database
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .limit(4)
-        .order('created_at', { ascending: false })
+      // Fetch products from API
+      const { data, error } = await productsApi.getAll()
 
       if (error) {
         console.error('Error fetching featured products:', error)
@@ -59,7 +54,8 @@ export default function Home() {
       }
 
       if (data) {
-        setFeaturedProducts(data)
+        // Take first 4 products
+        setFeaturedProducts(data.slice(0, 4))
       }
     } catch (error) {
       console.error('Error:', error)

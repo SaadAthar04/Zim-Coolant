@@ -6,8 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { supabase } from '@/lib/supabase'
-import { Product } from '@/lib/supabase'
+import { productsApi, Product } from '@/lib/api-client'
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([])
@@ -27,15 +26,12 @@ export default function Products() {
     setViewMode('grid')
   }
 
-  // Fetch products from Supabase
+  // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false })
+        const { data, error } = await productsApi.getAll()
 
         if (error) {
           console.error('Error fetching products:', error)

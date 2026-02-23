@@ -1,17 +1,17 @@
 import { MetadataRoute } from 'next'
-import { supabase } from '@/lib/supabase'
+import { productOperations, seedProducts } from '@/lib/database'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.zimchemicals.com'
-  
+
   // Fetch all products for dynamic product pages
   let productUrls: MetadataRoute.Sitemap = []
   try {
-    const { data: products } = await supabase
-      .from('products')
-      .select('slug, updated_at')
-      .order('updated_at', { ascending: false })
-    
+    // Ensure products are seeded
+    seedProducts()
+
+    const products = productOperations.getAll()
+
     if (products) {
       productUrls = products.map((product) => ({
         url: `${baseUrl}/products/${product.slug}`,
@@ -24,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // If products can't be fetched, continue without them
     console.error('Error fetching products for sitemap:', error)
   }
-  
+
   return [
     {
       url: baseUrl,
@@ -53,4 +53,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...productUrls,
   ]
 }
-

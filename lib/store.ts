@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { Product } from './supabase'
+import { Product } from './api-client'
 
 interface CartStore {
   items: Array<{

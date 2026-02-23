@@ -23,7 +23,7 @@ import {
 import toast, { Toaster } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { supabase } from '@/lib/supabase'
+import { ordersApi, productsApi } from '@/lib/api-client'
 import { checkAdminAuth, logoutAdmin } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
@@ -44,8 +44,10 @@ interface Order {
   customer_phone?: string
   shipping_address?: string
   items: Array<{
-    product_id: string
-    product_name: string
+    product_id?: string
+    product_name?: string
+    id?: string
+    name?: string
     quantity: number
     price: number
   }>
@@ -96,22 +98,15 @@ export default function AdminDashboard() {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .update({ 
-          status: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', orderId)
-        .select()
+      const { data, error } = await ordersApi.updateStatus(orderId, newStatus)
 
       if (error) {
-        toast.error(`Failed to update order status: ${error.message}`)
+        toast.error(`Failed to update order status: ${error}`)
         return
       }
 
-      if (!data || data.length === 0) {
-        toast.error('Failed to update order - no rows affected')
+      if (!data) {
+        toast.error('Failed to update order - no data returned')
         return
       }
 
@@ -162,22 +157,15 @@ export default function AdminDashboard() {
 
   const updatePaymentStatus = async (orderId: string, newPaymentStatus: string) => {
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .update({ 
-          payment_status: newPaymentStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', orderId)
-        .select()
+      const { data, error } = await ordersApi.updatePaymentStatus(orderId, newPaymentStatus)
 
       if (error) {
-        toast.error(`Failed to update payment status: ${error.message}`)
+        toast.error(`Failed to update payment status: ${error}`)
         return
       }
 
-      if (!data || data.length === 0) {
-        toast.error('Failed to update payment status - no rows affected')
+      if (!data) {
+        toast.error('Failed to update payment status - no data returned')
         return
       }
 
@@ -237,42 +225,17 @@ export default function AdminDashboard() {
 
   const generateChartData = async () => {
     try {
-      // Get orders for the selected period
-      const days = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90
-      const startDate = new Date()
-      startDate.setDate(startDate.getDate() - days)
+      // Get stats from API which includes chart data
+      const { data, error } = await ordersApi.getStats(selectedPeriod)
 
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('created_at, total_amount, status, payment_status')
-        .gte('created_at', startDate.toISOString())
-        .in('status', ['confirmed', 'completed'])
-        .eq('payment_status', 'paid')
-        .order('created_at', { ascending: true })
+      if (error || !data) {
+        console.error('Error generating chart data:', error)
+        setChartData([])
+        return
+      }
 
-      if (!orders) return
+      setChartData(data.chartData || [])
 
-      // Group orders by date
-      const dailyData: { [key: string]: { date: string; sales: number; orders: number } } = {}
-      
-      orders.forEach(order => {
-        const date = new Date(order.created_at).toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric' 
-        })
-        
-        if (!dailyData[date]) {
-          dailyData[date] = { date, sales: 0, orders: 0 }
-        }
-        
-        dailyData[date].sales += order.total_amount
-        dailyData[date].orders += 1
-      })
-
-      // Convert to array and fill missing dates with zero values
-      const chartDataArray = Object.values(dailyData)
-      setChartData(chartDataArray)
-      
     } catch (error) {
       console.error('Error generating chart data:', error)
       setChartData([])
@@ -298,124 +261,68 @@ export default function AdminDashboard() {
     }
   }
 
-  // Fetch dashboard data from Supabase
+  // Fetch dashboard data from API
   const fetchDashboardData = async () => {
       try {
         setLoading(true)
-        
-        // Fetch products count
-        const { count: productsCount } = await supabase
-          .from('products')
-          .select('*', { count: 'exact', head: true })
 
-        // Fetch confirmed and paid orders count
-        const { count: ordersCount } = await supabase
-          .from('orders')
-          .select('*', { count: 'exact', head: true })
-          .in('status', ['confirmed', 'completed'])
-          .eq('payment_status', 'paid')
+        // Fetch all stats from API
+        const { data: statsData, error: statsError } = await ordersApi.getStats(selectedPeriod)
 
-        // Calculate total sales from confirmed and paid orders
-        const { data: allOrders } = await supabase
-          .from('orders')
-          .select('total_amount, status, payment_status')
-          .in('status', ['confirmed', 'completed'])
-          .eq('payment_status', 'paid')
+        if (statsError) {
+          console.error('Error fetching stats:', statsError)
+        }
 
-        const totalSales = allOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+        if (statsData) {
+          const { stats: apiStats, chartData: apiChartData, topProducts: apiTopProducts } = statsData
 
-        // Calculate stats
-        const dashboardStats: DashboardStats[] = [
-          { 
-            title: 'Total Sales', 
-            value: `Rs. ${totalSales.toFixed(2)}`, 
-            change: '+0%', 
-            icon: TrendingUp, 
-            color: 'text-green-600' 
-          },
-          { 
-            title: 'Orders', 
-            value: ordersCount?.toString() || '0', 
-            change: '+0%', 
-            icon: ShoppingCart, 
-            color: 'text-blue-600' 
-          },
-          { 
-            title: 'Customers', 
-            value: allOrders?.length?.toString() || '0', 
-            change: '+0%', 
-            icon: Users, 
-            color: 'text-purple-600' 
-          },
-          { 
-            title: 'Products', 
-            value: productsCount?.toString() || '0', 
-            change: '+0%', 
-            icon: Package, 
-            color: 'text-orange-600' 
-          }
-        ]
+          // Build dashboard stats
+          const dashboardStats: DashboardStats[] = [
+            {
+              title: 'Total Sales',
+              value: `Rs. ${(apiStats.totalSales || 0).toFixed(2)}`,
+              change: '+0%',
+              icon: TrendingUp,
+              color: 'text-green-600'
+            },
+            {
+              title: 'Orders',
+              value: (apiStats.totalOrders || 0).toString(),
+              change: '+0%',
+              icon: ShoppingCart,
+              color: 'text-blue-600'
+            },
+            {
+              title: 'Customers',
+              value: (apiStats.totalCustomers || 0).toString(),
+              change: '+0%',
+              icon: Users,
+              color: 'text-purple-600'
+            },
+            {
+              title: 'Products',
+              value: (apiStats.productsCount || 0).toString(),
+              change: '+0%',
+              icon: Package,
+              color: 'text-orange-600'
+            }
+          ]
 
-        setStats(dashboardStats)
+          setStats(dashboardStats)
+          setChartData(apiChartData || [])
+          setTopProducts(apiTopProducts || [])
+        }
 
-        // Fetch recent orders (if orders table exists)
-        const { data: ordersData } = await supabase
-          .from('orders')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(5)
+        // Fetch recent orders
+        const { data: ordersData, error: ordersError } = await ordersApi.getAll(5)
+
+        if (ordersError) {
+          console.error('Error fetching orders:', ordersError)
+        }
 
         if (ordersData) {
           setRecentOrders(ordersData as Order[])
         }
-
-        // Fetch top products with real sales data from confirmed and paid orders
-        const { data: productsData } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(4)
-
-        if (productsData) {
-          // Get all confirmed and paid orders
-          const { data: confirmedOrders } = await supabase
-            .from('orders')
-            .select('items, status, payment_status')
-            .in('status', ['confirmed', 'completed'])
-            .eq('payment_status', 'paid')
-
-          // Calculate sales data for each product
-          const topProductsData: TopProduct[] = productsData.map((product) => {
-            let totalSales = 0
-            let totalRevenue = 0
-
-            if (confirmedOrders) {
-              confirmedOrders.forEach(order => {
-                // Find items in this order that match the current product
-                order.items.forEach((item: any) => {
-                  if (item.product_id === product.id) {
-                    totalSales += item.quantity || 0
-                    totalRevenue += (item.quantity || 0) * (item.price || 0)
-                  }
-                })
-              })
-            }
-
-            return {
-              name: product.name,
-              sales: totalSales,
-              revenue: totalRevenue,
-              stock_quantity: product.stock_quantity || 0
-            }
-          })
-
-                  // Sort by sales and take top 4
-        const sortedProducts = topProductsData.sort((a, b) => b.sales - a.sales).slice(0, 4)
-        setTopProducts(sortedProducts)
-      }
-
-      // Generate chart data
-      await generateChartData()
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error)

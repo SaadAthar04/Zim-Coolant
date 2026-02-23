@@ -8,7 +8,7 @@ import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { Product, supabase } from '@/lib/supabase'
+import { Product, productsApi } from '@/lib/api-client'
 
 export default function ProductDetail() {
   const params = useParams()
@@ -37,14 +37,10 @@ export default function ProductDetail() {
   const fetchProduct = async () => {
     try {
       setLoading(true)
-      
+
       // Fetch product directly by slug
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('slug', productSlugParam)
-        .single()
-      
+      const { data, error } = await productsApi.getBySlug(productSlugParam)
+
       if (error) {
         return
       }
@@ -61,25 +57,21 @@ export default function ProductDetail() {
 
   const fetchRelatedProducts = async () => {
     if (!product) return
-    
+
     try {
       setRelatedLoading(true)
-      
-      // Fetch products from the same category, excluding the current product
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('category', product.category)
-        .neq('id', product.id)
-        .limit(4)
-        .order('created_at', { ascending: false })
-      
+
+      // Fetch products from the same category
+      const { data, error } = await productsApi.getByCategory(product.category)
+
       if (error) {
         return
       }
 
       if (data) {
-        setRelatedProducts(data)
+        // Exclude the current product and limit to 4
+        const related = data.filter(p => p.id !== product.id).slice(0, 4)
+        setRelatedProducts(related)
       }
     } catch {
       // Error handled silently

@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { Product, supabase } from '@/lib/supabase'
+import { Product, ordersApi } from '@/lib/api-client'
 
 export default function Cart() {
   const [mounted, setMounted] = useState(false)
@@ -105,8 +105,8 @@ export default function Cart() {
       const orderData = {
         customer_name: customerDetails.name,
         customer_email: customerDetails.email,
-        customer_phone: customerDetails.phone || null,
-        shipping_address: customerDetails.address || null,
+        customer_phone: customerDetails.phone || undefined,
+        shipping_address: customerDetails.address || undefined,
         items: cartItems.map(item => ({
           product_id: item.product.id,
           product_name: item.product.name,
@@ -122,14 +122,14 @@ export default function Cart() {
       }
       
       // Save order to database
-      const { data, error } = await supabase
-        .from('orders')
-        .insert([orderData])
-        .select()
-        .single()
-      
+      const { data, error } = await ordersApi.create(orderData)
+
       if (error) {
         throw error
+      }
+
+      if (!data) {
+        throw new Error('Failed to create order')
       }
       
       // Show success state

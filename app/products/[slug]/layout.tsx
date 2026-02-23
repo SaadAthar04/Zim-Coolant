@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { supabase } from '@/lib/supabase'
+import { productOperations, seedProducts } from '@/lib/database'
 import Script from 'next/script'
 
 type Props = {
@@ -11,22 +11,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
 
   try {
-    const { data: product } = await supabase
-      .from('products')
-      .select('name, description, image_url, category, price')
-      .eq('slug', slug)
-      .single()
+    // Ensure products are seeded
+    seedProducts()
+
+    const product = productOperations.getBySlug(slug)
 
     if (product) {
       return {
         title: `${product.name} - Zim Chemicals | Premium Automotive Products`,
-        description: product.description 
-          ? `${product.description.substring(0, 160)}...` 
+        description: product.description
+          ? `${product.description.substring(0, 160)}...`
           : `Buy ${product.name} from Zim Chemicals. Premium quality ${product.category.toLowerCase()} for optimal vehicle performance.`,
         openGraph: {
           title: `${product.name} - Zim Chemicals`,
-          description: product.description 
-            ? `${product.description.substring(0, 160)}...` 
+          description: product.description
+            ? `${product.description.substring(0, 160)}...`
             : `Buy ${product.name} from Zim Chemicals. Premium quality ${product.category.toLowerCase()}.`,
           url: `https://www.zimchemicals.com/products/${slug}`,
           images: product.image_url ? [
@@ -42,6 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     }
   } catch (error) {
     // Fallback metadata if product not found
+    console.error('Error generating metadata:', error)
   }
 
   return {
@@ -52,19 +52,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductLayout({ params, children }: Props) {
   const { slug } = await params
-  
+
+  // Ensure products are seeded
+  seedProducts()
+
   // Fetch product data for structured data
   let product = null
   try {
-    const { data } = await supabase
-      .from('products')
-      .select('name, description, image_url, category, price, slug')
-      .eq('slug', slug)
-      .single()
-    
-    product = data
+    product = productOperations.getBySlug(slug)
   } catch (error) {
     // Product not found, continue without structured data
+    console.error('Error fetching product:', error)
   }
 
   // Generate JSON-LD structured data for Google
@@ -107,4 +105,3 @@ export default async function ProductLayout({ params, children }: Props) {
     </>
   )
 }
-

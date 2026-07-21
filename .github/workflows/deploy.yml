@@ -1,0 +1,30 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}   # allows manual "Run workflow" from the Actions tab
+
+concurrency:
+  group: vps-deploy
+  cancel-in-progress: true   # if you push twice quickly, only the latest deploys
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true   # stop on first failed command
+          script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            cd ~/htdocs/zimchemicals.com
+            git pull origin main
+            npm ci
+            npm run build
+            pm2 restart zim-coolant --update-env

@@ -20,16 +20,13 @@ jobs:
           VPS_SSH_KEY_B64: ${{ secrets.VPS_SSH_KEY_B64 }}
         run: |
           set -euo pipefail
+          # Strip any stray whitespace/newlines that may have crept into the secrets
+          VPS_HOST="$(printf '%s' "$VPS_HOST" | tr -d '[:space:]')"
+          VPS_USER="$(printf '%s' "$VPS_USER" | tr -d '[:space:]')"
+
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           echo "$VPS_SSH_KEY_B64" | base64 -d > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-
-          echo "::group::Key sanity check"
-          echo "Expected fingerprint: SHA256:sL0vJBkX1/JePVqFdsLqgYQ4onc/wr3rMIGXxVqFjL8"
-          echo -n "Actual fingerprint:   "
-          ssh-keygen -l -f ~/.ssh/deploy_key || echo "!! KEY FAILED TO PARSE — secret is corrupted !!"
-          echo "Connecting as user: [$VPS_USER] to host: [$VPS_HOST]"
-          echo "::endgroup::"
 
           ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes "$VPS_USER@$VPS_HOST" bash -s <<'REMOTE'

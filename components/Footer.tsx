@@ -84,7 +84,7 @@ export default function Footer() {
           <div className="h-[1px] sm:h-[2px] bg-gradient-to-r from-gray-700 via-gray-800 to-black rounded-full opacity-90"></div>
           <div className="pt-4 sm:pt-6 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
             <p className="text-white text-xs sm:text-sm text-center sm:text-left">
-              © 2025 Zim Chemicals. All rights reserved.
+              © 2026 Zim Chemicals. All rights reserved.
             </p>
             <div className="flex space-x-4 sm:space-x-6 text-xs sm:text-sm">
               <Link href="/privacy" className="text-white hover:text-primary-400 transition-colors">

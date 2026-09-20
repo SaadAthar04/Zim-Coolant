@@ -1,0 +1,1 @@
+/* Product links and the shared preview bag work without a separate homepage controller. */

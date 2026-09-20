@@ -1,0 +1,163 @@
+{
+  "zimx": {
+    "name": "ZIMX Anti-Freeze & Anti-Boil",
+    "category": "Anti-Freeze & Anti-Boil",
+    "intro": "Advanced Formula. Anti-Freeze & Anti-Boil Protection.",
+    "details": "ZIMX Anti-Freeze & Anti-Boil is an advanced, ready-to-use formula developed for modern automotive cooling systems. It helps protect against freezing, boil-over, rust and corrosion, while anti-foaming and anti-scaling additives support coolant flow. Available in red and green, in 1 Liter and 4 Liter bottles.",
+    "note": "Same formula. The colour is your preference.",
+    "variants": [
+      {
+        "size": "1",
+        "color": "green",
+        "volume": "1 Liter",
+        "asset": "zimx-anti-freeze-anti-boil-1-liter-green",
+        "price": 749
+      },
+      {
+        "size": "1",
+        "color": "red",
+        "volume": "1 Liter",
+        "asset": "zimx-anti-freeze-anti-boil-1-liter-red",
+        "price": 749
+      },
+      {
+        "size": "4",
+        "color": "green",
+        "volume": "4 Liter",
+        "asset": "zimx-anti-freeze-anti-boil-4-liter-green",
+        "price": 2999
+      },
+      {
+        "size": "4",
+        "color": "red",
+        "volume": "4 Liter",
+        "asset": "zimx-anti-freeze-anti-boil-4-liter-red",
+        "price": 2999
+      }
+    ],
+    "benefits": [
+      "Advanced formula with anti-freeze and anti-boil protection.",
+      "Anti-foaming and anti-scaling additives support the cooling system.",
+      "Ready-to-use formula with rust and corrosion inhibitors.",
+      "Red and green options use the same formula."
+    ],
+    "directions": [
+      "Check your vehicle handbook for the required coolant specification before filling.",
+      "Allow the engine to cool completely before opening the radiator cap. Never open a hot cooling system.",
+      "Follow your vehicle’s drain, fill and bleeding procedure, using ZIMX Anti-Freeze & Anti-Boil as directed.",
+      "After circulation and complete cooling, check the level and top up if needed."
+    ],
+    "titleName": "ZIMX Anti-Freeze and Anti-Boil",
+    "showSizeInTitle": true
+  },
+  "zim": {
+    "name": "ZIM Anti-Rust Coolant",
+    "category": "Radiator Coolant",
+    "intro": "Radiator Cooling. Rust & Corrosion Protection.",
+    "details": "Keep your engine cool with ZIM Anti-Rust Coolant, formulated to help protect your vehicle’s radiator against overheating, corrosion and rust. Designed for everyday cooling-system care. Available in 1 Liter and 4 Liter packs, in red and green.",
+    "note": "Choose your preferred available colour.",
+    "variants": [
+      {
+        "size": "1",
+        "color": "green",
+        "volume": "1 Liter",
+        "asset": "zim-anti-rust-coolant-1-liter-green",
+        "price": 349
+      },
+      {
+        "size": "1",
+        "color": "red",
+        "volume": "1 Liter",
+        "asset": "zim-anti-rust-coolant-1-liter-red",
+        "price": 349
+      },
+      {
+        "size": "4",
+        "color": "green",
+        "volume": "4 Liter",
+        "asset": "zim-anti-rust-coolant-4-liter-green",
+        "price": 1349
+      },
+      {
+        "size": "4",
+        "color": "red",
+        "volume": "4 Liter",
+        "asset": "zim-anti-rust-coolant-4-liter-red",
+        "price": 1349
+      }
+    ],
+    "benefits": [
+      "Helps prevent overheating during normal cooling-system operation.",
+      "Anti-corrosion and anti-rust protection.",
+      "Supports coolant flow through the radiator and water channels.",
+      "Available in 1 Liter and 4 Liter packs."
+    ],
+    "directions": [
+      "Check the vehicle handbook for the required coolant specification.",
+      "Allow the engine to cool completely before opening the radiator cap.",
+      "Drain the old coolant as directed by the vehicle manufacturer. Follow the mixing directions on your specific ZIM bottle before filling.",
+      "Circulate and bleed the cooling system according to the vehicle handbook; recheck the level once fully cool."
+    ],
+    "usageNote": "The bottle states that this coolant does not contain antifreeze. Follow the label’s mixing and cold-weather guidance.",
+    "showSizeInTitle": true
+  },
+  "gear": {
+    "name": "ZIM Gear Oil",
+    "category": "Gear Oil",
+    "intro": "EP-140 · GL-4. Smooth Shifting. Lasting Protection.",
+    "details": "Experience smoother gear shifts and lasting protection with ZIM Gear Oil. This EP-140, GL-4 lubricant is formulated to reduce friction, wear and heat in manual transmissions and differentials that require this grade and specification.",
+    "note": "",
+    "variants": [
+      {
+        "size": "1",
+        "color": "",
+        "volume": "1 Liter",
+        "asset": "zim-gear-oil-1-liter",
+        "price": 649
+      }
+    ],
+    "benefits": [
+      "Supports smooth and quiet gear shifting.",
+      "Helps protect gears and bearings against friction and wear.",
+      "Formulated to resist oxidation during operation.",
+      "For manual transmissions and differentials requiring EP-140, GL-4 gear oil."
+    ],
+    "directions": [
+      "Check your vehicle handbook for the recommended viscosity grade and specification.",
+      "Position the vehicle on level ground and follow the manufacturer’s service procedure.",
+      "Drain the old gear oil and refill to the specified level with the correct oil.",
+      "Secure the filler and drain plugs to the specified torque and check for leaks."
+    ],
+    "showSizeInTitle": false
+  },
+  "atf": {
+    "name": "ZIM ATF (Auto Transmission Fluid)",
+    "category": "Transmission Fluid",
+    "intro": "Smooth Shifts. Transmission Protection.",
+    "details": "Keep your transmission running smoothly with ZIM ATF, an automatic transmission and power steering fluid formulated for lubrication, cooling and wear protection. Designed to support responsive shifting and reliable operation in systems that meet its required fluid specification.",
+    "note": "",
+    "variants": [
+      {
+        "size": "standard",
+        "color": "",
+        "volume": "",
+        "asset": "zim-atf",
+        "price": 399
+      }
+    ],
+    "benefits": [
+      "Supports smooth and responsive gear changes.",
+      "Helps protect against friction, wear and corrosion.",
+      "Formulated for thermal and oxidation stability.",
+      "For compatible automatic transmission and power steering systems."
+    ],
+    "directions": [
+      "Check your vehicle handbook for the required ATF type, capacity and service procedure.",
+      "Park on level ground and follow the specified temperature and engine-state requirements.",
+      "Drain and refill through the designated fill point according to the manufacturer’s procedure.",
+      "Cycle the gears and check the fluid level only as directed for your vehicle."
+    ],
+    "usageNote": "Do not use in engines or brakes.",
+    "showSizeInTitle": false
+  }
+}

@@ -132,7 +132,7 @@ export default function Home() {
                 <Link 
                   key={product.id} 
                   href={`/products/${product.slug}`}
-                  className="flex h-full flex-col space-y-3 sm:space-y-4 group cursor-pointer hover:scale-105 transition-transform duration-200"
+                  className="flex h-full flex-col gap-3 sm:gap-4 group cursor-pointer hover:scale-105 transition-transform duration-200"
                 >
                   {/* 10:11 frame, no padding. The square bottle image is
                       scaled uniformly and cropped at the sides only. */}

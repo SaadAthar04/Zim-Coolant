@@ -249,7 +249,7 @@ export default function Products() {
                   className={`group cursor-pointer hover:scale-105 transition-transform duration-200 ${
                     viewMode === 'list'
                       ? 'flex space-x-4'
-                      : 'flex h-full flex-col space-y-3 sm:space-y-4'
+                      : 'flex h-full flex-col gap-3 sm:gap-4'
                   }`}
                 >
                   {/* Grid View */}

@@ -26,6 +26,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { ordersApi, productsApi } from '@/lib/api-client'
 import { checkAdminSession, signOut } from '@/lib/auth'
+import { formatPrice } from '@/lib/store-config'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import NewOrderModal from './NewOrderModal'
@@ -307,77 +308,119 @@ export default function AdminDashboard() {
   }
 
   // Fetch dashboard data from API
+  /**
+   * Builds the dashboard from the orders themselves.
+   *
+   * The tiles used to come from the stats endpoint, which counts only orders
+   * that are both confirmed and paid. A real pending order therefore showed as
+   * "0 orders, Rs. 0" here while the analytics page reported it correctly. Both
+   * screens now measure the same thing: everything except cancelled orders.
+   */
   const fetchDashboardData = async () => {
-      try {
-        setLoading(true)
+    try {
+      setLoading(true)
 
-        // Fetch all stats from API
-        const { data: statsData, error: statsError } = await ordersApi.getStats(selectedPeriod)
+      const [ordersResult, productsResult] = await Promise.all([
+        ordersApi.getAll(),
+        productsApi.getAll(),
+      ])
 
-        if (statsError) {
-          console.error('Error fetching stats:', statsError)
+      if (ordersResult.error) console.error('Error fetching orders:', ordersResult.error)
+
+      const allOrders = (ordersResult.data || []) as unknown as Order[]
+      const products = productsResult.data || []
+
+      const live = allOrders.filter((o) => o.status !== 'cancelled')
+      const orderValue = live.reduce((sum, o) => sum + o.total_amount, 0)
+      const collected = live
+        .filter((o) => o.payment_status === 'paid')
+        .reduce((sum, o) => sum + o.total_amount, 0)
+      const awaiting = allOrders.filter((o) => o.status === 'pending').length
+
+      setStats([
+        {
+          title: 'Order value',
+          value: formatPrice(orderValue),
+          change: `${live.length} order${live.length === 1 ? '' : 's'}`,
+          icon: TrendingUp,
+          color: 'text-green-600',
+        },
+        {
+          title: 'Cash collected',
+          value: formatPrice(collected),
+          change: 'Marked paid',
+          icon: Banknote,
+          color: 'text-blue-600',
+        },
+        {
+          title: 'Awaiting action',
+          value: String(awaiting),
+          change: 'Still pending',
+          icon: Clock,
+          color: 'text-purple-600',
+        },
+        {
+          title: 'Products',
+          value: String(products.length),
+          change: 'In the catalogue',
+          icon: Package,
+          color: 'text-orange-600',
+        },
+      ])
+
+      // Units sold per product, from the order line items.
+      const tally = new Map<string, TopProduct>()
+      for (const order of live) {
+        for (const item of order.items) {
+          const name = item.product_name || item.name || 'Unknown'
+          const row = tally.get(name) || { name, sales: 0, revenue: 0, stock_quantity: 0 }
+          row.sales += item.quantity
+          row.revenue += item.line_total ?? item.price * item.quantity
+          tally.set(name, row)
         }
-
-        if (statsData) {
-          const { stats: apiStats, chartData: apiChartData, topProducts: apiTopProducts } = statsData
-
-          // Build dashboard stats
-          const dashboardStats: DashboardStats[] = [
-            {
-              title: 'Total Sales',
-              value: `Rs. ${(apiStats.totalSales || 0).toFixed(2)}`,
-              change: '+0%',
-              icon: TrendingUp,
-              color: 'text-green-600'
-            },
-            {
-              title: 'Orders',
-              value: (apiStats.totalOrders || 0).toString(),
-              change: '+0%',
-              icon: ShoppingCart,
-              color: 'text-blue-600'
-            },
-            {
-              title: 'Customers',
-              value: (apiStats.totalCustomers || 0).toString(),
-              change: '+0%',
-              icon: Users,
-              color: 'text-purple-600'
-            },
-            {
-              title: 'Products',
-              value: (apiStats.productsCount || 0).toString(),
-              change: '+0%',
-              icon: Package,
-              color: 'text-orange-600'
-            }
-          ]
-
-          setStats(dashboardStats)
-          setChartData(apiChartData || [])
-          setTopProducts(apiTopProducts || [])
-        }
-
-        // Fetch recent orders
-        const { data: ordersData, error: ordersError } = await ordersApi.getAll(5)
-
-        if (ordersError) {
-          console.error('Error fetching orders:', ordersError)
-        }
-
-        if (ordersData) {
-          setRecentOrders(ordersData as Order[])
-        }
-
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error)
-        // Set empty data on error
-        setStats([])
-        setRecentOrders([])
-        setTopProducts([])
-      } finally {
-        setLoading(false)
       }
+      for (const row of Array.from(tally.values())) {
+        row.stock_quantity = products.find((p) => p.name === row.name)?.stock_quantity ?? 0
+      }
+      const ranked = Array.from(tally.values()).sort((a, b) => b.sales - a.sales)
+      setTopProducts(
+        ranked.length > 0
+          ? ranked.slice(0, 5)
+          : products.slice(0, 5).map((p) => ({
+              name: p.name,
+              sales: 0,
+              revenue: 0,
+              stock_quantity: p.stock_quantity,
+            }))
+      )
+
+      // Daily takings across the selected window.
+      const days = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90
+      const buckets = Array.from({ length: days }, (_, i) => {
+        const d = new Date(Date.now() - (days - 1 - i) * 24 * 60 * 60 * 1000)
+        return { date: `${d.getDate()}/${d.getMonth() + 1}`, sales: 0, orders: 0 }
+      })
+      const windowStart = Date.now() - (days - 1) * 24 * 60 * 60 * 1000
+      for (const order of live) {
+        const index = Math.floor(
+          (new Date(order.created_at).getTime() - windowStart) / (24 * 60 * 60 * 1000)
+        )
+        if (index >= 0 && index < buckets.length) {
+          buckets[index].sales += order.total_amount
+          buckets[index].orders += 1
+        }
+      }
+      setChartData(buckets)
+
+      setRecentOrders(allOrders.slice(0, 5))
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+      setStats([])
+      setRecentOrders([])
+      setTopProducts([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Fetch dashboard data on component mount

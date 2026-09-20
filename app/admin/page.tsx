@@ -18,7 +18,8 @@ import {
   LogOut,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Banknote
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
@@ -27,6 +28,7 @@ import { ordersApi, productsApi } from '@/lib/api-client'
 import { checkAdminSession, signOut } from '@/lib/auth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import NewOrderModal from './NewOrderModal'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
 
 // Types for admin dashboard data
@@ -103,9 +105,6 @@ function ActionCard({
   )
 }
 
-/** Wraps a CSV field so commas, quotes and newlines cannot break the column. */
-const csvCell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`
-
 export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('7d')
   const [searchTerm, setSearchTerm] = useState('')
@@ -117,6 +116,7 @@ export default function AdminDashboard() {
   const [showOrderModal, setShowOrderModal] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [chartData, setChartData] = useState<any[]>([])
+  const [showNewOrder, setShowNewOrder] = useState(false)
   const router = useRouter()
 
   // The server decides whether this session is valid; the APIs below refuse
@@ -256,58 +256,6 @@ export default function AdminDashboard() {
       console.error('Error updating payment status:', error)
       toast.error(`Failed to update payment status: ${error}`)
     }
-  }
-
-  /** Downloads every order shown, one row per order, for the shop's records. */
-  const exportOrdersCsv = () => {
-    if (recentOrders.length === 0) {
-      toast.error('There are no orders to export yet')
-      return
-    }
-
-    const headers = [
-      'Order', 'Date', 'Customer', 'Phone', 'Email', 'Address', 'City',
-      'Postal code', 'Notes', 'Items', 'Subtotal', 'Delivery', 'Tax',
-      'Total', 'Status', 'Payment',
-    ]
-
-    const rows = recentOrders.map((order) => {
-      const items = order.items
-        .map((i) => {
-          const variant = [i.volume, i.colour].filter(Boolean).join(' ')
-          return `${i.product_name || i.name}${variant ? ` (${variant})` : ''} x${i.quantity}`
-        })
-        .join('; ')
-
-      return [
-        order.order_number || order.id,
-        new Date(order.created_at).toLocaleString(),
-        order.customer_name,
-        order.customer_phone,
-        order.customer_email,
-        order.shipping_address,
-        order.shipping_city,
-        order.shipping_postal_code,
-        order.order_notes,
-        items,
-        order.subtotal,
-        order.shipping_cost,
-        order.tax_amount,
-        order.total_amount,
-        order.status,
-        order.payment_status,
-      ].map(csvCell).join(',')
-    })
-
-    // The BOM keeps Excel from mangling non-ASCII characters in addresses.
-    const csv = '﻿' + [headers.map(csvCell).join(','), ...rows].join('\r\n')
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `zim-orders-${new Date().toISOString().slice(0, 10)}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-    toast.success(`Exported ${recentOrders.length} orders`)
   }
 
   const openOrderModal = (order: Order) => {
@@ -628,9 +576,12 @@ export default function AdminDashboard() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Top Products</h3>
-                <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                <Link
+                  href="/admin/products"
+                  className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                >
                   View All
-                </button>
+                </Link>
               </div>
               
               <div className="space-y-4">
@@ -659,7 +610,12 @@ export default function AdminDashboard() {
             className="card p-6"
           >
             <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 sm:mb-0">Recent Orders</h3>
+              <div className="mb-4 sm:mb-0">
+                <h3 className="text-xl font-bold text-gray-900">Recent Orders</h3>
+                <Link href="/admin/orders" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                  See all orders
+                </Link>
+              </div>
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -671,9 +627,9 @@ export default function AdminDashboard() {
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                   />
                 </div>
-                <button 
-                  onClick={() => window.open('/products', '_blank')}
-                  className="btn-primary text-sm py-2 px-4"
+                <button
+                  onClick={() => setShowNewOrder(true)}
+                  className="btn-primary text-sm py-2 px-4 inline-flex items-center"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   New Order
@@ -717,30 +673,35 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-3 px-4 text-gray-600">{new Date(order.created_at).toLocaleDateString()}</td>
                       <td className="py-3 px-4">
-                        <div className="flex items-center space-x-2">
-                          <button 
+                        {/* Labelled, visually distinct actions: two identical
+                            green ticks gave no clue which was which. */}
+                        <div className="flex items-center gap-2">
+                          <button
                             onClick={() => openOrderModal(order)}
-                            className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded"
-                            title="View Details"
+                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded"
+                            title="View full order details"
                           >
                             <Eye className="w-4 h-4" />
+                            View
                           </button>
                           {order.status === 'pending' && (
-                            <button 
+                            <button
                               onClick={() => updateOrderStatus(order.id, 'confirmed')}
-                              className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded"
-                              title="Confirm Order"
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded"
+                              title="Confirm this order for delivery"
                             >
                               <CheckCircle className="w-4 h-4" />
+                              Confirm
                             </button>
                           )}
                           {order.payment_status === 'pending' && (
-                                                        <button
+                            <button
                               onClick={() => updatePaymentStatus(order.id, 'paid')}
-                              className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded"
-                              title="Mark as Paid"
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded"
+                              title="Record that cash has been received"
                             >
-                              <CheckCircle className="w-4 h-4" />
+                              <Banknote className="w-4 h-4" />
+                              Paid
                             </button>
                           )}
                         </div>
@@ -771,14 +732,13 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { title: 'Manage Products', icon: Package, color: 'bg-blue-500', description: 'Change prices, stock and copy', href: '/admin/products' },
-              { title: 'View Orders', icon: ShoppingCart, color: 'bg-green-500', description: 'Manage customer orders', href: '#orders' },
-              { title: 'Analytics', icon: TrendingUp, color: 'bg-purple-500', description: 'View detailed reports', href: '#analytics' },
-              { title: 'Export Orders', icon: Download, color: 'bg-orange-500', description: 'Download orders as CSV', onClick: exportOrdersCsv }
+              { title: 'View Orders', icon: ShoppingCart, color: 'bg-green-500', description: 'Search, confirm and fulfil orders', href: '/admin/orders' },
+              { title: 'Analytics', icon: TrendingUp, color: 'bg-purple-500', description: 'Revenue, best sellers and stock', href: '/admin/analytics' },
+              { title: 'Export Orders', icon: Download, color: 'bg-orange-500', description: 'Download orders as a spreadsheet', href: '/admin/export' }
             ].map((action) => (
               <ActionCard
                 key={action.title}
                 href={action.href}
-                onClick={action.onClick}
                 className="card p-6 text-center cursor-pointer hover:shadow-xl transition-shadow group"
               >
                 <div className={`w-16 h-16 ${action.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>

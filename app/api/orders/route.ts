@@ -67,6 +67,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // An order entered by the shop (a phone order, say) often has no email
+    // address, and does not need a "you have a new order" notification sent
+    // back to the shop that just typed it in.
+    const isAdminOrder = requireAdmin(request);
+
     const customer = {
       name: clean(body.customer_name, 120),
       email: clean(body.customer_email, 160).toLowerCase(),
@@ -79,8 +84,12 @@ export async function POST(request: NextRequest) {
 
     const fieldErrors: Record<string, string> = {};
     if (customer.name.length < 2) fieldErrors.customer_name = 'Please enter your full name.';
-    if (!EMAIL_PATTERN.test(customer.email))
+    if (customer.email) {
+      if (!EMAIL_PATTERN.test(customer.email))
+        fieldErrors.customer_email = 'Please enter a valid email address.';
+    } else if (!isAdminOrder) {
       fieldErrors.customer_email = 'Please enter a valid email address.';
+    }
     if (!PHONE_PATTERN.test(customer.phone))
       fieldErrors.customer_phone = 'Please enter a valid phone number.';
     if (customer.address.length < 10)
@@ -191,7 +200,7 @@ export async function POST(request: NextRequest) {
     );
 
     // The order is safely recorded; email must not be able to fail it.
-    sendOrderEmails(order).catch((err) =>
+    sendOrderEmails(order, { notifyShop: !isAdminOrder }).catch((err) =>
       console.error('[orders] Unexpected email failure:', err)
     );
 

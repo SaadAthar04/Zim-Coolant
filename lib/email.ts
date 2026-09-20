@@ -206,7 +206,11 @@ function customerEmail(order: Order) {
  * Notifies the shop and confirms to the customer. Never throws: the order has
  * already been taken by the time this runs.
  */
-export async function sendOrderEmails(order: Order) {
+export async function sendOrderEmails(
+  order: Order,
+  options: { notifyShop?: boolean } = {}
+) {
+  const { notifyShop = true } = options
   const result = { shop: false, customer: false, configured: isEmailConfigured() }
 
   if (!result.configured) {
@@ -223,7 +227,7 @@ export async function sendOrderEmails(order: Order) {
 
     const from = `"${SHOP_NAME}" <${process.env.SMTP_USER}>`
 
-    try {
+    if (notifyShop) try {
       await transport.sendMail({
         from,
         to: notificationAddress(),

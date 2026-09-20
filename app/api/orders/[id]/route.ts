@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { orderOperations } from '@/lib/database';
+import { orderOperations, deleteOrderRestoringStock } from '@/lib/database';
 import { requireAdmin } from '@/lib/admin-auth';
 
 // GET /api/orders/[id] - Get a single order
@@ -79,12 +79,12 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const existingOrder = orderOperations.getById(id);
-    if (!existingOrder) {
+    // Also returns the items to stock unless the order was already completed.
+    const deleted = deleteOrderRestoringStock(id);
+    if (!deleted) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    orderOperations.delete(id);
     return NextResponse.json({ message: 'Order deleted' });
   } catch (error) {
     console.error('Error deleting order:', error);

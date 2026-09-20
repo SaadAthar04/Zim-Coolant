@@ -596,6 +596,44 @@ export const placeOrder = (
 };
 
 /**
+ * Deletes an order and puts its stock back on the shelf.
+ *
+ * Stock is only returned for an order that was never completed. Deleting the
+ * record of something already delivered should not invent inventory that has
+ * physically left the building.
+ *
+ * Returns false when there is no such order.
+ */
+export const deleteOrderRestoringStock = (id: string) => {
+  const db = getDb();
+  const order = orderOperations.getById(id);
+  if (!order) return false;
+
+  const restock = order.status !== 'completed';
+  const now = new Date().toISOString();
+
+  const giveBack = db.prepare(`
+    UPDATE products
+    SET stock_quantity = stock_quantity + ?, updated_at = ?
+    WHERE id = ?
+  `);
+
+  const run = db.transaction(() => {
+    if (restock) {
+      for (const item of order.items) {
+        if (item.product_id && item.quantity > 0) {
+          giveBack.run(item.quantity, now, item.product_id);
+        }
+      }
+    }
+    orderOperations.delete(id);
+  });
+
+  run();
+  return true;
+};
+
+/**
  * Seeds the catalogue when the products table is empty.
  *
  * The data is the client handoff of 18 September 2026, held in

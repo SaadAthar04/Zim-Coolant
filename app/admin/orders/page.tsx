@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { ShoppingCart, Search, Eye, CheckCircle, Banknote, Plus, Download } from 'lucide-react'
+import { ShoppingCart, Search, Eye, CheckCircle, Banknote, Plus, Download, Trash2, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Order, ordersApi } from '@/lib/api-client'
 import { formatPrice } from '@/lib/store-config'
@@ -30,6 +30,8 @@ export default function AdminOrders() {
   const [payment, setPayment] = useState<PaymentFilter>('all')
   const [selected, setSelected] = useState<Order | null>(null)
   const [showNewOrder, setShowNewOrder] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<Order | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -79,6 +81,23 @@ export default function AdminOrders() {
     apply(id, { payment_status: next })
     setSelected((prev) => (prev && prev.id === id ? { ...prev, payment_status: next } : prev))
     toast.success(next === 'paid' ? 'Payment recorded' : `Payment ${next}`)
+  }
+
+  const confirmDelete = async () => {
+    if (!pendingDelete || deleting) return
+    setDeleting(true)
+    const { error } = await ordersApi.delete(pendingDelete.id)
+    setDeleting(false)
+
+    if (error) {
+      toast.error('Could not delete the order')
+      return
+    }
+
+    const reference = pendingDelete.order_number || pendingDelete.id.slice(0, 8)
+    setOrders((prev) => prev.filter((o) => o.id !== pendingDelete.id))
+    setPendingDelete(null)
+    toast.success(`Order ${reference} deleted`)
   }
 
   const exportFiltered = () => {
@@ -216,6 +235,14 @@ export default function AdminOrders() {
                             Paid
                           </button>
                         )}
+                        <button
+                          onClick={() => setPendingDelete(order)}
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded"
+                          title="Delete this order permanently"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -237,6 +264,51 @@ export default function AdminOrders() {
         onMarkPaid={(id) => setPaymentStatus(id, 'paid')}
         onComplete={(id) => setOrderStatus(id, 'completed')}
       />
+
+      {pendingDelete && (
+        <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Delete this order?</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {pendingDelete.order_number || pendingDelete.id.slice(0, 8)} ·{' '}
+                  {pendingDelete.customer_name} · {formatPrice(pendingDelete.total_amount)}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-2">
+              The order record is removed permanently and cannot be recovered.
+            </p>
+            <p className="text-sm text-gray-600 mb-6">
+              {pendingDelete.status === 'completed'
+                ? 'This order is marked completed, so its stock is treated as already delivered and will not be added back.'
+                : 'Its items go back into stock, since the order will not be fulfilled.'}
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setPendingDelete(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Keep order
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
+              >
+                <Trash2 className="w-4 h-4" />
+                {deleting ? 'Deleting...' : 'Delete permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <NewOrderModal open={showNewOrder} onClose={() => setShowNewOrder(false)} onCreated={load} />
     </AdminPage>

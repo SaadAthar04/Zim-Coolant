@@ -18,7 +18,14 @@
  * falls back to Node's built-in node:sqlite, so it does not depend on the
  * native module having been compiled for the running Node version.
  *
- * Usage: node scripts/migrate-catalog.js
+ * It is a no-op once the catalogue is in place. This matters because it runs
+ * on every deploy: the shop edits prices, stock and copy from the admin panel,
+ * and rebuilding the table each time would silently throw that work away. Pass
+ * --force to rebuild anyway, which is how a change to catalog.json gets
+ * applied. Even then, stock levels are carried over from the live rows, since
+ * those are real inventory rather than anything this file knows about.
+ *
+ * Usage: node scripts/migrate-catalog.js [--force]
  */
 
 const path = require('path');
@@ -149,22 +156,45 @@ function main() {
     process.exit(1);
   }
 
+  const force = process.argv.includes('--force');
+
   const db = openDatabase(DB_PATH);
   console.log(`SQLite driver: ${db.driver}`);
 
-  const backupPath = backup(db);
-  if (backupPath) console.log('Backed up database to ' + path.relative(ROOT, backupPath));
-
-  // Carry existing IDs across so historic order line items still resolve.
-  const existingIds = {};
   const hasProducts = db.get(
     "SELECT name FROM sqlite_master WHERE type='table' AND name='products'"
   );
+
+  // Carry existing IDs across so historic order line items still resolve, and
+  // remember live stock, which belongs to the shop rather than to this file.
+  const existingIds = {};
+  const existingStock = {};
+  let existingColumns = [];
   if (hasProducts) {
-    for (const row of db.all('SELECT id, slug FROM products')) {
+    existingColumns = db.all('PRAGMA table_info(products)').map((c) => c.name);
+    const hasStock = existingColumns.includes('stock_quantity');
+    for (const row of db.all(
+      `SELECT id, slug${hasStock ? ', stock_quantity' : ''} FROM products`
+    )) {
       existingIds[row.slug] = row.id;
+      if (hasStock) existingStock[row.slug] = row.stock_quantity;
     }
   }
+
+  // Already applied? Then leave the shop's own edits alone.
+  const schemaReady = existingColumns.includes('range_key');
+  const allPresent = products.every((p) => existingIds[p.slug]);
+  if (schemaReady && allPresent && !force) {
+    console.log(
+      `\nCatalogue is already applied (${products.length} products present). Nothing to do.\n` +
+        'Run with --force to rebuild it from database/catalog.json.'
+    );
+    db.close();
+    return;
+  }
+
+  const backupPath = backup(db);
+  if (backupPath) console.log('Backed up database to ' + path.relative(ROOT, backupPath));
 
   const now = new Date().toISOString();
 
@@ -217,7 +247,8 @@ function main() {
         p.usage_note || null,
         p.nozzle_included,
         p.show_size_in_title,
-        p.stock_quantity,
+        // Live stock is real inventory; the catalogue value is only a seed.
+        existingStock[p.slug] ?? existingStock[SLUG_CARRYOVER[p.slug]] ?? p.stock_quantity,
         Object.keys(specifications).length ? JSON.stringify(specifications) : null,
         directionsToHtml(p.directions),
         now,

@@ -59,8 +59,12 @@ jobs:
 
             npm ci
 
-            # Apply the catalogue from database/catalog.json. Backs the
-            # database up first and never touches the orders table.
+            # Apply the catalogue from database/catalog.json. This is a no-op
+            # once the six products exist, so a deploy never overwrites prices,
+            # stock or copy the shop has edited in the admin panel. To push a
+            # changed catalog.json to the live site, run this on the server
+            # deliberately:  node scripts/migrate-catalog.js --force
+            # It backs the database up first and never touches orders.
             node scripts/migrate-catalog.js
 
             npm run build

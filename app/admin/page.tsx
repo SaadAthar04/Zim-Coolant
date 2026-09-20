@@ -25,6 +25,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { ordersApi, productsApi } from '@/lib/api-client'
 import { checkAdminSession, signOut } from '@/lib/auth'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
 
@@ -75,6 +76,35 @@ interface TopProduct {
   revenue: number
   stock_quantity: number
 }
+
+/** A quick-action tile that is either a link or a button, never a dead div. */
+function ActionCard({
+  href,
+  onClick,
+  className,
+  children,
+}: {
+  href?: string
+  onClick?: () => void
+  className?: string
+  children: React.ReactNode
+}) {
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {children}
+      </Link>
+    )
+  }
+  return (
+    <button type="button" onClick={onClick} className={`${className} w-full`}>
+      {children}
+    </button>
+  )
+}
+
+/** Wraps a CSV field so commas, quotes and newlines cannot break the column. */
+const csvCell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`
 
 export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('7d')
@@ -226,6 +256,58 @@ export default function AdminDashboard() {
       console.error('Error updating payment status:', error)
       toast.error(`Failed to update payment status: ${error}`)
     }
+  }
+
+  /** Downloads every order shown, one row per order, for the shop's records. */
+  const exportOrdersCsv = () => {
+    if (recentOrders.length === 0) {
+      toast.error('There are no orders to export yet')
+      return
+    }
+
+    const headers = [
+      'Order', 'Date', 'Customer', 'Phone', 'Email', 'Address', 'City',
+      'Postal code', 'Notes', 'Items', 'Subtotal', 'Delivery', 'Tax',
+      'Total', 'Status', 'Payment',
+    ]
+
+    const rows = recentOrders.map((order) => {
+      const items = order.items
+        .map((i) => {
+          const variant = [i.volume, i.colour].filter(Boolean).join(' ')
+          return `${i.product_name || i.name}${variant ? ` (${variant})` : ''} x${i.quantity}`
+        })
+        .join('; ')
+
+      return [
+        order.order_number || order.id,
+        new Date(order.created_at).toLocaleString(),
+        order.customer_name,
+        order.customer_phone,
+        order.customer_email,
+        order.shipping_address,
+        order.shipping_city,
+        order.shipping_postal_code,
+        order.order_notes,
+        items,
+        order.subtotal,
+        order.shipping_cost,
+        order.tax_amount,
+        order.total_amount,
+        order.status,
+        order.payment_status,
+      ].map(csvCell).join(',')
+    })
+
+    // The BOM keeps Excel from mangling non-ASCII characters in addresses.
+    const csv = '﻿' + [headers.map(csvCell).join(','), ...rows].join('\r\n')
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `zim-orders-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    toast.success(`Exported ${recentOrders.length} orders`)
   }
 
   const openOrderModal = (order: Order) => {
@@ -472,7 +554,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* Charts and Analytics */}
-      <section className="py-16 bg-gray-50">
+      <section id="analytics" className="py-16 bg-gray-50">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Sales Chart */}
@@ -571,7 +653,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* Recent Orders */}
-      <section className="py-16 bg-white">
+      <section id="orders" className="py-16 bg-white">
         <div className="container-custom">
           <div
             className="card p-6"
@@ -688,13 +770,15 @@ export default function AdminDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: 'Add Product', icon: Plus, color: 'bg-blue-500', description: 'Create new product listings' },
-              { title: 'View Orders', icon: ShoppingCart, color: 'bg-green-500', description: 'Manage customer orders' },
-              { title: 'Analytics', icon: TrendingUp, color: 'bg-purple-500', description: 'View detailed reports' },
-              { title: 'Export Data', icon: Download, color: 'bg-orange-500', description: 'Download business data' }
-            ].map((action, index) => (
-              <div
+              { title: 'Manage Products', icon: Package, color: 'bg-blue-500', description: 'Change prices, stock and copy', href: '/admin/products' },
+              { title: 'View Orders', icon: ShoppingCart, color: 'bg-green-500', description: 'Manage customer orders', href: '#orders' },
+              { title: 'Analytics', icon: TrendingUp, color: 'bg-purple-500', description: 'View detailed reports', href: '#analytics' },
+              { title: 'Export Orders', icon: Download, color: 'bg-orange-500', description: 'Download orders as CSV', onClick: exportOrdersCsv }
+            ].map((action) => (
+              <ActionCard
                 key={action.title}
+                href={action.href}
+                onClick={action.onClick}
                 className="card p-6 text-center cursor-pointer hover:shadow-xl transition-shadow group"
               >
                 <div className={`w-16 h-16 ${action.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
@@ -706,7 +790,7 @@ export default function AdminDashboard() {
                 <p className="text-gray-600 text-sm">
                   {action.description}
                 </p>
-              </div>
+              </ActionCard>
             ))}
           </div>
         </div>

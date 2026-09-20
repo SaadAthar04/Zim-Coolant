@@ -7,33 +7,61 @@ export interface Product {
   description: string;
   price: number;
   category: string;
+
+  /** Green (or, for single-colour products, the only) front view. */
   image_url: string;
-  red_image_url?: string;
+  back_image_url?: string | null;
+  /** Red front view. Null when the product has no colour choice. */
+  red_image_url?: string | null;
+  red_back_image_url?: string | null;
+
+  /** Groups the sizes of one product line: zim | zimx | gear | atf. */
+  range_key: string;
+  size_key: string;
+  /** '1 Liter' | '4 Liter' | '' — empty for ATF, which has no public capacity. */
+  volume: string;
+  sort_order: number;
+
+  intro?: string | null;
+  colour_note?: string | null;
+  benefits?: string[];
+  directions?: string[];
+  usage_note?: string | null;
+
+  /** 1 when a free pouring nozzle ships with this product. */
+  nozzle_included: number;
+  show_size_in_title: number;
+
   stock_quantity: number;
   specifications?: any;
-  directionsForUse?: string;
+  directionsForUse?: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export interface CartItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image_url: string;
-  stock_quantity: number;
+export interface OrderItem {
+  product_id: string;
+  product_name: string;
+  colour?: string;
+  volume?: string;
+  image_url?: string;
   quantity: number;
+  price: number;
+  line_total: number;
 }
 
 export interface Order {
   id: string;
+  order_number: string;
   customer_email: string;
   customer_name: string;
   customer_phone?: string;
   shipping_address?: string;
-  items: CartItem[];
+  shipping_city?: string;
+  shipping_postal_code?: string;
+  order_notes?: string;
+  payment_method: string;
+  items: OrderItem[];
   subtotal: number;
   shipping_cost: number;
   tax_amount: number;
@@ -203,19 +231,28 @@ export const ordersApi = {
     }
   },
 
+  /**
+   * Places an order.
+   *
+   * Only the customer's details and what they picked are sent. The server
+   * looks every line up in the database and works out the prices, shipping and
+   * total itself, so nothing about the money comes from the browser.
+   */
   async create(order: {
     customer_name: string;
     customer_email: string;
-    customer_phone?: string;
-    shipping_address?: string;
-    items: any[];
-    subtotal: number;
-    shipping_cost: number;
-    tax_amount: number;
-    total_amount: number;
-    status?: string;
-    payment_status?: string;
-  }): Promise<{ data: Order | null; error: any }> {
+    customer_phone: string;
+    shipping_address: string;
+    shipping_city: string;
+    shipping_postal_code?: string;
+    order_notes?: string;
+    items: Array<{ product_id: string; colour?: string; quantity: number }>;
+  }): Promise<{
+    data: Order | null;
+    error: string | null;
+    fieldErrors?: Record<string, string>;
+    emailConfigured?: boolean;
+  }> {
     try {
       const response = await fetch('/api/orders', {
         method: 'POST',
@@ -224,11 +261,19 @@ export const ordersApi = {
       });
       const result = await response.json();
       if (!response.ok) {
-        return { data: null, error: result.error || 'Failed to create order' };
+        return {
+          data: null,
+          error: result.error || 'Failed to create order',
+          fieldErrors: result.fieldErrors,
+        };
       }
-      return { data: result.data, error: null };
-    } catch (error) {
-      return { data: null, error: error };
+      return {
+        data: result.data,
+        error: null,
+        emailConfigured: result.meta?.emailConfigured,
+      };
+    } catch {
+      return { data: null, error: 'Could not reach the server. Please check your connection.' };
     }
   },
 

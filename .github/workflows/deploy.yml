@@ -34,8 +34,38 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             cd ~/htdocs/zimchemicals.com
+
+            # The database holds live customer orders and is no longer tracked
+            # in git. Copy it aside before pulling: the pull that untracks it
+            # would otherwise delete it from the working tree.
+            DB=database/zim-coolant.db
+            SAFE=~/zim-db-backups
+            mkdir -p "$SAFE"
+            if [ -f "$DB" ]; then
+              cp "$DB" "$SAFE/zim-coolant-$(date +%Y%m%d-%H%M%S).db"
+              cp "$DB" /tmp/zim-coolant-live.db
+              # Discard the tracked-file modification so the pull is clean.
+              # The real data is already safe in the two copies above.
+              git checkout -- "$DB" 2>/dev/null || true
+            fi
+
             git pull origin main
+
+            # Put the live database back if the pull removed it.
+            if [ ! -f "$DB" ] && [ -f /tmp/zim-coolant-live.db ]; then
+              mkdir -p database
+              cp /tmp/zim-coolant-live.db "$DB"
+            fi
+
             npm ci
+
+            # Apply the catalogue from database/catalog.json. Backs the
+            # database up first and never touches the orders table.
+            node scripts/migrate-catalog.js
+
             npm run build
             pm2 restart zim-coolant --update-env
+
+            # Keep the ten most recent database backups.
+            ls -1t "$SAFE"/zim-coolant-*.db 2>/dev/null | tail -n +11 | xargs -r rm --
           REMOTE

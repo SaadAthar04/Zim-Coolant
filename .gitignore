@@ -42,9 +42,14 @@ next-env.d.ts
 # OS
 Thumbs.db
 
-# SQLite WAL files (temporary, not needed in git)
+# SQLite database. Deliberately NOT tracked: the live database on the server
+# holds real customer orders, and a deploy does `git pull`, which would
+# overwrite or delete a tracked copy. The catalogue is rebuilt on deploy by
+# scripts/migrate-catalog.js from database/catalog.json, which IS tracked.
+database/*.db
 database/*.db-shm
 database/*.db-wal
+database/backups/
 
 # Export/migration scripts data
 scripts/supabase-export.json

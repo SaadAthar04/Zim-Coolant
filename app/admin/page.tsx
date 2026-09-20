@@ -20,11 +20,11 @@ import {
   XCircle,
   Clock
 } from 'lucide-react'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { ordersApi, productsApi } from '@/lib/api-client'
-import { checkAdminAuth, logoutAdmin } from '@/lib/auth'
+import { checkAdminSession, signOut } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
 
@@ -39,17 +39,25 @@ interface DashboardStats {
 
 interface Order {
   id: string
+  order_number?: string
   customer_name: string
   customer_email: string
   customer_phone?: string
   shipping_address?: string
+  shipping_city?: string
+  shipping_postal_code?: string
+  order_notes?: string
+  payment_method?: string
   items: Array<{
     product_id?: string
     product_name?: string
     id?: string
     name?: string
+    colour?: string
+    volume?: string
     quantity: number
     price: number
+    line_total?: number
   }>
   subtotal: number
   shipping_cost: number
@@ -81,18 +89,25 @@ export default function AdminDashboard() {
   const [chartData, setChartData] = useState<any[]>([])
   const router = useRouter()
 
-  // Check authentication on component mount
+  // The server decides whether this session is valid; the APIs below refuse
+  // to answer without a valid cookie regardless of what this check does.
   useEffect(() => {
-    const authCheck = checkAdminAuth()
-    if (!authCheck) {
-      router.push('/admin/login')
-    } else {
-      setIsAuthenticated(true)
+    let active = true
+    checkAdminSession().then((ok) => {
+      if (!active) return
+      if (!ok) {
+        router.push('/admin/login')
+      } else {
+        setIsAuthenticated(true)
+      }
+    })
+    return () => {
+      active = false
     }
   }, [router])
 
-  const handleLogout = () => {
-    logoutAdmin()
+  const handleLogout = async () => {
+    await signOut()
     router.push('/admin/login')
   }
 
@@ -715,15 +730,34 @@ export default function AdminDashboard() {
               {/* Order Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Customer Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Customer &amp; Delivery</h3>
                   <div className="space-y-2">
                     <p><span className="font-medium">Name:</span> {selectedOrder.customer_name}</p>
-                    <p><span className="font-medium">Email:</span> {selectedOrder.customer_email}</p>
-                    {selectedOrder.customer_phone && (
-                      <p><span className="font-medium">Phone:</span> {selectedOrder.customer_phone}</p>
+                    <p>
+                      <span className="font-medium">Phone:</span>{' '}
+                      {selectedOrder.customer_phone ? (
+                        <a href={`tel:${selectedOrder.customer_phone}`} className="text-primary-600 hover:underline">
+                          {selectedOrder.customer_phone}
+                        </a>
+                      ) : '—'}
+                    </p>
+                    <p>
+                      <span className="font-medium">Email:</span>{' '}
+                      <a href={`mailto:${selectedOrder.customer_email}`} className="text-primary-600 hover:underline">
+                        {selectedOrder.customer_email}
+                      </a>
+                    </p>
+                    <p className="whitespace-pre-line">
+                      <span className="font-medium">Address:</span> {selectedOrder.shipping_address || '—'}
+                    </p>
+                    <p><span className="font-medium">City:</span> {selectedOrder.shipping_city || '—'}</p>
+                    {selectedOrder.shipping_postal_code && (
+                      <p><span className="font-medium">Postal code:</span> {selectedOrder.shipping_postal_code}</p>
                     )}
-                    {selectedOrder.shipping_address && (
-                      <p><span className="font-medium">Address:</span> {selectedOrder.shipping_address}</p>
+                    {selectedOrder.order_notes && (
+                      <p className="whitespace-pre-line p-2 bg-amber-50 border-l-2 border-amber-300 rounded">
+                        <span className="font-medium">Notes:</span> {selectedOrder.order_notes}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -731,8 +765,12 @@ export default function AdminDashboard() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Order Information</h3>
                   <div className="space-y-2">
-                    <p><span className="font-medium">Order ID:</span> {selectedOrder.id}</p>
+                    {selectedOrder.order_number && (
+                      <p><span className="font-medium">Reference:</span> <span className="font-mono">{selectedOrder.order_number}</span></p>
+                    )}
+                    <p className="text-xs text-gray-500 break-all"><span className="font-medium">Order ID:</span> {selectedOrder.id}</p>
                     <p><span className="font-medium">Date:</span> {new Date(selectedOrder.created_at).toLocaleString()}</p>
+                    <p><span className="font-medium">Payment method:</span> {selectedOrder.payment_method === 'cod' ? 'Cash on Delivery' : (selectedOrder.payment_method || '—')}</p>
                     <p><span className="font-medium">Status:</span> 
                       <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedOrder.status)}`}>
                         {getStatusLabel(selectedOrder.status)}
@@ -761,14 +799,24 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedOrder.items.map((item, index) => (
-                        <tr key={index}>
-                          <td className="border border-gray-300 px-4 py-2">{item.product_name}</td>
-                          <td className="border border-gray-300 px-4 py-2">{item.quantity}</td>
-                          <td className="border border-gray-300 px-4 py-2">Rs. {item.price}</td>
-                          <td className="border border-gray-300 px-4 py-2">Rs. {item.price * item.quantity}</td>
-                        </tr>
-                      ))}
+                      {selectedOrder.items.map((item, index) => {
+                        const variant = [item.volume, item.colour].filter(Boolean).join(' · ')
+                        return (
+                          <tr key={index}>
+                            <td className="border border-gray-300 px-4 py-2">
+                              {item.product_name || item.name}
+                              {variant && (
+                                <span className="block text-xs text-gray-500 capitalize">{variant}</span>
+                              )}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2">{item.quantity}</td>
+                            <td className="border border-gray-300 px-4 py-2">Rs. {item.price}</td>
+                            <td className="border border-gray-300 px-4 py-2">
+                              Rs. {item.line_total ?? item.price * item.quantity}
+                            </td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -784,12 +832,14 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping:</span>
-                    <span>Rs. {selectedOrder.shipping_cost}</span>
+                    <span>{selectedOrder.shipping_cost === 0 ? 'Free' : `Rs. ${selectedOrder.shipping_cost}`}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Tax:</span>
-                    <span>Rs. {selectedOrder.tax_amount}</span>
-                  </div>
+                  {selectedOrder.tax_amount > 0 && (
+                    <div className="flex justify-between">
+                      <span>Tax:</span>
+                      <span>Rs. {selectedOrder.tax_amount}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold text-lg border-t pt-2">
                     <span>Total:</span>
                     <span>Rs. {selectedOrder.total_amount}</span>
@@ -837,31 +887,6 @@ export default function AdminDashboard() {
 
       <Footer />
       
-      {/* Toast Notifications */}
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-          success: {
-            duration: 3000,
-            iconTheme: {
-              primary: '#10B981',
-              secondary: '#fff',
-            },
-          },
-          error: {
-            duration: 4000,
-            iconTheme: {
-              primary: '#EF4444',
-              secondary: '#fff',
-            },
-          },
-        }}
-      />
     </div>
   )
 }

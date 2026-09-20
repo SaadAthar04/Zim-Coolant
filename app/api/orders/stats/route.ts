@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { orderOperations, productOperations } from '@/lib/database';
+import { requireAdmin } from '@/lib/admin-auth';
 
 // GET /api/orders/stats - Get dashboard statistics
 export async function GET(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const period = searchParams.get('period') || '7d';

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { productOperations } from '@/lib/database';
+import { requireAdmin } from '@/lib/admin-auth';
 
 // GET /api/products/[id] - Get a single product
 export async function GET(
@@ -26,6 +27,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -48,6 +53,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
 

@@ -1,49 +1,47 @@
-// Admin authentication utilities
+// Admin session helpers for the browser.
+//
+// There is deliberately no credential check here. Signing in posts to
+// /api/admin/session, which verifies against server-only env vars and sets a
+// signed httpOnly cookie. The browser never sees the password, and it cannot
+// fake being signed in: the admin APIs check the cookie on every request.
 
-export const getAdminCredentials = () => {
-  return {
-    username: process.env.ADMIN_USERNAME || 'admin',
-    password: process.env.ADMIN_PASSWORD || 'zim1234'
+export async function signIn(
+  username: string,
+  password: string
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const response = await fetch('/api/admin/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    })
+    const result = await response.json()
+
+    if (!response.ok) {
+      return { ok: false, error: result.error || 'Sign in failed' }
+    }
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Could not reach the server. Please try again.' }
   }
 }
 
-export const checkAdminAuth = (): boolean => {
-  if (typeof window === 'undefined') return false
-  
-  const isAuthenticated = localStorage.getItem('admin_authenticated')
-  const loginTime = localStorage.getItem('admin_login_time')
-  
-  if (!isAuthenticated || !loginTime) return false
-  
-  // Check if login is still valid (24 hours)
-  const loginDate = new Date(loginTime)
-  const now = new Date()
-  const hoursDiff = (now.getTime() - loginDate.getTime()) / (1000 * 60 * 60)
-  
-  if (hoursDiff > 24) {
-    // Session expired
-    localStorage.removeItem('admin_authenticated')
-    localStorage.removeItem('admin_login_time')
+export async function signOut(): Promise<void> {
+  try {
+    await fetch('/api/admin/session', { method: 'DELETE' })
+  } catch {
+    // Signing out locally is enough for the UI; the cookie expires regardless.
+  }
+}
+
+/** Asks the server whether the current cookie is a valid admin session. */
+export async function checkAdminSession(): Promise<boolean> {
+  try {
+    const response = await fetch('/api/admin/session', { cache: 'no-store' })
+    if (!response.ok) return false
+    const result = await response.json()
+    return Boolean(result?.data?.authenticated)
+  } catch {
     return false
   }
-  
-  return true
-}
-
-export const logoutAdmin = (): void => {
-  if (typeof window === 'undefined') return
-  
-  localStorage.removeItem('admin_authenticated')
-  localStorage.removeItem('admin_login_time')
-}
-
-export const requireAdminAuth = (): boolean => {
-  const isAuthenticated = checkAdminAuth()
-  
-  if (!isAuthenticated && typeof window !== 'undefined') {
-    window.location.href = '/admin/login'
-    return false
-  }
-  
-  return isAuthenticated
 }

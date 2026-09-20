@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Lock, User, Eye, EyeOff } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { signIn } from '@/lib/auth'
 
 export default function AdminLogin() {
   const [username, setUsername] = useState('')
@@ -14,32 +15,21 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  // Admin credentials from environment variables
-  const ADMIN_CREDENTIALS = {
-    username: process.env.NEXT_PUBLIC_ADMIN_USERNAME,
-    password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD,
-  }
-
+  // Credentials are checked on the server. Nothing secret reaches this bundle.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    // Simulate loading delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const { ok, error: signInError } = await signIn(username, password)
 
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-      // Store admin session
-      localStorage.setItem('admin_authenticated', 'true')
-      localStorage.setItem('admin_login_time', new Date().toISOString())
-      
-      // Redirect to admin dashboard
+    if (ok) {
       router.push('/admin')
+      router.refresh()
     } else {
-      setError('Invalid username or password')
+      setError(signInError || 'Invalid username or password')
+      setLoading(false)
     }
-    
-    setLoading(false)
   }
 
   return (

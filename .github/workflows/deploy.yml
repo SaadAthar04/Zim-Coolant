@@ -38,23 +38,38 @@ jobs:
             # The database holds live customer orders and is no longer tracked
             # in git. Copy it aside before pulling: the pull that untracks it
             # would otherwise delete it from the working tree.
+            #
+            # SQLite runs in WAL mode here, so recently committed transactions
+            # may still live in the -wal file rather than the .db. All three
+            # files move together, or an order could be lost and the restored
+            # .db could be left beside a stale WAL it does not match.
             DB=database/zim-coolant.db
             SAFE=~/zim-db-backups
+            STAGE=/tmp/zim-db-stage
             mkdir -p "$SAFE"
+            rm -rf "$STAGE" && mkdir -p "$STAGE"
+
             if [ -f "$DB" ]; then
-              cp "$DB" "$SAFE/zim-coolant-$(date +%Y%m%d-%H%M%S).db"
-              cp "$DB" /tmp/zim-coolant-live.db
+              STAMP=$(date +%Y%m%d-%H%M%S)
+              for ext in "" "-wal" "-shm"; do
+                if [ -f "$DB$ext" ]; then cp -p "$DB$ext" "$STAGE/zim-coolant.db$ext"; fi
+              done
+              tar -czf "$SAFE/zim-coolant-$STAMP.tar.gz" -C "$STAGE" .
               # Discard the tracked-file modification so the pull is clean.
-              # The real data is already safe in the two copies above.
+              # The real data is already safe in the staged copy above.
               git checkout -- "$DB" 2>/dev/null || true
             fi
 
             git pull origin main
 
-            # Put the live database back if the pull removed it.
-            if [ ! -f "$DB" ] && [ -f /tmp/zim-coolant-live.db ]; then
+            # Put the live database back, replacing whatever the pull left, and
+            # restore its WAL alongside so the set stays internally consistent.
+            if [ -f "$STAGE/zim-coolant.db" ]; then
               mkdir -p database
-              cp /tmp/zim-coolant-live.db "$DB"
+              rm -f "$DB" "$DB-wal" "$DB-shm"
+              for ext in "" "-wal" "-shm"; do
+                if [ -f "$STAGE/zim-coolant.db$ext" ]; then cp -p "$STAGE/zim-coolant.db$ext" "$DB$ext"; fi
+              done
             fi
 
             npm ci
@@ -71,5 +86,6 @@ jobs:
             pm2 restart zim-coolant --update-env
 
             # Keep the ten most recent database backups.
-            ls -1t "$SAFE"/zim-coolant-*.db 2>/dev/null | tail -n +11 | xargs -r rm --
+            ls -1t "$SAFE"/zim-coolant-*.tar.gz 2>/dev/null | tail -n +11 | xargs -r rm --
+            rm -rf "$STAGE"
           REMOTE

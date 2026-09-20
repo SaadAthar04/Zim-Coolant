@@ -55,14 +55,18 @@ jobs:
                 if [ -f "$DB$ext" ]; then cp -p "$DB$ext" "$STAGE/zim-coolant.db$ext"; fi
               done
               tar -czf "$SAFE/zim-coolant-$STAMP.tar.gz" -C "$STAGE" .
-              # Discard the tracked-file modification so the pull is clean.
-              # The real data is already safe in the staged copy above.
-              git checkout -- "$DB" 2>/dev/null || true
             fi
 
-            git pull origin main
+            # Mirror the repository rather than merging into it. A deploy target
+            # accumulates local edits to tracked files -- package-lock.json gets
+            # rewritten by a stray npm install, the tracked database was written
+            # to on every order -- and `git pull` then aborts rather than
+            # deploying. Everything that matters here is either in git or staged
+            # above, and ignored files such as .env are left untouched.
+            git fetch origin main
+            git reset --hard origin/main
 
-            # Put the live database back, replacing whatever the pull left, and
+            # Put the live database back, replacing whatever the reset left, and
             # restore its WAL alongside so the set stays internally consistent.
             if [ -f "$STAGE/zim-coolant.db" ]; then
               mkdir -p database

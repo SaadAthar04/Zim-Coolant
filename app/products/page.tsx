@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Search, Filter, Grid3X3, List, ArrowUpDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { productsApi, Product } from '@/lib/api-client'
+import { formatPrice } from '@/lib/store-config'
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([])
@@ -16,7 +17,12 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sortBy, setSortBy] = useState('name')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [categories] = useState<string[]>(['Coolant', 'ATF', 'Gear Oil'])
+
+  // Derived from the catalogue, so adding a range never leaves a stale filter.
+  const categories = useMemo(
+    () => Array.from(new Set(products.map((p) => p.category))).sort(),
+    [products]
+  )
 
   // Reset filters function
   const resetAllFilters = () => {
@@ -124,8 +130,8 @@ export default function Products() {
               Our <span className="text-green-500">Products</span>
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 leading-relaxed max-w-3xl mx-auto">
-              Discover our premium selection of coolants, ATF, and gear oils — engineered for
-              optimal performance and long-lasting protection.
+              Discover our premium selection of anti-freeze, radiator coolants, gear oil and
+              transmission fluid — engineered for optimal performance and long-lasting protection.
             </p>
           </div>
         </section>
@@ -173,9 +179,8 @@ export default function Products() {
                 className="pl-8 sm:pl-10 pr-6 sm:pr-8 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white text-xs sm:text-sm"
               >
                 <option value="name">Sort by Name</option>
-                {/* Price sorting options hidden temporarily */}
-                {/* <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option> */}
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
                 <option value="category">Sort by Category</option>
               </select>
             </div>
@@ -241,14 +246,17 @@ export default function Products() {
                 <Link 
                   key={product.id} 
                   href={`/products/${product.slug}`}
-                  className={`block group cursor-pointer hover:scale-105 transition-transform duration-200 ${
-                    viewMode === 'list' ? 'flex space-x-4' : 'space-y-3 sm:space-y-4'
+                  className={`group cursor-pointer hover:scale-105 transition-transform duration-200 ${
+                    viewMode === 'list'
+                      ? 'flex space-x-4'
+                      : 'flex h-full flex-col space-y-3 sm:space-y-4'
                   }`}
                 >
                   {/* Grid View */}
                   {viewMode === 'grid' ? (
                     <>
-                      <div className="w-full h-64 sm:h-68 md:h-72 lg:h-76 xl:h-80 rounded-lg overflow-hidden relative bg-gray-100">
+                      {/* 10:11 frame, no padding, cropped at the sides only */}
+                      <div className="w-full aspect-[10/11] rounded-lg overflow-hidden relative bg-gray-100">
                         <Image
                           src={product.image_url}
                           alt={product.name}
@@ -256,10 +264,6 @@ export default function Products() {
                           className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
                           sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           quality={85}
-                          onError={(e) => {
-                            console.error('Image failed to load:', product.image_url);
-                            e.currentTarget.style.display = 'none';
-                          }}
                         />
                       </div>
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">
@@ -268,11 +272,11 @@ export default function Products() {
                       <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
                         {product.description}
                       </p>
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-                        {/* Price hidden temporarily */}
-                        {/* <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
-                          Rs. {product.price}/-
-                        </span> */}
+                      {/* mt-auto keeps the price row on the baseline across cards */}
+                      <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                        <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
+                          {formatPrice(product.price)}
+                        </span>
                         <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 w-full sm:w-auto text-center group-hover:bg-primary-700 transition-colors">
                           View Details
                         </span>
@@ -289,10 +293,6 @@ export default function Products() {
                           className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
                           sizes="(max-width: 640px) 128px, 160px"
                           quality={85}
-                          onError={(e) => {
-                            console.error('Image failed to load:', product.image_url);
-                            e.currentTarget.style.display = 'none';
-                          }}
                         />
                       </div>
                       <div className="flex-1 space-y-2">
@@ -301,13 +301,14 @@ export default function Products() {
                         </h3>
                         <p className="text-gray-600 text-sm line-clamp-2">{product.description}</p>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                          {/* Price hidden temporarily */}
-                          {/* <span className="text-xl sm:text-2xl font-bold text-primary-600">
-                            Rs. {product.price}
-                          </span> */}
-                          {/* <span className="text-xs sm:text-sm text-gray-500">
-                            Stock: {product.stock_quantity}
-                          </span> */}
+                          <span className="text-xl sm:text-2xl font-bold text-primary-600">
+                            {formatPrice(product.price)}
+                          </span>
+                          {product.stock_quantity <= 0 && (
+                            <span className="text-xs sm:text-sm font-medium text-red-600">
+                              Out of stock
+                            </span>
+                          )}
                         </div>
                         <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 mt-4 inline-block group-hover:bg-primary-700 transition-colors">
                           View Details

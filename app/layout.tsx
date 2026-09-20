@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import './globals.css'
 import { NavbarProvider } from '@/lib/navbar-context'
+import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: 'Zim Chemicals - Premium Automotive Products',
@@ -82,6 +83,16 @@ export default function RootLayout({
         <NavbarProvider>
           {children}
         </NavbarProvider>
+        {/* Cart and checkout feedback. Without this mounted, every toast()
+            call in the app is silently discarded. */}
+        <Toaster
+          position="bottom-center"
+          toastOptions={{
+            duration: 3000,
+            style: { background: '#111827', color: '#fff', fontSize: '14px' },
+            success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } },
+          }}
+        />
       </body>
     </html>
   )

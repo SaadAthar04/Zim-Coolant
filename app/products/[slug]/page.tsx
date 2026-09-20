@@ -1,83 +1,144 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Star, Truck, Shield, MessageCircle } from 'lucide-react'
+import { Truck, Shield, Minus, Plus, ShoppingCart, Maximize2, X, Check } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Product, productsApi } from '@/lib/api-client'
+import { addToCart } from '@/lib/cart'
+import {
+  FREE_SHIPPING_THRESHOLD,
+  MAX_QUANTITY_PER_ITEM,
+  NOZZLE_IMAGE,
+  formatPrice,
+} from '@/lib/store-config'
+
+type Colour = 'green' | 'red'
+type View = 'front' | 'back' | 'nozzle'
 
 export default function ProductDetail() {
   const params = useParams()
-  const productSlugParam = params.slug as string
-  const [product, setProduct] = useState<Product | null>(null)
-  const [selectedColor, setSelectedColor] = useState<'green' | 'red'>('green')
+  const router = useRouter()
+  const slug = params.slug as string
+
+  const [allProducts, setAllProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
-  const [relatedLoading, setRelatedLoading] = useState(false)
+  const [colour, setColour] = useState<Colour>('green')
+  const [view, setView] = useState<View>('front')
+  const [quantity, setQuantity] = useState(1)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
-  // WhatsApp contact link
-  const whatsappNumber = '923268871985' // +92 326-8871985 formatted for WhatsApp
-  const whatsappUrl = `https://wa.me/${whatsappNumber}`
-
+  // The catalogue is six rows, so one fetch gives us the product and its
+  // sibling sizes without a second round trip.
   useEffect(() => {
-    fetchProduct()
-  }, [productSlugParam])
-
-  useEffect(() => {
-    if (product) {
-      fetchRelatedProducts()
-      setSelectedColor('green') // Reset to green when product changes
-    }
-  }, [product])
-
-  const fetchProduct = async () => {
-    try {
-      setLoading(true)
-
-      // Fetch product directly by slug
-      const { data, error } = await productsApi.getBySlug(productSlugParam)
-
-      if (error) {
-        return
-      }
-
-      if (data) {
-        setProduct(data)
-      }
-    } catch {
-      // Error handled silently
-    } finally {
+    let active = true
+    productsApi.getAll().then(({ data }) => {
+      if (!active) return
+      setAllProducts(data || [])
       setLoading(false)
+    })
+    return () => {
+      active = false
     }
-  }
+  }, [])
 
-  const fetchRelatedProducts = async () => {
-    if (!product) return
+  const product = useMemo(
+    () => allProducts.find((p) => p.slug === slug) || null,
+    [allProducts, slug]
+  )
 
-    try {
-      setRelatedLoading(true)
+  /** Every size of this product line, for the size selector. */
+  const siblings = useMemo(() => {
+    if (!product) return []
+    return allProducts
+      .filter((p) => p.range_key === product.range_key)
+      .sort((a, b) => a.sort_order - b.sort_order)
+  }, [allProducts, product])
 
-      // Fetch products from the same category
-      const { data, error } = await productsApi.getByCategory(product.category)
+  const hasColours = Boolean(product?.red_image_url)
+  const includesNozzle = product?.nozzle_included === 1
+  // ATF is sold without any public capacity, so it shows no size control.
+  const showSizeSelector = product ? product.range_key !== 'atf' && siblings.length > 0 : false
 
-      if (error) {
-        return
+  // Reset the view when the product or colour changes.
+  useEffect(() => {
+    setView('front')
+    setQuantity(1)
+    setColour('green')
+  }, [slug])
+
+  useEffect(() => {
+    if (view === 'nozzle' && !includesNozzle) setView('front')
+  }, [view, includesNozzle])
+
+  const imageFor = useCallback(
+    (which: View): string => {
+      if (!product) return ''
+      if (which === 'nozzle') return NOZZLE_IMAGE
+      if (colour === 'red' && hasColours) {
+        return (which === 'front' ? product.red_image_url : product.red_back_image_url) || product.image_url
       }
+      return (which === 'front' ? product.image_url : product.back_image_url) || product.image_url
+    },
+    [product, colour, hasColours]
+  )
 
-      if (data) {
-        // Exclude the current product and limit to 4
-        const related = data.filter(p => p.id !== product.id).slice(0, 4)
-        setRelatedProducts(related)
-      }
-    } catch {
-      // Error handled silently
-    } finally {
-      setRelatedLoading(false)
+  const altFor = useCallback(
+    (which: View) => {
+      if (!product) return ''
+      if (which === 'nozzle')
+        return 'Transparent flexible pouring nozzle, included free with red and green ZIMX 1 Liter bottles'
+      return [product.name, product.volume, hasColours ? colour : '', `${which} view`]
+        .filter(Boolean)
+        .join(', ')
+    },
+    [product, colour, hasColours]
+  )
+
+  const views: View[] = includesNozzle ? ['front', 'back', 'nozzle'] : ['front', 'back']
+
+  // Close the lightbox with Escape.
+  useEffect(() => {
+    if (!lightboxOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxOpen(false)
     }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightboxOpen])
+
+  const outOfStock = (product?.stock_quantity ?? 0) <= 0
+  const maxQuantity = Math.min(MAX_QUANTITY_PER_ITEM, product?.stock_quantity || MAX_QUANTITY_PER_ITEM)
+
+  const handleAddToCart = (thenCheckout = false) => {
+    if (!product || outOfStock) return
+
+    addToCart(
+      {
+        productId: product.id,
+        slug: product.slug,
+        name: product.name,
+        colour: hasColours ? colour : '',
+        volume: product.volume,
+        price: product.price,
+        image_url: imageFor('front'),
+        stock_quantity: product.stock_quantity,
+      },
+      quantity
+    )
+
+    if (thenCheckout) {
+      // Buy Now adds the chosen variant and quantity, then opens checkout.
+      router.push('/cart')
+      return
+    }
+
+    toast.success(`${product.name} added to your cart`)
   }
 
   if (loading) {
@@ -110,142 +171,321 @@ export default function ProductDetail() {
     )
   }
 
+  const benefits = Array.isArray(product.benefits) ? product.benefits : []
+  const directions = Array.isArray(product.directions) ? product.directions : []
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      
-      {/* Product Details */}
+
       <section className="pt-28 sm:pt-32 md:pt-36 pb-16 bg-white">
         <div className="container-custom">
+          {/* Breadcrumb */}
+          <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
+            <ol className="flex flex-wrap items-center gap-2">
+              <li><Link href="/products" className="hover:text-primary-600">Products</Link></li>
+              <li aria-hidden="true">/</li>
+              <li>{product.category}</li>
+              <li aria-hidden="true">/</li>
+              <li className="text-gray-900 font-medium">{product.name}</li>
+            </ol>
+          </nav>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Product Images */}
+            {/* Gallery */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
+              initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-6"
+              transition={{ duration: 0.6 }}
+              className="space-y-4"
             >
-              <div className="w-full h-[500px] lg:h-[600px] rounded-2xl overflow-hidden relative bg-gray-100">
+              <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
                 <Image
-                  src={selectedColor === 'green' ? product.image_url : (product.red_image_url || product.image_url)}
-                  alt={product.name}
+                  key={`${product.id}-${colour}-${view}`}
+                  src={imageFor(view)}
+                  alt={altFor(view)}
                   fill
-                  className="object-cover object-center"
+                  /* contain, so the whole supplied bottle image is visible */
+                  className="object-contain"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   quality={90}
                   priority
-                  key={selectedColor}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
                 />
+                {hasColours && view !== 'nozzle' && (
+                  <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold tracking-wide text-gray-700 uppercase">
+                    {colour}
+                  </span>
+                )}
+                {view === 'nozzle' && (
+                  <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-primary-600 text-xs font-semibold tracking-wide text-white uppercase">
+                    Included free
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setLightboxOpen(true)}
+                  className="absolute top-4 right-4 p-2 rounded-full bg-white/90 text-gray-700 hover:bg-white transition-colors"
+                  aria-label="Enlarge product image"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Thumbnails. No captions underneath, per the handoff; the
+                  accessible name carries the meaning instead. */}
+              <div className="flex gap-3">
+                {views.map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setView(v)}
+                    aria-pressed={view === v}
+                    aria-label={
+                      v === 'nozzle' ? 'Included pouring nozzle' : `${v} view`
+                    }
+                    className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 bg-gray-50 transition-all ${
+                      view === v
+                        ? 'border-primary-600 ring-1 ring-primary-200'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <Image
+                      src={imageFor(v)}
+                      alt=""
+                      fill
+                      className="object-contain"
+                      sizes="80px"
+                      quality={70}
+                    />
+                  </button>
+                ))}
               </div>
             </motion.div>
 
-            {/* Product Info */}
+            {/* Purchase panel */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-8"
+              transition={{ duration: 0.6 }}
+              className="space-y-6"
             >
-              {/* Category and Rating */}
-              <div className="space-y-4">
-                <span className="inline-block px-4 py-2 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">
+              <div>
+                <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 text-xs font-semibold rounded-full uppercase tracking-wide">
                   {product.category}
                 </span>
               </div>
 
-              {/* Product Name and Price */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
                   {product.name}
                 </h1>
-                {/* Price hidden temporarily */}
-                {/* <div className="flex items-baseline space-x-4">
-                  <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-600">
-                    Rs. {product.price}/-
-                  </span>
-                </div> */}
-                
-                {/* Color Selection - Show only if product has red_image_url */}
-                {product.red_image_url && (
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xs font-medium text-gray-600">Color:</span>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setSelectedColor('green')}
-                        className={`w-7 h-7 rounded-full border-2 transition-all ${
-                          selectedColor === 'green'
-                            ? 'border-primary-600 ring-1 ring-primary-200'
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                        style={{ backgroundColor: '#22c55e' }}
-                        aria-label="Select green color"
-                      />
-                      <button
-                        onClick={() => setSelectedColor('red')}
-                        className={`w-7 h-7 rounded-full border-2 transition-all ${
-                          selectedColor === 'red'
-                            ? 'border-primary-600 ring-1 ring-primary-200'
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                        style={{ backgroundColor: '#ef4444' }}
-                        aria-label="Select red color"
-                      />
-                    </div>
-                  </div>
+                {product.intro && (
+                  <p className="text-base text-gray-600">{product.intro}</p>
                 )}
+                <div className="flex items-baseline gap-3">
+                  <span className="text-3xl md:text-4xl font-bold text-primary-600">
+                    {formatPrice(product.price)}
+                  </span>
+                  <span className="text-sm text-gray-500">PKR</span>
+                </div>
               </div>
 
-              {/* Description */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
-                <div 
-                  className="text-gray-600 leading-relaxed whitespace-pre-line"
-                  dangerouslySetInnerHTML={{ __html: product.description || '' }}
-                />
-              </div>
+              {/* Size — one product page per size, so this navigates */}
+              {showSizeSelector && (
+                <fieldset className="border-t border-gray-200 pt-5">
+                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    Bottle Size
+                  </legend>
+                  <div className="flex flex-wrap gap-3">
+                    {siblings.map((sibling) => {
+                      const active = sibling.id === product.id
+                      return (
+                        <button
+                          key={sibling.id}
+                          type="button"
+                          onClick={() => router.push(`/products/${sibling.slug}`)}
+                          aria-pressed={active}
+                          aria-label={`${sibling.volume}, ${formatPrice(sibling.price)}`}
+                          className={`px-5 py-3 rounded-lg border-2 text-left transition-all ${
+                            active
+                              ? 'border-primary-600 bg-primary-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <span className="block font-semibold text-gray-900">
+                            {sibling.volume}
+                          </span>
+                          <span className="block text-xs text-gray-500">
+                            {formatPrice(sibling.price)}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </fieldset>
+              )}
 
-              {/* Directions for Use */}
-              {product.directionsForUse && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Directions for Use</h3>
-                  <div 
-                    className="text-gray-600 leading-relaxed whitespace-pre-line"
-                    dangerouslySetInnerHTML={{ __html: product.directionsForUse || '' }}
-                  />
+              {/* Colour */}
+              {hasColours && (
+                <fieldset className="border-t border-gray-200 pt-5">
+                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    Colour — <span className="text-gray-900 capitalize">{colour}</span>
+                  </legend>
+                  <div className="flex gap-3">
+                    {(['green', 'red'] as Colour[]).map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setColour(c)}
+                        aria-pressed={colour === c}
+                        aria-label={`Select ${c}`}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all ${
+                          colour === c
+                            ? 'border-primary-600 bg-primary-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span
+                          className="w-5 h-5 rounded-full border border-black/10"
+                          style={{ backgroundColor: c === 'green' ? '#22c55e' : '#ef4444' }}
+                        />
+                        <span className="text-sm font-medium capitalize text-gray-900">{c}</span>
+                        {colour === c && <Check className="w-4 h-4 text-primary-600" />}
+                      </button>
+                    ))}
+                  </div>
+                  {product.colour_note && (
+                    <p className="mt-2 text-xs text-gray-500">{product.colour_note}</p>
+                  )}
+                </fieldset>
+              )}
+
+              {/* Free nozzle — ZIMX 1 Liter only */}
+              {includesNozzle && (
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-primary-50 border border-primary-100">
+                  <div className="relative w-16 h-16 flex-shrink-0">
+                    <Image
+                      src={NOZZLE_IMAGE}
+                      alt="Pouring nozzle included with ZIMX 1 Liter bottles"
+                      fill
+                      className="object-contain"
+                      sizes="64px"
+                      quality={75}
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Free Easy-Pour Nozzle</p>
+                    <p className="text-sm text-gray-600">
+                      Included with red and green 1 Liter bottles. Pour directly, with no separate funnel.
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {/* Contact Button (WhatsApp) */}
-              <div className="space-y-6">
-                {/* Contact Button - Links to WhatsApp */}
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full min-h-[48px] flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 font-medium"
+              {/* Quantity and purchase */}
+              <div className="border-t border-gray-200 pt-5 space-y-4">
+                {outOfStock ? (
+                  <p className="text-sm font-medium text-red-600">
+                    This product is currently out of stock.
+                  </p>
+                ) : product.stock_quantity <= 10 ? (
+                  <p className="text-sm font-medium text-amber-600">
+                    Only {product.stock_quantity} left in stock.
+                  </p>
+                ) : (
+                  <p className="text-sm font-medium text-green-700">In stock</p>
+                )}
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center border border-gray-300 rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      disabled={quantity <= 1}
+                      className="p-3 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-lg"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="w-12 text-center font-semibold" aria-live="polite">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
+                      disabled={quantity >= maxQuantity}
+                      className="p-3 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed rounded-r-lg"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddToCart(false)}
+                    disabled={outOfStock}
+                    className="flex-1 min-h-[52px] flex items-center justify-center gap-2 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    <span>Add to Cart</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleAddToCart(true)}
+                  disabled={outOfStock}
+                  className="w-full min-h-[52px] flex items-center justify-center gap-2 bg-gray-900 hover:bg-black text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <MessageCircle className="w-5 h-5" />
-                  <span className="whitespace-nowrap">Contact via WhatsApp</span>
-                </a>
+                  Buy Now
+                </button>
               </div>
 
-              {/* Features */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-200">
+              {/* Description */}
+              <div className="border-t border-gray-200 pt-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">Product Description</h2>
+                <p className="text-gray-600 leading-relaxed">{product.description}</p>
+                {benefits.length > 0 && (
+                  <ul className="mt-4 space-y-2">
+                    {benefits.map((benefit, i) => (
+                      <li key={i} className="flex gap-2 text-gray-600">
+                        <Check className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              {/* Directions */}
+              {directions.length > 0 && (
+                <div className="border-t border-gray-200 pt-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-3">Directions for Use</h2>
+                  <ol className="space-y-2 list-decimal list-inside text-gray-600">
+                    {directions.map((step, i) => (
+                      <li key={i} className="leading-relaxed">{step}</li>
+                    ))}
+                  </ol>
+                  {product.usage_note && (
+                    <p className="mt-4 pl-4 border-l-2 border-gray-300 text-sm text-gray-600">
+                      {product.usage_note}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Reassurance */}
+              <div className="grid grid-cols-2 gap-6 pt-6 border-t border-gray-200">
                 <div className="text-center">
-                  <Truck className="w-8 h-8 text-primary-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Free shipping above Rs. 1,499</p>
+                  <Truck className="w-7 h-7 text-primary-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600">
+                    Free delivery above {formatPrice(FREE_SHIPPING_THRESHOLD)}
+                  </p>
                 </div>
                 <div className="text-center">
-                  <Shield className="w-8 h-8 text-primary-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Quality Guaranteed</p>
-                </div>
-                <div className="text-center">
-                  <Star className="w-8 h-8 text-primary-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Premium Grade</p>
+                  <Shield className="w-7 h-7 text-primary-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600">Cash on delivery</p>
                 </div>
               </div>
             </motion.div>
@@ -253,77 +493,40 @@ export default function ProductDetail() {
         </div>
       </section>
 
-      {/* Related Products */}
-      {!relatedLoading && relatedProducts.length > 0 && (
-        <section className="py-16 bg-gray-50">
-          <div className="container-custom">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                Related Products
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
-                You might also be interested in these {product?.category} products
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {relatedProducts.map((relatedProduct, index) => (
-                <motion.div
-                  key={relatedProduct.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="card group cursor-pointer"
-                >
-                  <Link href={`/products/${relatedProduct.slug}`}>
-                    <div className="p-6">
-                      <div className="w-full h-48 rounded-lg mb-4 overflow-hidden relative bg-gray-100">
-                        <Image
-                          src={relatedProduct.image_url}
-                          alt={relatedProduct.name}
-                          fill
-                          className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
-                          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                          quality={85}
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      </div>
-                      <div className="space-y-3">
-                        <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
-                          {relatedProduct.category}
-                        </span>
-                        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
-                          {relatedProduct.name}
-                        </h3>
-                        <p className="text-gray-600 text-sm line-clamp-2">
-                          {relatedProduct.description}
-                        </p>
-                        {/* Price hidden temporarily */}
-                        {/* <div className="flex items-center justify-between">
-                          <span className="text-2xl font-bold text-primary-600">
-                            Rs. {relatedProduct.price}/-
-                          </span>
-                        </div> */}
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setLightboxOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Enlarged product image"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-6 right-6 p-2 rounded-full bg-white/90 text-gray-900"
+            aria-label="Close image"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div
+            className="relative w-full max-w-3xl aspect-square"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={imageFor(view)}
+              alt={altFor(view)}
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 768px"
+              quality={95}
+            />
           </div>
-        </section>
+        </div>
       )}
-      <Footer />  
+
+      <Footer />
     </div>
   )
 }
-

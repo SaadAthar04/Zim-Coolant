@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { productsApi, Product } from '@/lib/api-client'
 import { useNavbar } from '@/lib/navbar-context'
+import { formatPrice } from '@/lib/store-config'
 
 const features = [
   {
@@ -54,8 +55,7 @@ export default function Home() {
       }
 
       if (data) {
-        // Take first 4 products
-        setFeaturedProducts(data.slice(0, 4))
+        setFeaturedProducts(data)
       }
     } catch (error) {
       console.error('Error:', error)
@@ -132,9 +132,11 @@ export default function Home() {
                 <Link 
                   key={product.id} 
                   href={`/products/${product.slug}`}
-                  className="block space-y-3 sm:space-y-4 group cursor-pointer hover:scale-105 transition-transform duration-200"
+                  className="flex h-full flex-col space-y-3 sm:space-y-4 group cursor-pointer hover:scale-105 transition-transform duration-200"
                 >
-                  <div className="w-full h-64 sm:h-68 md:h-72 lg:h-76 xl:h-80 rounded-lg overflow-hidden relative bg-gray-100">
+                  {/* 10:11 frame, no padding. The square bottle image is
+                      scaled uniformly and cropped at the sides only. */}
+                  <div className="w-full aspect-[10/11] rounded-lg overflow-hidden relative bg-gray-100">
                     <Image
                       src={product.image_url}
                       alt={product.name}
@@ -142,9 +144,6 @@ export default function Home() {
                       className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       quality={85}
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
                     />
                   </div>
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">
@@ -153,11 +152,11 @@ export default function Home() {
                   <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
                     {product.description}
                   </p>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-                    {/* Price hidden temporarily */}
-                    {/* <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
-                      Rs. {product.price}/-
-                    </span> */}
+                  {/* mt-auto keeps the price row on the baseline across cards */}
+                  <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
+                      {formatPrice(product.price)}
+                    </span>
                     <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 w-full sm:w-auto text-center group-hover:bg-primary-700 transition-colors">
                       View Details
                     </span>

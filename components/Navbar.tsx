@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCart, Menu, X, Search as SearchIcon, MessageCircle } from 'lucide-react'
 import { productsApi } from '@/lib/api-client'
+import { cartCount, readCart, subscribeToCart } from '@/lib/cart'
 
 type ProductSuggest = {
   id: string
@@ -23,9 +24,9 @@ const NAV_ITEMS = [
 ]
 
 export default function Navbar() {
-  // cart badge (desktop) - COMMENTED OUT FOR NOW
-  // const [mounted, setMounted] = useState(false)
-  // const [cartItems, setCartItems] = useState(0)
+  // cart badge
+  const [mounted, setMounted] = useState(false)
+  const [cartItems, setCartItems] = useState(0)
 
   // mobile toggles
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -41,35 +42,13 @@ export default function Navbar() {
   const whatsappNumber = '923268871985' // +92 326-8871985 formatted for WhatsApp
   const whatsappUrl = `https://wa.me/${whatsappNumber}`
 
-  // ── cart count from localStorage - COMMENTED OUT FOR NOW
-  // useEffect(() => {
-  //   setMounted(true)
-  //   const update = () => {
-  //     try {
-  //       const stored = localStorage.getItem('cart-storage')
-  //       if (!stored) return setCartItems(0)
-  //       const data = JSON.parse(stored)
-  //       const total =
-  //         data.state?.items?.reduce(
-  //           (sum: number, it: any) => sum + (it.quantity || 0),
-  //           0
-  //         ) || 0
-  //       setCartItems(total)
-  //     } catch {
-  //       setCartItems(0)
-  //     }
-  //   }
-  //   update()
-  //   const onCartUpdated = () => update()
-  //   window.addEventListener('cartUpdated', onCartUpdated)
-  //   window.addEventListener('storage', (e) => {
-  //     if (e.key === 'cart-storage') update()
-  //   })
-  //   return () => {
-  //     window.removeEventListener('cartUpdated', onCartUpdated)
-  //     window.removeEventListener('storage', update as any)
-  //   }
-  // }, [])
+  // ── cart count, kept in step with other tabs by subscribeToCart
+  useEffect(() => {
+    setMounted(true)
+    const update = () => setCartItems(cartCount(readCart()))
+    update()
+    return subscribeToCart(update)
+  }, [])
 
   // ── click outside to close search dropdown (mobile) and clear query (desktop)
   useEffect(() => {
@@ -195,9 +174,9 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Right: Contact Button (WhatsApp) */}
-        <div className="justify-self-end">
-          <a 
+        {/* Right: Contact (WhatsApp) and Cart */}
+        <div className="justify-self-end flex items-center gap-4">
+          <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -206,19 +185,16 @@ export default function Navbar() {
             <MessageCircle className="w-5 h-5" />
             <span>Contact</span>
           </a>
-        </div>
 
-        {/* Right: Cart - COMMENTED OUT FOR NOW */}
-        {/* <div className="justify-self-end">
-          <Link href="/cart" className="relative inline-flex">
+          <Link href="/cart" className="relative inline-flex p-1" aria-label="View cart">
             <ShoppingCart className="w-6 h-6 text-white hover:text-green-100 transition-colors" />
             {mounted && cartItems > 0 && (
-              <span className="absolute -top-2 -right-2 bg-white text-green-700 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow">
+              <span className="absolute -top-1 -right-1 bg-white text-green-700 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow">
                 {cartItems}
               </span>
             )}
           </Link>
-        </div> */}
+        </div>
       </div>
 
       {/* Inline nav (desktop) */}
@@ -266,17 +242,28 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Right: hamburger */}
-          <button
-            onClick={() => {
-              setSearchOpen(false)
-              setIsMobileMenuOpen((o) => !o)
-            }}
-            className="justify-self-end text-white"
-            aria-label="Open menu"
-          >
-            {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-          </button>
+          {/* Right: cart and hamburger */}
+          <div className="justify-self-end flex items-center gap-3">
+            <Link href="/cart" className="relative inline-flex text-white" aria-label="View cart">
+              <ShoppingCart className="w-6 h-6" />
+              {mounted && cartItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-white text-green-700 text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold shadow">
+                  {cartItems}
+                </span>
+              )}
+            </Link>
+
+            <button
+              onClick={() => {
+                setSearchOpen(false)
+                setIsMobileMenuOpen((o) => !o)
+              }}
+              className="text-white"
+              aria-label="Open menu"
+            >
+              {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+            </button>
+          </div>
         </div>
 
         {/* Slide-down search */}

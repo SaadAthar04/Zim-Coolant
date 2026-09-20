@@ -79,16 +79,13 @@ export default async function ProductLayout({ params, children }: Props) {
     category: product.category,
     offers: {
       '@type': 'Offer',
-      // Price hidden temporarily
-      // price: product.price,
-      // priceCurrency: 'PKR',
-      availability: 'https://schema.org/InStock',
+      price: product.price,
+      priceCurrency: 'PKR',
+      availability:
+        product.stock_quantity > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
       url: `https://www.zimchemicals.com/products/${product.slug}`,
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      reviewCount: '200',
     },
   } : null
 

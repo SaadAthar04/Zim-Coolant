@@ -137,21 +137,22 @@
 .announcement-track {
   display: flex;
   width: max-content;
-  animation: announcement-scroll 32s linear infinite;
+  /* Duration is tuned to the track length so the text moves at a readable
+     pace rather than a speed that depends on the viewport width. */
+  animation: announcement-scroll 60s linear infinite;
 }
 
 .announcement-group {
   display: flex;
   flex-shrink: 0;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 28px;
-  min-width: 100vw;
-  padding: 0 14px;
 }
 
+/* The spacing lives on the message, not on a flex gap: that way the two
+   halves are exactly equal and the 50% slide lines up perfectly, including
+   across the join. */
 .announcement-group span {
   white-space: nowrap;
+  margin-right: 56px;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.6px;
@@ -189,9 +190,7 @@
     width: 100%;
   }
   .announcement-group {
-    min-width: 0;
     width: 100%;
-    gap: 6px 22px;
     padding: 7px 14px;
     flex-wrap: wrap;
     justify-content: center;
@@ -201,7 +200,11 @@
     line-height: 1.5;
     text-align: center;
     font-size: 12px;
+    margin-right: 0;
+    padding: 0 11px;
   }
+  /* Only the first run of messages, and only the first half. */
+  .announcement-group span:nth-child(n + 4),
   .announcement-group + .announcement-group,
   .announcement-toggle {
     display: none;

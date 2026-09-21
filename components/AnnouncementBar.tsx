@@ -5,8 +5,14 @@ import { useState } from 'react'
 /**
  * The scrolling announcement strip from the client's reference design.
  *
- * The messages are duplicated and the track slides by exactly half its width,
- * so the second copy arrives where the first began and the loop is seamless.
+ * The three messages are repeated several times to form one half of the track,
+ * and that half is duplicated. Sliding the track by exactly 50% therefore lands
+ * the second half where the first began, so the loop never shows a seam — and
+ * because the messages repeat across the whole width, the spacing between them
+ * stays even instead of leaving a long blank after the last one.
+ *
+ * Spacing comes from a right margin on each message rather than a flex gap, so
+ * the two halves measure exactly the same and the 50% slide is exact.
  *
  * It pauses on hover and on keyboard focus, and the button pauses it for good,
  * so nobody is forced to chase moving text in order to read it. Below 680px,
@@ -20,14 +26,19 @@ const MESSAGES = [
   'Serving Automotives Since 1988',
 ]
 
+/** Enough repeats that one half is wider than any realistic viewport. */
+const REPEATS = 4
+
 export default function AnnouncementBar() {
   const [paused, setPaused] = useState(false)
 
-  const group = (
-    <div className="announcement-group">
-      {MESSAGES.map((message) => (
-        <span key={message}>{message}</span>
-      ))}
+  const half = (halfKey: string) => (
+    <div className="announcement-group" key={halfKey}>
+      {Array.from({ length: REPEATS }).flatMap((_, repeat) =>
+        MESSAGES.map((message) => (
+          <span key={`${halfKey}-${repeat}-${message}`}>{message}</span>
+        ))
+      )}
     </div>
   )
 
@@ -42,8 +53,8 @@ export default function AnnouncementBar() {
 
       <div className="announcement-window" aria-hidden="true">
         <div className="announcement-track">
-          {group}
-          {group}
+          {half('a')}
+          {half('b')}
         </div>
       </div>
 

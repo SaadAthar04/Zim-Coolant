@@ -24,8 +24,20 @@ const SITE_URL = 'https://www.zimchemicals.com'
 const notificationAddress = () =>
   process.env.ORDER_NOTIFICATION_EMAIL || 'meelanahmad321@gmail.com'
 
-export const isEmailConfigured = () =>
-  Boolean(process.env.SMTP_USER && process.env.SMTP_PASS)
+const smtpUser = () => (process.env.SMTP_USER || '').trim()
+
+/**
+ * Google displays an App Password in four groups of four, and those spaces are
+ * formatting rather than part of the secret. Stripping them means a password
+ * pasted straight from Google works, instead of failing with a bare
+ * "invalid login" that gives no hint why.
+ */
+const smtpPass = () => {
+  const raw = (process.env.SMTP_PASS || '').trim()
+  return process.env.SMTP_HOST ? raw : raw.replace(/\s+/g, '')
+}
+
+export const isEmailConfigured = () => Boolean(smtpUser() && smtpPass())
 
 async function getTransport() {
   if (!isEmailConfigured()) return null
@@ -39,13 +51,13 @@ async function getTransport() {
       host,
       port: Number(process.env.SMTP_PORT || 587),
       secure: process.env.SMTP_SECURE === 'true',
-      auth: { user: process.env.SMTP_USER!, pass: process.env.SMTP_PASS! },
+      auth: { user: smtpUser(), pass: smtpPass() },
     })
   }
 
   return nodemailer.createTransport({
     service: 'gmail',
-    auth: { user: process.env.SMTP_USER!, pass: process.env.SMTP_PASS! },
+    auth: { user: smtpUser(), pass: smtpPass() },
   })
 }
 
@@ -225,7 +237,7 @@ export async function sendOrderEmails(
     const transport = await getTransport()
     if (!transport) return result
 
-    const from = `"${SHOP_NAME}" <${process.env.SMTP_USER}>`
+    const from = `"${SHOP_NAME}" <${smtpUser()}>`
 
     if (notifyShop) try {
       await transport.sendMail({

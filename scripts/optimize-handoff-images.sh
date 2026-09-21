@@ -36,12 +36,28 @@ TARGET_PX=1254
 
 mkdir -p "$OUT"
 
+# Resampling needs Pillow, and the first python3 on PATH does not always have
+# it. Pick one that does, rather than failing halfway through the set.
+PYBIN=""
+for candidate in python3 /usr/bin/python3 /usr/local/bin/python3; do
+  if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c "import PIL" >/dev/null 2>&1; then
+    PYBIN="$candidate"
+    break
+  fi
+done
+
 TMPDIR_NORM="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR_NORM"' EXIT
 
 # normalize <src> <dest-png> -> prints the path to use for encoding
 normalize() {
-  python3 - "$1" "$2" "$TARGET_PX" <<'PY'
+  # Nothing to resample with: the handoff images are already the right size,
+  # and only replacement artwork ever needs resizing.
+  if [[ -z "$PYBIN" ]]; then
+    echo "$1"
+    return
+  fi
+  "$PYBIN" - "$1" "$2" "$TARGET_PX" <<'PY'
 import sys
 from PIL import Image
 
@@ -51,7 +67,9 @@ if im.size == (target, target):
     print(src)
 else:
     if im.width != im.height:
-        sys.exit(f"refusing to resample non-square image {src} ({im.width}x{im.height})")
+        # Wide artwork such as the home banner keeps its own proportions.
+        print(src)
+        raise SystemExit
     im.resize((target, target), Image.LANCZOS).save(dst, 'PNG')
     print(dst)
 PY
@@ -82,6 +100,7 @@ IMAGES=(
   zim-atf-front
   zim-atf-back
   zimx-nozzle
+  banner-main
 )
 
 total_in=0

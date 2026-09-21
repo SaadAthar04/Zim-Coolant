@@ -61,7 +61,7 @@ export default function About() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 overflow-hidden">
+      <section className="relative w-full text-center text-white pt-10 sm:pt-12 md:pt-14 pb-20 sm:pb-24 md:pb-28 overflow-hidden">
           {/* Background Image */}
           <div>
             <Image
@@ -79,7 +79,7 @@ export default function About() {
           {/* Content */}
           <div className="relative z-10 max-w-4xl mx-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6">
-              About <span className="text-green-500">Zim</span>
+              About <span className="text-white/70">Zim</span>
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 leading-relaxed px-2 sm:px-0">
               We are a leading manufacturer and distributor of premium-quality coolants and automotive fluids, serving the automotive industry with excellence since 1988.

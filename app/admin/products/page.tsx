@@ -146,7 +146,7 @@ export default function AdminProducts() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <section className="pt-28 sm:pt-32 md:pt-36 pb-16">
+      <section className="pt-10 sm:pt-12 md:pt-14 pb-16">
         <div className="container-custom">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
             <div>

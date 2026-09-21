@@ -5,7 +5,6 @@ import { ShoppingCart, Trash2, ArrowLeft, Truck, CheckCircle, Minus, Plus, Bankn
 import Link from 'next/link'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
-import { motion } from 'framer-motion'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Order, ordersApi } from '@/lib/api-client'
@@ -138,9 +137,7 @@ export default function Cart() {
       <div className="min-h-screen bg-white">
         <Navbar />
         <div className="container-custom pt-32 pb-16">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+          <div
             className="max-w-2xl mx-auto text-center"
           >
             <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-8" />
@@ -182,7 +179,7 @@ export default function Cart() {
               <Link href="/products" className="btn-primary">Continue Shopping</Link>
               <Link href="/" className="btn-outline">Back to Home</Link>
             </div>
-          </motion.div>
+          </div>
         </div>
         <Footer />
       </div>
@@ -204,9 +201,7 @@ export default function Cart() {
       <div className="min-h-screen bg-white">
         <Navbar />
         <div className="container-custom pt-32 pb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
             className="max-w-2xl mx-auto text-center"
           >
             <ShoppingCart className="w-20 h-20 text-gray-300 mx-auto mb-8" />
@@ -215,7 +210,7 @@ export default function Cart() {
               Browse the range and add something to get started.
             </p>
             <Link href="/products" className="btn-primary">Start Shopping</Link>
-          </motion.div>
+          </div>
         </div>
         <Footer />
       </div>
@@ -226,7 +221,7 @@ export default function Cart() {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      <section className="pt-28 sm:pt-32 md:pt-36 pb-16 bg-gray-50">
+      <section className="pt-10 sm:pt-12 md:pt-14 pb-16 bg-gray-50">
         <div className="container-custom">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
             {step === 'cart' ? 'Your Cart' : 'Checkout'}

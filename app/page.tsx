@@ -2,214 +2,252 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Shield, Zap, Users, Award } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { productsApi, Product } from '@/lib/api-client'
-import { useNavbar } from '@/lib/navbar-context'
 import { formatPrice } from '@/lib/store-config'
 
-const features = [
-  {
-    icon: Shield,
-    title: 'Premium Quality',
-    description: 'Manufactured to the highest standards for optimal performance and longevity.'
-  },
-  {
-    icon: Zap,
-    title: 'Performance Boost',
-    description: 'Enhanced engine efficiency and cooling system performance.'
-  },
-  {
-    icon: Users,
-    title: 'Expert Support',
-    description: 'Professional technical support and guidance for all your needs.'
-  },
-  {
-    icon: Award,
-    title: 'Certified Products',
-    description: 'All products meet international quality and safety standards.'
-  }
+/**
+ * Home page, following the client's reference design: banner, then the range
+ * groups under their own headings.
+ *
+ * One card is one buyable variant rather than one product record, so a coolant
+ * sold in red and green appears twice. Each card opens the product page with
+ * that colour already selected, which is how the reference behaves and saves
+ * the customer a step.
+ */
+interface VariantCard {
+  key: string
+  href: string
+  image: string
+  alt: string
+  category: string
+  colour: '' | 'green' | 'red'
+  title: string
+  price: number
+}
+
+/** Group order and headings, from the reference design. */
+const RANGE_GROUPS = [
+  { key: 'zim', ranges: ['zim'], heading: 'ZIM Anti-Rust Coolant', style: 'range' as const },
+  { key: 'zimx', ranges: ['zimx'], heading: 'ZIMX Anti-Freeze & Anti-Boil', style: 'range' as const },
+  { key: 'fluids', ranges: ['gear', 'atf'], heading: 'Gear & Transmission Care.', style: 'feature' as const },
 ]
 
 export default function Home() {
-  const { isMobileMenuOpen } = useNavbar()
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchFeaturedProducts()
+    let active = true
+    productsApi.getAll().then(({ data }) => {
+      if (!active) return
+      setProducts(data || [])
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
   }, [])
 
-  const fetchFeaturedProducts = async () => {
-    try {
-      setLoading(true)
-
-      // Fetch products from API
-      const { data, error } = await productsApi.getAll()
-
-      if (error) {
-        console.error('Error fetching featured products:', error)
-        return
+  const groups = useMemo(() => {
+    const cardsFor = (product: Product): VariantCard[] => {
+      const base = {
+        category: product.category.toUpperCase(),
+        title: product.name,
+        price: product.price,
       }
 
-      if (data) {
-        setFeaturedProducts(data)
+      if (product.red_image_url) {
+        return [
+          {
+            ...base,
+            key: `${product.id}-green`,
+            href: `/products/${product.slug}?colour=green`,
+            image: product.image_url,
+            alt: `${product.name}, green`,
+            colour: 'green' as const,
+          },
+          {
+            ...base,
+            key: `${product.id}-red`,
+            href: `/products/${product.slug}?colour=red`,
+            image: product.red_image_url,
+            alt: `${product.name}, red`,
+            colour: 'red' as const,
+          },
+        ]
       }
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
+
+      return [
+        {
+          ...base,
+          key: product.id,
+          href: `/products/${product.slug}`,
+          image: product.image_url,
+          alt: product.name,
+          colour: '' as const,
+        },
+      ]
     }
-  }
+
+    return RANGE_GROUPS.map((group) => ({
+      ...group,
+      cards: products
+        .filter((p) => group.ranges.includes(p.range_key))
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .flatMap(cardsFor),
+    })).filter((group) => group.cards.length > 0)
+  }, [products])
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
       <Navbar />
 
-      {/* Hero Banner Section - Full Width */}
-      <div className={`relative w-full max-w-full overflow-hidden transition-all duration-300 ${isMobileMenuOpen ? 'pt-48 md:pt-0' : 'pt-0'}`}>
-        <div className="relative w-full overflow-hidden">
-          {/* Mobile Banner - for screens less than 640px */}
-          <Image
-            src="/forMobile.png"
-            alt="Zim Coolant Premium Banner"
-            width={1920}
-            height={800}
-            priority
-            className="object-cover sm:hidden object-[center_40%] hero-zoom"
-            sizes="100vw"
-            quality={90}
-          />
-          {/* Tablet Banner - for screens 640px to 1024px */}
-          <Image
-            src="/ZimBanner_3.png"
-            alt="Zim Coolant Premium Banner"
-            width={1920}
-            height={800}
-            priority
-            className="hidden sm:block lg:hidden object-contain object-center hero-zoom"
-            sizes="100vw"
-            quality={90}
-          />
-          {/* Desktop Banner - for screens 1024px and above */}
-          <Image
-            src="/ZimBanner_3.png"
-            alt="Zim Coolant Premium Banner"
-            width={1920}
-            height={800}
-            priority
-            className="hidden lg:block object-cover object-[center_25%] xl:object-[center_35%] 2xl:object-[center_45%] hero-zoom"
-            sizes="100vw"
-            quality={90}
-          />
-          <div className="absolute inset-0 bg-black/5 mix-blend-multiply"></div>
+      {/* Banner */}
+      <section className="w-full bg-[#080a09]" aria-label="ZIM Automotive Care">
+        <h1 className="sr-only">ZIM. Performance You Can Trust.</h1>
+        <Image
+          src="/products/banner-main.webp"
+          alt="ZIM Automotive Care: coolants, automatic transmission fluid and gear oil. Performance you can trust."
+          width={1784}
+          height={882}
+          priority
+          quality={88}
+          sizes="100vw"
+          className="block w-full h-auto"
+        />
+      </section>
+
+      {/* Products, grouped by range */}
+      <section
+        id="products"
+        className="mx-auto max-w-[1480px] px-[6%] py-10 sm:py-14 lg:px-[5%] lg:py-[72px] scroll-mt-6"
+      >
+        <div className="mb-7 lg:mb-[34px]">
+          <h2 className="text-[30px] lg:text-[38px] font-normal leading-[1.15] tracking-[-1px] lg:tracking-[-1.4px] text-[#171c1e]">
+            Meet Your Next Coolant.
+          </h2>
         </div>
-      </div>
 
-      {/* Featured Products Section */}
-      <section className="section-padding bg-gray-50">
-        <div className="container-custom">
-          <div
-            className="text-center mb-6 sm:mb-8 md:mb-12 lg:mb-16"
-          >
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Featured Products
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              Our Premium Selection of Zim Products
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {loading ? (
-              <p>Loading products...</p>
-            ) : featuredProducts.length === 0 ? (
-              <p>No featured products found.</p>
-            ) : (
-              featuredProducts.map((product, index) => (
-                <Link 
-                  key={product.id} 
-                  href={`/products/${product.slug}`}
-                  className="flex h-full flex-col gap-3 sm:gap-4 group cursor-pointer hover:scale-105 transition-transform duration-200"
+        {loading ? (
+          <p className="text-gray-500">Loading products...</p>
+        ) : groups.length === 0 ? (
+          <p className="text-gray-500">No products found.</p>
+        ) : (
+          groups.map((group, index) => (
+            <section
+              key={group.key}
+              className={index > 0 ? 'mt-[38px] lg:mt-[55px]' : ''}
+              aria-labelledby={`${group.key}-range`}
+            >
+              {group.style === 'range' ? (
+                <h3
+                  id={`${group.key}-range`}
+                  className="text-[20px] lg:text-[22px] font-medium tracking-[-0.5px] pb-4 border-b border-[#e4e6e6] mb-5 lg:mb-6 text-[#171c1e]"
                 >
-                  {/* 10:11 frame, no padding. The square bottle image is
-                      scaled uniformly and cropped at the sides only. */}
-                  <div className="w-full aspect-[10/11] rounded-lg overflow-hidden relative bg-gray-100">
-                    <Image
-                      src={product.image_url}
-                      alt={product.name}
-                      fill
-                      className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
-                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      quality={85}
-                    />
-                  </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
-                    {product.description}
-                  </p>
-                  {/* mt-auto keeps the price row on the baseline across cards */}
-                  <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600">
-                      {formatPrice(product.price)}
-                    </span>
-                    <span className="btn-primary text-xs sm:text-sm py-2 px-3 sm:px-4 w-full sm:w-auto text-center group-hover:bg-primary-700 transition-colors">
-                      View Details
-                    </span>
-                  </div>
-                </Link>
-              ))
-            )}
+                  {group.heading}
+                </h3>
+              ) : (
+                <h2
+                  id={`${group.key}-range`}
+                  className="text-[28px] lg:text-[34px] font-normal leading-[1.2] tracking-[-1px] mb-6 lg:mb-7 text-[#171c1e]"
+                >
+                  {group.heading}
+                </h2>
+              )}
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-[30px] gap-x-[14px] lg:gap-[22px]">
+                {group.cards.map((card) => (
+                  <Link key={card.key} href={card.href} className="group block min-w-0">
+                    {/* 10:11 frame, no padding, cropped at the sides only */}
+                    <div className="relative overflow-hidden bg-[#f1f2f2] aspect-[10/11]">
+                      <Image
+                        src={card.image}
+                        alt={card.alt}
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 25vw"
+                        quality={85}
+                        className="object-cover object-center transition-transform duration-[250ms] lg:group-hover:scale-[1.035]"
+                      />
+                      <span
+                        aria-hidden="true"
+                        className="absolute bottom-2 right-2 lg:bottom-3 lg:right-3 grid place-items-center w-[27px] h-[27px] lg:w-[34px] lg:h-[34px] rounded-full bg-white text-[17px] lg:text-[20px] leading-none text-[#171c1e]"
+                      >
+                        ↗
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap justify-between items-center mt-3 lg:mt-[19px] gap-x-[7px] gap-y-1 text-[9px] lg:text-[10px] tracking-[0.5px] lg:tracking-[1px] text-[#737b77]">
+                      <span>{card.category}</span>
+                      {card.colour && (
+                        <span className="flex items-center gap-1.5 text-[11px] lg:text-[12px] tracking-normal capitalize">
+                          <i
+                            className="block w-[9px] h-[9px] rounded-full"
+                            style={{ backgroundColor: card.colour === 'green' ? '#22c55e' : '#ef4444' }}
+                          />
+                          {card.colour}
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-[15px] lg:text-[17px] font-medium leading-[1.5] tracking-[-0.3px] mt-2 mb-3 lg:mt-[9px] lg:mb-[15px] text-[#171c1e]">
+                      {card.title}
+                    </h3>
+
+                    <div className="border-t border-[#e4e6e6] pt-[13px] flex flex-wrap items-center justify-between gap-x-[14px] gap-y-2.5">
+                      <span className="text-[1.125rem] lg:text-[1.25rem] font-medium leading-[1.3] tracking-[-0.2px] text-[#171c1e] tabular-nums whitespace-nowrap">
+                        {formatPrice(card.price)}
+                      </span>
+                      <span className="text-[0.8125rem] lg:text-[0.875rem] font-medium text-[#171c1e]">
+                        View Product ↗
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))
+        )}
+      </section>
+
+      {/* CTA */}
+      <section className="relative section-padding bg-white overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/cta-bg.jpg"
+            alt="Zim Coolant car driving performance background"
+            fill
+            className="object-cover object-center brightness-[0.45] blur-[1px]"
+          />
+        </div>
+
+        <div className="relative z-10 container-custom text-center text-white">
+          <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-bold text-white">
+              Performance You Can Feel, Protection You Can Trust.
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100">
+              Join thousands of satisfied customers who trust Zim for their vehicle needs.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <Link
+                href="/products"
+                className="bg-white text-brand-dark font-semibold text-sm sm:text-base py-3 px-6 rounded-md shadow-md hover:bg-gray-100 transition"
+              >
+                Shop Now
+              </Link>
+              <Link
+                href="/contact"
+                className="border border-white text-white font-semibold text-sm sm:text-base py-3 px-6 rounded-md hover:bg-white hover:text-brand-dark transition"
+              >
+                Contact Us
+              </Link>
+            </div>
           </div>
         </div>
       </section>
-
-{/* CTA Section */}
-<section className="relative section-padding bg-white overflow-hidden">
-  {/* Background Image */}
-  <div className="absolute inset-0 z-0">
-    <Image
-      src="/cta-bg.jpg" // ← update with your actual path
-      alt="Zim Coolant car driving performance background"
-      fill
-      className="object-cover object-center brightness-[0.45] blur-[1px]"
-      priority
-    />
-  </div>
-
-  {/* Overlay Content */}
-  <div className="relative z-10 container-custom text-center text-white">
-    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-4">
-      <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-bold text-white">
-  Performance You Can Feel, Protection You Can Trust.
-</h2>
-
-      <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100">
-        Join thousands of satisfied customers who trust Zim for their vehicle needs.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-        <Link
-          href="/products"
-          className="bg-white text-brand-dark font-semibold text-sm sm:text-base py-3 px-6 rounded-md shadow-md hover:bg-gray-100 transition"
-        >
-          Shop Now
-        </Link>
-        <Link
-          href="/contact"
-          className="border border-white text-white font-semibold text-sm sm:text-base py-3 px-6 rounded-md hover:bg-white hover:text-brand-dark transition"
-        >
-          Contact Us
-        </Link>
-      </div>
-    </div>
-  </div>
-</section>
-
-
 
       <Footer />
     </div>

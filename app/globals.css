@@ -8,7 +8,7 @@
   }
   
   html {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     overflow-x: hidden;
     max-width: 100vw;
   }
@@ -29,7 +29,7 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-primary-600 hover:border-primary-700 text-sm sm:text-base;
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 border border-primary-600 hover:border-primary-700 text-sm sm:text-base;
   }
   
   .btn-secondary {
@@ -37,11 +37,11 @@
   }
   
   .btn-outline {
-    @apply border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base;
+    @apply border border-primary-600 text-primary-600 hover:bg-primary-50 font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 text-sm sm:text-base;
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 hover:border-primary-600/30;
+    @apply bg-white rounded-xl border border-gray-200 transition-colors duration-200;
   }
   
   .section-padding {
@@ -57,7 +57,7 @@
   }
 
   .hero-gradient {
-    @apply bg-gradient-to-br from-primary-50 via-primary-100/20 to-primary-200/10;
+    @apply bg-primary-50;
   }
 
   .text-brand-gradient {
@@ -75,11 +75,11 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-primary-500 via-primary-600 to-primary-800 bg-clip-text text-transparent;
+    @apply text-primary-600;
   }
   
   .bg-gradient-primary {
-    @apply bg-gradient-to-br from-primary-50 via-primary-100/20 to-primary-200/10;
+    @apply bg-primary-50;
   }
 
   .bg-gradient-brand {
@@ -107,21 +107,107 @@
   }
 }
 
-@keyframes zoomOutSlow {
-  from {
-    transform: scale(1.10);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-.hero-zoom {
-  animation: zoomOutSlow 4s ease-out forwards;
-}
-
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-slide-down { animation: slideDown .22s ease-out both; }
+
+/* ─────────────────────────────────────────────────────────────
+   Announcement strip, ported from the client's reference design.
+   The track holds two identical groups and slides by half its
+   width, so the loop repeats without a visible seam.
+   ───────────────────────────────────────────────────────────── */
+.announcement {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  background: #171c1e;
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+}
+
+.announcement-window {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.announcement-track {
+  display: flex;
+  width: max-content;
+  animation: announcement-scroll 32s linear infinite;
+}
+
+.announcement-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 28px;
+  min-width: 100vw;
+  padding: 0 14px;
+}
+
+.announcement-group span {
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  line-height: 38px;
+}
+
+.announcement-toggle {
+  border: 0;
+  border-left: 1px solid #424746;
+  background: #171c1e;
+  color: #fff;
+  width: 38px;
+  align-self: stretch;
+  flex-shrink: 0;
+  font-size: 15px;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Never make someone chase moving text to read it. */
+.announcement:hover .announcement-track,
+.announcement:focus-within .announcement-track,
+.announcement.is-paused .announcement-track {
+  animation-play-state: paused;
+}
+
+@keyframes announcement-scroll {
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 680px) {
+  .announcement-track {
+    animation: none;
+    width: 100%;
+  }
+  .announcement-group {
+    min-width: 0;
+    width: 100%;
+    gap: 6px 22px;
+    padding: 7px 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .announcement-group span {
+    white-space: normal;
+    line-height: 1.5;
+    text-align: center;
+    font-size: 12px;
+  }
+  .announcement-group + .announcement-group,
+  .announcement-toggle {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-track { animation: none; }
+}

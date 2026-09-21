@@ -110,7 +110,7 @@ export default function Products() {
       <Navbar />
 
       {/* Hero Section */}
-        <section className="relative w-full text-center text-white pt-28 sm:pt-32 md:pt-36 pb-20 sm:pb-24 md:pb-28 overflow-hidden">
+        <section className="relative w-full text-center text-white pt-10 sm:pt-12 md:pt-14 pb-20 sm:pb-24 md:pb-28 overflow-hidden">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -127,7 +127,7 @@ export default function Products() {
           {/* Content */}
           <div className="relative z-10 container-custom">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
-              Our <span className="text-green-500">Products</span>
+              Our <span className="text-white/70">Products</span>
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 leading-relaxed max-w-3xl mx-auto">
               Discover our premium selection of anti-freeze, radiator coolants, gear oil and
@@ -230,7 +230,7 @@ export default function Products() {
               <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-2">
                 No products found
               </h3>
-              <button onClick={resetAllFilters} className="btn-primary animate-pulse-green">
+              <button onClick={resetAllFilters} className="btn-primary">
                 Clear All Filters
               </button>
             </div>

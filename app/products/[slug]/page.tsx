@@ -1,11 +1,10 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { motion } from 'framer-motion'
 import { Truck, Shield, Minus, Plus, ShoppingCart, Maximize2, X, Check } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -24,7 +23,11 @@ type View = 'front' | 'back' | 'nozzle'
 export default function ProductDetail() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const slug = params.slug as string
+
+  // Home-page cards link straight to a colour, e.g. ?colour=red.
+  const requestedColour = searchParams.get('colour') === 'red' ? 'red' : 'green'
 
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -65,12 +68,12 @@ export default function ProductDetail() {
   // ATF is sold without any public capacity, so it shows no size control.
   const showSizeSelector = product ? product.range_key !== 'atf' && siblings.length > 0 : false
 
-  // Reset the view when the product or colour changes.
+  // Start fresh on each product, honouring any colour asked for in the URL.
   useEffect(() => {
     setView('front')
     setQuantity(1)
-    setColour('green')
-  }, [slug])
+    setColour(requestedColour)
+  }, [slug, requestedColour])
 
   useEffect(() => {
     if (view === 'nozzle' && !includesNozzle) setView('front')
@@ -178,7 +181,7 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      <section className="pt-28 sm:pt-32 md:pt-36 pb-16 bg-white">
+      <section className="pt-10 sm:pt-12 md:pt-14 pb-16 bg-white">
         <div className="container-custom">
           {/* Breadcrumb */}
           <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
@@ -193,10 +196,7 @@ export default function ProductDetail() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Gallery */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
+            <div
               className="space-y-4"
             >
               <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
@@ -260,13 +260,10 @@ export default function ProductDetail() {
                   </button>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
             {/* Purchase panel */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
+            <div
               className="space-y-6"
             >
               <div>
@@ -488,7 +485,7 @@ export default function ProductDetail() {
                   <p className="text-sm text-gray-600">Cash on delivery</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>

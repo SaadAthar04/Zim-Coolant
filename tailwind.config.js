@@ -9,16 +9,18 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#f0fff4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#66FF00', // Bright Green - Main brand color
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#013220', // Dark Green - Secondary brand color
+          // The reference design is monochrome: ink, greys and a hairline rule.
+          // Product colour comes from the bottles, not the interface.
+          50: '#f4f5f5',
+          100: '#e9ebeb',
+          200: '#d7dbdb',
+          300: '#b4baba',
+          400: '#878f8f',
+          500: '#5c6465',
+          600: '#171c1e', // ink - buttons, headings, active states
+          700: '#204b3b', // accent - hover on solid buttons
+          800: '#0f1416',
+          900: '#080a09',
         },
         secondary: {
           50: '#f0fdf4',
@@ -52,7 +54,7 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        sans: ['Arial', 'Helvetica', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
@@ -86,9 +88,9 @@ module.exports = {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'gradient-brand': 'linear-gradient(135deg, #66FF00 0%, #013220 100%)',
-        'gradient-brand-reverse': 'linear-gradient(135deg, #013220 0%, #66FF00 100%)',
-        'gradient-green': 'linear-gradient(135deg, #f0fff4 0%, #66FF00 50%, #013220 100%)',
+        'gradient-brand': 'linear-gradient(135deg, #171c1e 0%, #204b3b 100%)',
+        'gradient-brand-reverse': 'linear-gradient(135deg, #204b3b 0%, #171c1e 100%)',
+        'gradient-green': 'linear-gradient(135deg, #f4f5f5 0%, #d7dbdb 50%, #171c1e 100%)',
       },
       boxShadow: {
         'glow': '0 0 20px rgba(102, 255, 0, 0.3)',

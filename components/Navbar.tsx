@@ -7,7 +7,9 @@ import { usePathname } from 'next/navigation'
 import { ShoppingCart, Menu, X, Search as SearchIcon } from 'lucide-react'
 import { productsApi } from '@/lib/api-client'
 import { cartCount, readCart, subscribeToCart } from '@/lib/cart'
+import { formatPrice } from '@/lib/store-config'
 import AnnouncementBar from './AnnouncementBar'
+import WhatsAppIcon from './WhatsAppIcon'
 
 type ProductSuggest = {
   id: string
@@ -15,6 +17,7 @@ type ProductSuggest = {
   slug: string
   image_url: string | null
   category?: string | null
+  price: number
 }
 
 const NAV_ITEMS = [
@@ -43,7 +46,7 @@ export default function Navbar() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState<ProductSuggest[]>([])
-  const searchRef = useRef<HTMLDivElement | null>(null)
+  const whatsappUrl = 'https://wa.me/923268871985'
 
   useEffect(() => {
     setMounted(true)
@@ -60,16 +63,16 @@ export default function Navbar() {
   }, [pathname])
 
   useEffect(() => {
-    const onDocClick = (e: MouseEvent) => {
-      if (!searchRef.current) return
-      if (!searchRef.current.contains(e.target as Node)) {
+    if (!searchOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         setSearchOpen(false)
         setQuery('')
       }
     }
-    document.addEventListener('mousedown', onDocClick)
-    return () => document.removeEventListener('mousedown', onDocClick)
-  }, [])
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [searchOpen])
 
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -85,14 +88,22 @@ export default function Navbar() {
       setResults(
         !error && data
           ? data
-              .filter((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()))
-              .slice(0, 5)
+              // Match the range name and the description too, so searching
+              // "coolant" still finds ZIMX, whose name never says the word.
+              .filter((p) => {
+                const term = query.trim().toLowerCase()
+                return [p.name, p.category, p.description, p.volume]
+                  .filter(Boolean)
+                  .some((field) => String(field).toLowerCase().includes(term))
+              })
+              .slice(0, 6)
               .map((p) => ({
                 id: p.id,
                 name: p.name,
                 slug: p.slug,
                 image_url: p.image_url,
                 category: p.category,
+                price: p.price,
               }))
           : []
       )
@@ -107,34 +118,113 @@ export default function Navbar() {
   const isCurrent = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
 
-  const searchResults = query.trim().length >= 2 && (
-    <div className="absolute top-full right-0 mt-2 w-[min(360px,calc(100vw-2rem))] bg-white rounded-md shadow-lg border border-[#e4e6e6] max-h-72 overflow-y-auto z-50">
-      {loading ? (
-        <div className="p-4 text-center text-sm text-[#72787a]">Searching...</div>
-      ) : results.length > 0 ? (
-        results.map((p) => (
-          <Link
-            key={p.id}
-            href={`/products/${p.slug}`}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-            onClick={() => {
-              setQuery('')
-              setSearchOpen(false)
-            }}
-          >
-            <div className="relative w-10 h-10 rounded-md overflow-hidden bg-[#f1f2f2] flex-shrink-0">
-              {p.image_url && <Image src={p.image_url} alt="" fill className="object-contain" sizes="40px" />}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-[#171c1e] truncate">{p.name}</p>
-              {p.category && <p className="text-xs text-[#72787a] truncate">{p.category}</p>}
-            </div>
-          </Link>
-        ))
-      ) : (
-        <div className="p-4 text-sm text-[#72787a]">No results for &ldquo;{query}&rdquo;.</div>
-      )}
-    </div>
+  const trimmed = query.trim()
+
+  const closeSearch = () => {
+    setSearchOpen(false)
+    setQuery('')
+  }
+
+  /**
+   * Search opens as a full-width panel beneath the header rather than a small
+   * floating box: there is room for a real result row — photo, name, range and
+   * price — so people can recognise what they want without leaving the page.
+   */
+  const searchPanel = searchOpen && (
+    <>
+      {/* Dims the page below the header, so the header itself stays legible. */}
+      <div
+        className="absolute left-0 right-0 top-full h-screen bg-black/20 z-30"
+        onClick={closeSearch}
+        aria-hidden="true"
+      />
+
+      <div className="absolute left-0 right-0 top-full bg-white border-t border-[#e4e6e6] shadow-lg z-40">
+        <div className="mx-auto max-w-[1260px] px-[6%] md:px-8 py-5">
+          <div className="relative">
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#72787a]" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+              placeholder="Search for a coolant, gear oil or transmission fluid"
+              aria-label="Search products"
+              className="w-full border border-[#d7dbdb] rounded-lg pl-12 pr-11 py-3.5 text-base outline-none focus:border-[#171c1e] transition-colors"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label="Clear search"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-[#f1f2f2] text-[#72787a]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="mt-4">
+            {trimmed.length < 2 ? (
+              <p className="text-sm text-[#72787a] py-2">
+                Type at least two letters, or{' '}
+                <Link href="/products" onClick={closeSearch} className="underline hover:opacity-70">
+                  browse the full range
+                </Link>
+                .
+              </p>
+            ) : loading ? (
+              <p className="text-sm text-[#72787a] py-2">Searching...</p>
+            ) : results.length === 0 ? (
+              <p className="text-sm text-[#72787a] py-2">
+                Nothing matches &ldquo;{trimmed}&rdquo;.{' '}
+                <Link href="/products" onClick={closeSearch} className="underline hover:opacity-70">
+                  See all products
+                </Link>
+                .
+              </p>
+            ) : (
+              <>
+                <ul className="divide-y divide-[#e4e6e6] border-y border-[#e4e6e6]">
+                  {results.map((p) => (
+                    <li key={p.id}>
+                      <Link
+                        href={`/products/${p.slug}`}
+                        onClick={closeSearch}
+                        className="flex items-center gap-4 py-3 hover:bg-[#f8f9f9] -mx-2 px-2 rounded transition-colors"
+                      >
+                        <div className="relative w-12 h-12 flex-shrink-0 bg-[#f1f2f2] rounded overflow-hidden">
+                          {p.image_url && (
+                            <Image src={p.image_url} alt="" fill className="object-contain" sizes="48px" quality={60} />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[15px] font-medium text-[#171c1e] truncate">{p.name}</p>
+                          {p.category && (
+                            <p className="text-[11px] tracking-[0.5px] uppercase text-[#737b77] mt-0.5">
+                              {p.category}
+                            </p>
+                          )}
+                        </div>
+                        <span className="text-[15px] font-medium tabular-nums whitespace-nowrap">
+                          {formatPrice(p.price)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/products"
+                  onClick={closeSearch}
+                  className="inline-block mt-3 text-sm font-medium hover:opacity-70"
+                >
+                  See all products ↗
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   )
 
   return (
@@ -171,32 +261,28 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Search, cart, menu */}
-          <div className="flex items-center gap-4 ml-auto md:ml-8" ref={searchRef}>
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setSearchOpen((s) => !s)}
-                aria-label="Search products"
-                aria-expanded={searchOpen}
-                className="flex items-center p-1 hover:opacity-70 transition-opacity"
-              >
-                <SearchIcon className="w-5 h-5" />
-              </button>
+          {/* Search, contact, cart, menu */}
+          <div className="flex items-center gap-3 md:gap-4 ml-auto md:ml-8">
+            <button
+              type="button"
+              onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
+              aria-label={searchOpen ? 'Close search' : 'Search products'}
+              aria-expanded={searchOpen}
+              className="flex items-center p-1 hover:opacity-70 transition-opacity"
+            >
+              {searchOpen ? <X className="w-5 h-5" /> : <SearchIcon className="w-5 h-5" />}
+            </button>
 
-              {searchOpen && (
-                <div className="absolute top-full right-0 mt-2 w-[min(360px,calc(100vw-2rem))] z-50">
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    autoFocus
-                    placeholder="Search products..."
-                    className="w-full border border-[#e4e6e6] rounded-md px-3 py-2 text-sm outline-none focus:border-[#171c1e]"
-                  />
-                  {searchResults}
-                </div>
-              )}
-            </div>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Message us on WhatsApp"
+              title="Message us on WhatsApp"
+              className="hidden sm:flex items-center p-1 text-[#171c1e] hover:text-[#25D366] transition-colors"
+            >
+              <WhatsAppIcon />
+            </a>
 
             <Link href="/cart" className="flex items-center gap-[5px] md:gap-2.5 hover:opacity-70 transition-opacity" aria-label="View cart">
               <ShoppingCart className="w-5 h-5 md:w-[23px] md:h-[23px]" />
@@ -214,6 +300,8 @@ export default function Navbar() {
             </button>
           </div>
         </div>
+
+        {searchPanel}
 
         {/* Mobile navigation */}
         {menuOpen && (

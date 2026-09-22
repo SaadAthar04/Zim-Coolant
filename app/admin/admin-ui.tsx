@@ -12,7 +12,8 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, XCircle } from 'lucide-react'
+import { ArrowLeft, XCircle, Truck, Mail, Loader2 } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Order } from '@/lib/api-client'
@@ -90,8 +91,11 @@ export const statusColor = (status: string) =>
   ({
     pending: 'bg-yellow-100 text-yellow-800',
     confirmed: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
+    dispatched: 'bg-purple-100 text-purple-800',
+    delivered: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
+    // Pre-migration orders, should any survive.
+    completed: 'bg-green-100 text-green-800',
   }[status] || 'bg-gray-100 text-gray-800')
 
 export const paymentColor = (status: string) =>
@@ -115,12 +119,18 @@ export function OrderDetailModal({
   onConfirm,
   onMarkPaid,
   onComplete,
+  onDispatch,
 }: {
   order: Order | null
   onClose: () => void
   onConfirm?: (id: string) => void
   onMarkPaid?: (id: string) => void
   onComplete?: (id: string) => void
+  /** Saves the courier details and moves the order to 'dispatched'. */
+  onDispatch?: (
+    id: string,
+    tracking: { courier_name: string; tracking_number: string; tracking_url: string }
+  ) => void
 }) {
   if (!order) return null
 
@@ -190,6 +200,15 @@ export function OrderDetailModal({
                   <span className="font-medium">Payment:</span>
                   <Badge text={titleCase(order.payment_status)} className={paymentColor(order.payment_status)} />
                 </p>
+                {order.courier_name && (
+                  <p><span className="font-medium">Courier:</span> {order.courier_name}</p>
+                )}
+                {order.tracking_number && (
+                  <p>
+                    <span className="font-medium">Tracking:</span>{' '}
+                    <span className="font-mono">{order.tracking_number}</span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -244,6 +263,13 @@ export function OrderDetailModal({
             </div>
           </div>
 
+          {/* Courier capture, on an order that is ready to go out. */}
+          {onDispatch && order.status !== 'cancelled' && order.status !== 'pending' && (
+            <DispatchPanel order={order} onDispatch={onDispatch} />
+          )}
+
+          <ResendPanel order={order} />
+
           <div className="mt-6 flex flex-wrap gap-3">
             {order.status === 'pending' && onConfirm && (
               <button onClick={() => onConfirm(order.id)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
@@ -255,7 +281,7 @@ export function OrderDetailModal({
                 Mark Cash Received
               </button>
             )}
-            {order.status === 'confirmed' && onComplete && (
+            {order.status === 'dispatched' && onComplete && (
               <button onClick={() => onComplete(order.id)} className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800">
                 Mark as Delivered
               </button>
@@ -265,6 +291,154 @@ export function OrderDetailModal({
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Courier details, captured at the moment the parcel is handed over.
+ *
+ * Its own component so it can hold form state: OrderDetailModal returns early
+ * when there is no order, which rules out hooks there.
+ */
+function DispatchPanel({
+  order,
+  onDispatch,
+}: {
+  order: Order
+  onDispatch: (
+    id: string,
+    tracking: { courier_name: string; tracking_number: string; tracking_url: string }
+  ) => void
+}) {
+  const [courier, setCourier] = useState(order.courier_name || '')
+  const [number, setNumber] = useState(order.tracking_number || '')
+  const [url, setUrl] = useState(order.tracking_url || '')
+
+  const dispatched = order.status === 'dispatched' || order.status === 'delivered'
+
+  return (
+    <div className="mt-6 p-4 rounded-lg border border-gray-200 bg-gray-50">
+      <h3 className="text-sm font-semibold text-gray-900 mb-1">
+        {dispatched ? 'Courier details' : 'Dispatch this order'}
+      </h3>
+      <p className="text-xs text-gray-600 mb-3">
+        {dispatched
+          ? 'Correcting these and saving re-sends the dispatch email with the new details.'
+          : 'Entered here, these appear in the customer’s dispatch email and on their tracking page.'}
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <label className="text-xs text-gray-600">
+          Courier
+          <input
+            value={courier}
+            onChange={(e) => setCourier(e.target.value)}
+            placeholder="TCS, Leopards, M&amp;P..."
+            className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+          />
+        </label>
+        <label className="text-xs text-gray-600">
+          Tracking number
+          <input
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
+            placeholder="e.g. 771234567890"
+            className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+          />
+        </label>
+        <label className="text-xs text-gray-600">
+          Tracking link
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://..."
+            className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+          />
+        </label>
+      </div>
+
+      <button
+        onClick={() =>
+          onDispatch(order.id, {
+            courier_name: courier,
+            tracking_number: number,
+            tracking_url: url,
+          })
+        }
+        className="mt-3 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg inline-flex items-center gap-2"
+      >
+        <Truck className="w-4 h-4" />
+        {dispatched ? 'Save and re-send dispatch email' : 'Mark dispatched and email customer'}
+      </button>
+    </div>
+  )
+}
+
+/** Re-sends one of the customer emails for an order. */
+function ResendPanel({ order }: { order: Order }) {
+  const [sending, setSending] = useState('')
+
+  // Only what the order has actually reached; offering 'delivered' on a pending
+  // order would email the customer something untrue.
+  const available = [
+    { kind: 'received', label: 'Order received' },
+    ...(order.status !== 'pending' && order.status !== 'cancelled'
+      ? [{ kind: 'confirmed', label: 'Confirmed' }]
+      : []),
+    ...(order.status === 'dispatched' || order.status === 'delivered'
+      ? [{ kind: 'dispatched', label: 'Dispatched' }]
+      : []),
+    ...(order.status === 'delivered' ? [{ kind: 'delivered', label: 'Delivered' }] : []),
+    ...(order.status === 'cancelled' ? [{ kind: 'cancelled', label: 'Cancelled' }] : []),
+  ]
+
+  const resend = async (kind: string) => {
+    setSending(kind)
+    try {
+      const response = await fetch(`/api/orders/${order.id}/emails`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind }),
+      })
+      const payload = await response.json()
+      if (!response.ok) {
+        toast.error(payload.error || 'The email could not be sent.')
+        return
+      }
+      toast.success(payload.message || 'Email sent.')
+    } catch {
+      toast.error('Could not reach the server.')
+    } finally {
+      setSending('')
+    }
+  }
+
+  if (!order.customer_email) return null
+
+  return (
+    <div className="mt-4 p-4 rounded-lg border border-gray-200">
+      <h3 className="text-sm font-semibold text-gray-900 mb-1">Re-send an email</h3>
+      <p className="text-xs text-gray-600 mb-3">
+        Goes to {order.customer_email}. Useful when a message lands in spam.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {available.map((item) => (
+          <button
+            key={item.kind}
+            onClick={() => resend(item.kind)}
+            disabled={Boolean(sending)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 inline-flex items-center gap-1.5"
+          >
+            {sending === item.kind ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Mail className="w-3.5 h-3.5" />
+            )}
+            {item.label}
+          </button>
+        ))}
       </div>
     </div>
   )

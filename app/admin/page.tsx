@@ -19,7 +19,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Banknote
+  Banknote,
+  Mail
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
@@ -772,12 +773,13 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {[
               { title: 'Manage Products', icon: Package, color: 'bg-blue-500', description: 'Change prices, stock and copy', href: '/admin/products' },
               { title: 'View Orders', icon: ShoppingCart, color: 'bg-green-500', description: 'Search, confirm and fulfil orders', href: '/admin/orders' },
               { title: 'Analytics', icon: TrendingUp, color: 'bg-purple-500', description: 'Revenue, best sellers and stock', href: '/admin/analytics' },
-              { title: 'Export Orders', icon: Download, color: 'bg-orange-500', description: 'Download orders as a spreadsheet', href: '/admin/export' }
+              { title: 'Export Orders', icon: Download, color: 'bg-orange-500', description: 'Download orders as a spreadsheet', href: '/admin/export' },
+              { title: 'Email Log', icon: Mail, color: 'bg-rose-500', description: 'See what the site has emailed', href: '/admin/emails' }
             ].map((action) => (
               <ActionCard
                 key={action.title}

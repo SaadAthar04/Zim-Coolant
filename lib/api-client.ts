@@ -68,6 +68,10 @@ export interface Order {
   total_amount: number;
   status: string;
   payment_status: string;
+  /** Set when the order is marked dispatched. */
+  courier_name?: string;
+  tracking_number?: string;
+  tracking_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -287,6 +291,33 @@ export const ordersApi = {
       const result = await response.json();
       if (!response.ok) {
         return { data: null, error: result.error || 'Failed to update order' };
+      }
+      return { data: result.data, error: null };
+    } catch (error) {
+      return { data: null, error: error };
+    }
+  },
+
+  /**
+   * Saves the courier details and moves the order to 'dispatched' in one call,
+   * so the dispatch email is built from an order that already has its tracking
+   * number on it.
+   */
+  async dispatch(
+    id: string,
+    tracking: { courier_name: string; tracking_number: string; tracking_url: string }
+  ): Promise<{ data: Order | null; error: any }> {
+    try {
+      const response = await fetch(`/api/orders/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        // resendDispatch covers the case where the order is already dispatched
+        // and only the courier details changed, which is not a status change.
+        body: JSON.stringify({ ...tracking, status: 'dispatched', resendDispatch: true })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        return { data: null, error: result.error || 'Failed to dispatch order' };
       }
       return { data: result.data, error: null };
     } catch (error) {

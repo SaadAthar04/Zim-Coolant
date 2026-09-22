@@ -18,7 +18,7 @@ import {
 } from '../admin-ui'
 import NewOrderModal from '../NewOrderModal'
 
-type StatusFilter = 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled'
+type StatusFilter = 'all' | 'pending' | 'confirmed' | 'dispatched' | 'delivered' | 'cancelled'
 type PaymentFilter = 'all' | 'pending' | 'paid' | 'failed'
 
 export default function AdminOrders() {
@@ -73,6 +73,17 @@ export default function AdminOrders() {
     apply(id, { status: next })
     setSelected((prev) => (prev && prev.id === id ? { ...prev, status: next } : prev))
     toast.success(`Order ${next}`)
+  }
+
+  const dispatchOrder = async (
+    id: string,
+    tracking: { courier_name: string; tracking_number: string; tracking_url: string }
+  ) => {
+    const { data, error } = await ordersApi.dispatch(id, tracking)
+    if (error || !data) return toast.error('Could not dispatch the order')
+    apply(id, data)
+    setSelected((prev) => (prev && prev.id === id ? { ...prev, ...data } : prev))
+    toast.success('Marked dispatched — the customer has been emailed')
   }
 
   const setPaymentStatus = async (id: string, next: string) => {
@@ -148,7 +159,8 @@ export default function AdminOrders() {
             <option value="all">All statuses</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
-            <option value="completed">Completed</option>
+            <option value="dispatched">Dispatched</option>
+            <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
           </select>
           <select value={payment} onChange={(e) => setPayment(e.target.value as PaymentFilter)} className={selectClass}>
@@ -262,7 +274,8 @@ export default function AdminOrders() {
         onClose={() => setSelected(null)}
         onConfirm={(id) => setOrderStatus(id, 'confirmed')}
         onMarkPaid={(id) => setPaymentStatus(id, 'paid')}
-        onComplete={(id) => setOrderStatus(id, 'completed')}
+        onComplete={(id) => setOrderStatus(id, 'delivered')}
+        onDispatch={dispatchOrder}
       />
 
       {pendingDelete && (
@@ -285,8 +298,8 @@ export default function AdminOrders() {
               The order record is removed permanently and cannot be recovered.
             </p>
             <p className="text-sm text-gray-600 mb-6">
-              {pendingDelete.status === 'completed'
-                ? 'This order is marked completed, so its stock is treated as already delivered and will not be added back.'
+              {pendingDelete.status === 'delivered'
+                ? 'This order is marked delivered, so its stock is treated as already gone and will not be added back.'
                 : 'Its items go back into stock, since the order will not be fulfilled.'}
             </p>
 

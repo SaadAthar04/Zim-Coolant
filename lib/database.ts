@@ -79,8 +79,36 @@ export interface Order {
   total_amount: number;
   status: string;
   payment_status: string;
+  /** Set when the order is marked dispatched. */
+  courier_name?: string;
+  tracking_number?: string;
+  tracking_url?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface EmailLogEntry {
+  id: number;
+  to_address: string;
+  template: string;
+  subject?: string;
+  status: 'queued' | 'sent' | 'retried' | 'failed';
+  attempts: number;
+  error_message?: string;
+  related_order_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  handled: number;
+  created_at: string;
 }
 
 const CATEGORIES = [
@@ -108,6 +136,105 @@ export const getDb = () => {
   }
   return db;
 };
+
+/**
+ * The order lifecycle, in the sequence the client confirmed on 22 September
+ * 2026. 'dispatched' and 'delivered' replace the old single 'completed' step so
+ * the customer can be told when their parcel is actually on its way.
+ */
+export const ORDER_STATUSES = [
+  'pending',
+  'confirmed',
+  'dispatched',
+  'delivered',
+  'cancelled',
+] as const;
+
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+const orderStatusCheck = ORDER_STATUSES.map((s) => `'${s}'`).join(', ');
+
+/** Statuses that count as a real sale for the revenue figures. */
+const FULFILLED_STATUSES = ['confirmed', 'dispatched', 'delivered'];
+
+const fulfilledCheck = FULFILLED_STATUSES.map((s) => `'${s}'`).join(', ');
+
+/**
+ * Brings an older database up to the five-status lifecycle.
+ *
+ * SQLite cannot alter a CHECK constraint in place, so the table is rebuilt.
+ * Orders previously marked 'completed' become 'delivered', which is what that
+ * status always meant in practice.
+ */
+function migrateOrderStatuses(database: Database.Database) {
+  const row = database
+    .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'orders'")
+    .get() as { sql: string } | undefined;
+
+  // Already migrated, or a fresh database created with the new constraint.
+  if (!row || row.sql.includes("'dispatched'")) return;
+
+  console.log('[db] Migrating orders to the dispatched/delivered lifecycle...');
+
+  const columns = (
+    database.prepare('PRAGMA table_info(orders)').all() as { name: string }[]
+  ).map((c) => c.name);
+  const columnList = columns.join(', ');
+
+  // 'completed' has to become 'delivered' as the row is copied, not afterwards:
+  // the new CHECK constraint rejects the old value on the way in.
+  const selectList = columns
+    .map((name) =>
+      name === 'status'
+        ? "CASE WHEN status = 'completed' THEN 'delivered' ELSE status END AS status"
+        : name
+    )
+    .join(', ');
+
+  database.exec('PRAGMA foreign_keys = OFF');
+
+  database.transaction(() => {
+    database.exec(`
+      CREATE TABLE orders_migrated (
+        id TEXT PRIMARY KEY,
+        order_number TEXT,
+        customer_name TEXT NOT NULL,
+        customer_email TEXT NOT NULL,
+        customer_phone TEXT,
+        shipping_address TEXT,
+        shipping_city TEXT,
+        shipping_postal_code TEXT,
+        order_notes TEXT,
+        payment_method TEXT DEFAULT 'cod',
+        items TEXT NOT NULL,
+        subtotal REAL NOT NULL,
+        shipping_cost REAL NOT NULL,
+        tax_amount REAL NOT NULL,
+        total_amount REAL NOT NULL,
+        status TEXT DEFAULT 'pending' CHECK(status IN (${orderStatusCheck})),
+        payment_status TEXT DEFAULT 'pending'
+          CHECK(payment_status IN ('pending', 'paid', 'failed')),
+        courier_name TEXT,
+        tracking_number TEXT,
+        tracking_url TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      )
+    `);
+
+    database.exec(`
+      INSERT INTO orders_migrated (${columnList})
+      SELECT ${selectList} FROM orders
+    `);
+
+    database.exec('DROP TABLE orders');
+    database.exec('ALTER TABLE orders_migrated RENAME TO orders');
+  })();
+
+  database.exec('PRAGMA foreign_keys = ON');
+
+  console.log('[db] Orders migrated.');
+}
 
 /** Adds a column to an existing table when it is not there yet. */
 function ensureColumn(
@@ -175,10 +302,46 @@ function initializeDatabase(database: Database.Database) {
       shipping_cost REAL NOT NULL,
       tax_amount REAL NOT NULL,
       total_amount REAL NOT NULL,
-      status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'confirmed', 'completed', 'cancelled')),
+      status TEXT DEFAULT 'pending' CHECK(status IN (${orderStatusCheck})),
       payment_status TEXT DEFAULT 'pending' CHECK(payment_status IN ('pending', 'paid', 'failed')),
+      courier_name TEXT,
+      tracking_number TEXT,
+      tracking_url TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
+  // Every email we attempt, so the shop can diagnose delivery from the admin
+  // panel instead of needing server logs. Written even when SMTP is unset.
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS email_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      to_address TEXT NOT NULL,
+      template TEXT NOT NULL,
+      subject TEXT,
+      status TEXT NOT NULL DEFAULT 'queued'
+        CHECK(status IN ('queued', 'sent', 'retried', 'failed')),
+      attempts INTEGER NOT NULL DEFAULT 0,
+      error_message TEXT,
+      related_order_id TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
+  // Contact-form enquiries are stored as well as emailed, so a message is never
+  // lost when SMTP is down. The form used to discard them entirely.
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS contact_messages (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT,
+      subject TEXT,
+      message TEXT NOT NULL,
+      handled INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
     )
   `);
 
@@ -202,6 +365,11 @@ function initializeDatabase(database: Database.Database) {
   ensureColumn(database, 'orders', 'shipping_postal_code', 'TEXT');
   ensureColumn(database, 'orders', 'order_notes', 'TEXT');
   ensureColumn(database, 'orders', 'payment_method', "TEXT DEFAULT 'cod'");
+  ensureColumn(database, 'orders', 'courier_name', 'TEXT');
+  ensureColumn(database, 'orders', 'tracking_number', 'TEXT');
+  ensureColumn(database, 'orders', 'tracking_url', 'TEXT');
+
+  migrateOrderStatuses(database);
 
   database.exec(`
     CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
@@ -397,9 +565,24 @@ const hydrateOrder = (o: any): Order => ({
 });
 
 /** ZIM-000417 style reference the customer and the client can quote. */
+/**
+ * The next free order reference.
+ *
+ * Derived from the highest number already used, not from COUNT(*): deleting an
+ * order would otherwise make the next one reuse a number that is already out
+ * there on a customer's confirmation email, leaving two different orders
+ * sharing a reference.
+ */
 function nextOrderNumber(database: Database.Database) {
-  const row = database.prepare('SELECT COUNT(*) as count FROM orders').get() as { count: number };
-  return `ZIM-${String(row.count + 1).padStart(6, '0')}`;
+  const row = database
+    .prepare(`
+      SELECT MAX(CAST(substr(order_number, 5) AS INTEGER)) AS highest
+      FROM orders
+      WHERE order_number LIKE 'ZIM-%'
+    `)
+    .get() as { highest: number | null };
+
+  return `ZIM-${String((row.highest || 0) + 1).padStart(6, '0')}`;
 }
 
 // Order operations
@@ -433,7 +616,7 @@ export const orderOperations = {
       db
         .prepare(`
           SELECT * FROM orders
-          WHERE status IN ('confirmed', 'completed')
+          WHERE status IN (${fulfilledCheck})
           AND payment_status = 'paid'
           ORDER BY created_at DESC
         `)
@@ -466,7 +649,7 @@ export const orderOperations = {
     const result = db.prepare(`
       SELECT COALESCE(SUM(total_amount), 0) as total
       FROM orders
-      WHERE status IN ('confirmed', 'completed')
+      WHERE status IN (${fulfilledCheck})
       AND payment_status = 'paid'
     `).get() as { total: number };
     return result.total;
@@ -478,7 +661,7 @@ export const orderOperations = {
       db
         .prepare(`
           SELECT * FROM orders
-          WHERE status IN ('confirmed', 'completed')
+          WHERE status IN (${fulfilledCheck})
           AND payment_status = 'paid'
           AND created_at >= ?
           ORDER BY created_at ASC
@@ -553,6 +736,32 @@ export const orderOperations = {
     return orderOperations.getById(id);
   },
 
+  /**
+   * Records who is carrying the parcel. Written before the dispatch email is
+   * built so the customer sees the tracking details, not an empty block.
+   */
+  updateTracking: (
+    id: string,
+    tracking: { courier_name?: string; tracking_number?: string; tracking_url?: string }
+  ) => {
+    const db = getDb();
+    db.prepare(`
+      UPDATE orders
+      SET courier_name = @courier_name,
+          tracking_number = @tracking_number,
+          tracking_url = @tracking_url,
+          updated_at = @updated_at
+      WHERE id = @id
+    `).run({
+      id,
+      courier_name: tracking.courier_name?.trim() || null,
+      tracking_number: tracking.tracking_number?.trim() || null,
+      tracking_url: tracking.tracking_url?.trim() || null,
+      updated_at: new Date().toISOString(),
+    });
+    return orderOperations.getById(id);
+  },
+
   updatePaymentStatus: (id: string, paymentStatus: string) => {
     const db = getDb();
     db.prepare('UPDATE orders SET payment_status = ?, updated_at = ? WHERE id = ?')
@@ -564,6 +773,158 @@ export const orderOperations = {
     const db = getDb();
     db.prepare('DELETE FROM orders WHERE id = ?').run(id);
   },
+};
+
+/**
+ * The email log, written by lib/email/mailer.ts around every send attempt.
+ *
+ * Kept here rather than in the mailer so the admin log page can read it without
+ * pulling nodemailer into the bundle.
+ */
+export const emailLogOperations = {
+  /** Opens a row before the send is attempted, and returns its id. */
+  queue: (entry: {
+    to_address: string;
+    template: string;
+    subject?: string;
+    related_order_id?: string | null;
+  }) => {
+    const db = getDb();
+    const now = new Date().toISOString();
+    const result = db
+      .prepare(`
+        INSERT INTO email_log (to_address, template, subject, status, attempts,
+                               related_order_id, created_at, updated_at)
+        VALUES (?, ?, ?, 'queued', 0, ?, ?, ?)
+      `)
+      .run(
+        entry.to_address,
+        entry.template,
+        entry.subject || null,
+        entry.related_order_id || null,
+        now,
+        now
+      );
+    return Number(result.lastInsertRowid);
+  },
+
+  /** Closes the row once the outcome is known. */
+  settle: (
+    id: number,
+    status: 'sent' | 'retried' | 'failed',
+    attempts: number,
+    errorMessage?: string
+  ) => {
+    const db = getDb();
+    db.prepare(`
+      UPDATE email_log
+      SET status = ?, attempts = ?, error_message = ?, updated_at = ?
+      WHERE id = ?
+    `).run(
+      status,
+      attempts,
+      errorMessage ? errorMessage.slice(0, 500) : null,
+      new Date().toISOString(),
+      id
+    );
+  },
+
+  list: (status?: string, limit = 200) => {
+    const db = getDb();
+    const rows = status
+      ? db
+          .prepare(
+            'SELECT * FROM email_log WHERE status = ? ORDER BY created_at DESC LIMIT ?'
+          )
+          .all(status, limit)
+      : db
+          .prepare('SELECT * FROM email_log ORDER BY created_at DESC LIMIT ?')
+          .all(limit);
+    return rows as EmailLogEntry[];
+  },
+
+  /**
+   * Historical and recent failure counts are reported separately: failures from
+   * before SMTP was configured would otherwise read as a live outage.
+   */
+  stats: () => {
+    const db = getDb();
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const one = (sql: string, ...values: any[]) =>
+      (db.prepare(sql).get(...values) as { count: number }).count;
+
+    return {
+      total: one('SELECT COUNT(*) as count FROM email_log'),
+      failedCount: one("SELECT COUNT(*) as count FROM email_log WHERE status = 'failed'"),
+      recentFailedCount: one(
+        "SELECT COUNT(*) as count FROM email_log WHERE status = 'failed' AND created_at >= ?",
+        since
+      ),
+      sentCount: one(
+        "SELECT COUNT(*) as count FROM email_log WHERE status IN ('sent', 'retried')"
+      ),
+    };
+  },
+};
+
+export const contactMessageOperations = {
+  create: (message: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject?: string;
+    message: string;
+  }) => {
+    const db = getDb();
+    const id = uuidv4();
+    db.prepare(`
+      INSERT INTO contact_messages (id, name, email, phone, subject, message, handled, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, 0, ?)
+    `).run(
+      id,
+      message.name,
+      message.email,
+      message.phone || null,
+      message.subject || null,
+      message.message,
+      new Date().toISOString()
+    );
+    return db.prepare('SELECT * FROM contact_messages WHERE id = ?').get(id) as ContactMessage;
+  },
+
+  list: (limit = 200) => {
+    const db = getDb();
+    return db
+      .prepare('SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT ?')
+      .all(limit) as ContactMessage[];
+  },
+
+  markHandled: (id: string, handled: boolean) => {
+    const db = getDb();
+    db.prepare('UPDATE contact_messages SET handled = ? WHERE id = ?').run(handled ? 1 : 0, id);
+  },
+};
+
+/** Products at or below this many units trigger the low-stock alert to the shop. */
+export const LOW_STOCK_THRESHOLD = 5;
+
+/** The ordered products that have now fallen to or below the threshold. */
+export const lowStockAfterOrder = (productIds: string[]) => {
+  if (productIds.length === 0) return [];
+  const db = getDb();
+  const placeholders = productIds.map(() => '?').join(', ');
+  return db
+    .prepare(`
+      SELECT id, name, volume, stock_quantity FROM products
+      WHERE id IN (${placeholders}) AND stock_quantity <= ?
+      ORDER BY stock_quantity ASC
+    `)
+    .all(...productIds, LOW_STOCK_THRESHOLD) as Array<{
+    id: string;
+    name: string;
+    volume: string;
+    stock_quantity: number;
+  }>;
 };
 
 /**
@@ -609,7 +970,7 @@ export const deleteOrderRestoringStock = (id: string) => {
   const order = orderOperations.getById(id);
   if (!order) return false;
 
-  const restock = order.status !== 'completed';
+  const restock = order.status !== 'delivered';
   const now = new Date().toISOString();
 
   const giveBack = db.prepare(`

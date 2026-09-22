@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { orderOperations, productOperations, placeOrder, type OrderItem } from '@/lib/database';
 import { requireAdmin } from '@/lib/admin-auth';
-import { isEmailConfigured, sendOrderEmails } from '@/lib/email';
+import { isEmailConfigured } from '@/lib/email/mailer';
+import { sendNewOrderEmails } from '@/lib/email/order-emails';
 import {
   MAX_QUANTITY_PER_ITEM,
   PAYMENT_METHOD,
@@ -199,10 +200,14 @@ export async function POST(request: NextRequest) {
       stockDeductions
     );
 
-    // The order is safely recorded; email must not be able to fail it.
-    sendOrderEmails(order, { notifyShop: !isAdminOrder }).catch((err) =>
-      console.error('[orders] Unexpected email failure:', err)
-    );
+    // The order and its stock deduction are committed by this point, so email
+    // is fired after the transaction and never awaited: an SMTP round trip must
+    // not hold the customer on the checkout screen, nor be able to fail an
+    // order that has already been taken.
+    sendNewOrderEmails(order.id, {
+      notifyShop: !isAdminOrder,
+      productIds: stockDeductions.map((d) => d.productId),
+    }).catch((err) => console.error('[orders] Unexpected email failure:', err));
 
     // Tells the confirmation screen whether it can honestly promise an email.
     return NextResponse.json(

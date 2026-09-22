@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { orderOperations, deleteOrderRestoringStock } from '@/lib/database';
+import {
+  orderOperations,
+  deleteOrderRestoringStock,
+  ORDER_STATUSES,
+} from '@/lib/database';
 import { requireAdmin } from '@/lib/admin-auth';
+import {
+  EMAIL_FOR_STATUS,
+  sendCustomerOrderEmail,
+  sendAdminCancelledEmail,
+} from '@/lib/email/order-emails';
 
 // GET /api/orders/[id] - Get a single order
 export async function GET(
@@ -46,8 +55,33 @@ export async function PUT(
 
     let order;
 
+    // Courier details are written before the status, so the dispatch email
+    // below is built from an order that already carries its tracking number
+    // rather than an empty one.
+    if (
+      body.courier_name !== undefined ||
+      body.tracking_number !== undefined ||
+      body.tracking_url !== undefined
+    ) {
+      order = orderOperations.updateTracking(id, {
+        courier_name: body.courier_name ?? existingOrder.courier_name,
+        tracking_number: body.tracking_number ?? existingOrder.tracking_number,
+        tracking_url: body.tracking_url ?? existingOrder.tracking_url,
+      });
+    }
+
     // Update status
+    let statusChangedTo: string | null = null;
     if (body.status !== undefined) {
+      if (!(ORDER_STATUSES as readonly string[]).includes(body.status)) {
+        return NextResponse.json(
+          { error: `Unknown status. Use one of: ${ORDER_STATUSES.join(', ')}.` },
+          { status: 400 }
+        );
+      }
+      // Only a real transition notifies the customer — re-saving an order that
+      // is already 'dispatched' must not email them a second time.
+      if (body.status !== existingOrder.status) statusChangedTo = body.status;
       order = orderOperations.updateStatus(id, body.status);
     }
 
@@ -58,6 +92,30 @@ export async function PUT(
 
     if (!order) {
       order = orderOperations.getById(id);
+    }
+
+    // Correcting a tracking number on an already-dispatched order is not a
+    // status change, but the customer still needs the new details.
+    if (!statusChangedTo && body.resendDispatch && existingOrder.status === 'dispatched') {
+      sendCustomerOrderEmail(id, 'dispatched').catch((err) =>
+        console.error(`[orders] Dispatch re-send failed for ${id}:`, err)
+      );
+    }
+
+    // Fired after every write, never awaited: a mail server that is slow or
+    // down must not make the admin's status change appear to fail.
+    if (statusChangedTo) {
+      const kind = EMAIL_FOR_STATUS[statusChangedTo];
+      if (kind) {
+        sendCustomerOrderEmail(id, kind).catch((err) =>
+          console.error(`[orders] ${kind} email failed for ${id}:`, err)
+        );
+      }
+      if (statusChangedTo === 'cancelled') {
+        sendAdminCancelledEmail(id).catch((err) =>
+          console.error(`[orders] Admin cancellation email failed for ${id}:`, err)
+        );
+      }
     }
 
     return NextResponse.json({ data: order });

@@ -38,21 +38,50 @@ export default function Contact() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+    // Clear the error as soon as the customer starts fixing the field.
+    if (fieldErrors[e.target.name]) {
+      setFieldErrors((errors) => {
+        const next = { ...errors }
+        delete next[e.target.name]
+        return next
+      })
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsSubmitting(false)
-    setIsSubmitted(true)
-    toast.success('Thank you! Your message has been sent successfully.')
+    setFieldErrors({})
 
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
-    setTimeout(() => setIsSubmitted(false), 5000)
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      const payload = await response.json()
+
+      if (!response.ok) {
+        setFieldErrors(payload.fieldErrors || {})
+        toast.error(payload.error || 'We could not send your message. Please try again.')
+        return
+      }
+
+      setIsSubmitted(true)
+      toast.success(payload.message || 'Thank you! Your message has been sent.')
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+      setTimeout(() => setIsSubmitted(false), 5000)
+    } catch {
+      toast.error(
+        'We could not reach the server. Please call us on +92 333-1632138.'
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -174,9 +203,12 @@ export default function Contact() {
                           value={formData.name}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all"
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all ${fieldErrors.name ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                           placeholder="Your full name"
                         />
+                        {fieldErrors.name && (
+                          <p className="mt-1.5 text-sm text-red-600">{fieldErrors.name}</p>
+                        )}
                       </div>
                       <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
@@ -187,9 +219,12 @@ export default function Contact() {
                           value={formData.email}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all"
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all ${fieldErrors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                           placeholder="your.email@example.com"
                         />
+                        {fieldErrors.email && (
+                          <p className="mt-1.5 text-sm text-red-600">{fieldErrors.email}</p>
+                        )}
                       </div>
                     </div>
 
@@ -235,9 +270,12 @@ export default function Contact() {
                         onChange={handleInputChange}
                         required
                         rows={6}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all resize-none"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all resize-none ${fieldErrors.message ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                         placeholder="Tell us how we can help you..."
                       />
+                      {fieldErrors.message && (
+                        <p className="mt-1.5 text-sm text-red-600">{fieldErrors.message}</p>
+                      )}
                     </div>
 
                     <button

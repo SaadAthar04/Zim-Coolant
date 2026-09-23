@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import Script from 'next/script'
 import './globals.css'
 import { NavbarProvider } from '@/lib/navbar-context'
 import { Toaster } from 'react-hot-toast'
+import CookieNotice from '@/components/CookieNotice'
 
 export const metadata: Metadata = {
   title: 'Zim Chemicals - Premium Automotive Products',
@@ -65,24 +65,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-C6HWTCS8SX"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-C6HWTCS8SX');
-          `}
-        </Script>
-      </head>
       <body>
         <NavbarProvider>
           {children}
         </NavbarProvider>
+        {/* Carries the cookie notice and, once accepted, Google Analytics.
+            Analytics is no longer loaded here directly: it must not run before
+            the visitor has answered. */}
+        <CookieNotice />
         {/* Cart and checkout feedback. Without this mounted, every toast()
             call in the app is silently discarded. */}
         <Toaster

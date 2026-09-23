@@ -23,10 +23,25 @@ export default function Footer() {
               Premium Automotive Products, Ensuring optimal performance, longevity and protection, for all kinds of vehicles.
             </p>
             <div className="flex justify-center sm:justify-start space-x-4 mt-2">
-              <a href="#" className="text-[#171c1e] hover:opacity-60 transition-opacity hover:scale-110 transform duration-200">
+              {/* Canonical page URLs, not the share links the client sent:
+                  those carry a per-share tracking token that would follow every
+                  visitor who clicked through from the site. */}
+              <a
+                href="https://www.facebook.com/ZimPakistan"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Zim Chemicals on Facebook"
+                className="text-[#171c1e] hover:opacity-60 transition-opacity hover:scale-110 transform duration-200"
+              >
                 <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
-              <a href="#" className="text-[#171c1e] hover:opacity-60 transition-opacity hover:scale-110 transform duration-200">
+              <a
+                href="https://www.instagram.com/zimpakistan"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Zim Chemicals on Instagram"
+                className="text-[#171c1e] hover:opacity-60 transition-opacity hover:scale-110 transform duration-200"
+              >
                 <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             </div>

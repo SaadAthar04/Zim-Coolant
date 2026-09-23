@@ -42,10 +42,16 @@ const sections: LegalSection[] = [
       'Website infrastructure may process technical information, such as IP addresses, browser details, request times and error logs, to operate and secure the site. Cookies or similar browser storage may support functions such as the shopping cart and session. You can manage browser storage through your browser settings; disabling it may affect store functions.',
     ],
   },
+  // Section 6 as supplied described Analytics as "planned", which did not
+  // match the live site. The client confirmed on 23 September 2026 that
+  // Analytics is in use and asked for a cookie notice, so this describes the
+  // actual setup: nothing loads until the visitor answers the notice.
   {
-    heading: '6. Planned Google Analytics',
+    heading: '6. Google Analytics and your choice',
     body: [
-      'We plan to introduce Google Analytics to understand website visits and improve the store. This statement does not mean Analytics is already active. Before activation, this policy and relevant cookie notices will be updated to explain the actual setup and choices available. When enabled, Analytics may collect usage events, page visits, device/browser information and identifiers using cookies or similar technology. Google explains its handling of partner-site information at policies.google.com/technologies/partner-sites. Google’s browser opt-out tool is available at tools.google.com/dlpage/gaoptout.',
+      'We use Google Analytics to understand website visits and improve the store. Analytics may collect usage events, page visits, device and browser information, and identifiers, using cookies or similar technology.',
+      'Analytics does not run until you allow it. When you first visit the site, a notice asks whether you accept analytics cookies. Nothing is loaded while that notice is unanswered, and choosing "Decline" means Analytics is never started for your browser. Your choice is stored in your own browser only; clearing your browser storage will cause the notice to appear again. The cookies needed to operate the shopping cart and your session are unaffected by this choice, as the store cannot function without them.',
+      'Google explains its handling of partner-site information at policies.google.com/technologies/partner-sites. Google’s browser opt-out tool is available at tools.google.com/dlpage/gaoptout.',
     ],
   },
   {

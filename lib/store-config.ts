@@ -5,7 +5,13 @@
 // number here changes checkout everywhere at once. Never let the browser decide
 // any of this.
 
-/** Orders at or above this subtotal (PKR) ship free. */
+/**
+ * Orders *above* this subtotal (PKR) ship free.
+ *
+ * Strictly above, not at: the Shipping Policy of 22 September 2026 reads
+ * "Rs. 300 for orders of Rs. 2,000 or less. Orders above Rs. 2,000 receive
+ * free delivery", so an order of exactly Rs. 2,000 still pays delivery.
+ */
 export const FREE_SHIPPING_THRESHOLD = 2000
 
 /** Flat delivery charge (PKR) applied below the free-shipping threshold. */
@@ -32,7 +38,7 @@ export const MAX_QUANTITY_PER_ITEM = 99
 export const NOZZLE_IMAGE = '/products/zimx-nozzle.webp'
 
 export const shippingCostFor = (subtotal: number) =>
-  subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT_RATE
+  subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT_RATE
 
 export const taxFor = (subtotal: number) => Math.round(subtotal * TAX_RATE)
 

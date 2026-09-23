@@ -311,8 +311,14 @@ export function orderDeliveredEmail(order: Order, o: OrderEmailOptions): EmailCo
         Your order ${orderRef(order)} has been delivered. We hope you are happy with it.
       </p>
       <p style="margin:0 0 16px;">
-        If anything arrived damaged or is not what you ordered, reply to this email or
-        call us on +92 333-1632138 within 48 hours and we will put it right.
+        Please open the outer packaging today and check the bottle, cap seal and packaging.
+        If anything is damaged, leaking or not what you ordered, message us on WhatsApp at
+        <strong>+92 333-1632138</strong> the same day with your order number and photographs
+        of the packaging, courier label, bottle and seals. Keep everything as it arrived.
+      </p>
+      <p style="margin:0 0 16px;color:${MUTED};font-size:13px;">
+        Same-day reporting is how we preserve the evidence needed for a courier claim. Full
+        details are in our <a href="${escapeHtml(o.siteUrl)}/shipping" style="color:${BRAND};">Shipping Policy</a>.
       </p>
       ${itemsTable(order.items, o.siteUrl)}
       ${totalsBlock(order)}

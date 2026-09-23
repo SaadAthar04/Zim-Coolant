@@ -25,8 +25,12 @@ const publicView = (order: Order) => ({
   courier_name: order.courier_name,
   tracking_number: order.tracking_number,
   tracking_url: order.tracking_url,
-  /** An order can only be called back before it has been packed. */
-  can_cancel: order.status === 'pending' || order.status === 'confirmed',
+  /**
+   * Only before we confirm it. The Shipping Policy and Terms of 22 September
+   * 2026 both read "You may cancel only before we confirm the order", so a
+   * confirmed order has to be cancelled by talking to the shop.
+   */
+  can_cancel: order.status === 'pending',
 })
 
 // GET /api/orders/track/[token]
@@ -82,12 +86,12 @@ export async function POST(
     if (order.status === 'cancelled') {
       return NextResponse.json({ error: 'This order is already cancelled.' }, { status: 409 })
     }
-    if (order.status !== 'pending' && order.status !== 'confirmed') {
+    if (order.status !== 'pending') {
       return NextResponse.json(
         {
           error:
-            'This order has already been dispatched, so it can no longer be cancelled online. ' +
-            'Please call us on +92 333-1632138.',
+            'This order has already been confirmed, so it can no longer be cancelled online. ' +
+            'Please contact us on WhatsApp at +92 333-1632138.',
         },
         { status: 409 }
       )

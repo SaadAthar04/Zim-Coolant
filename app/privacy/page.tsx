@@ -4,93 +4,73 @@ import LegalPage, { type LegalSection } from '@/components/LegalPage'
 export const metadata: Metadata = {
   title: 'Privacy Policy - Zim Chemicals',
   description:
-    'How Zim Chemicals collects, uses, and protects the personal information you share when you place an order or contact us.',
+    'How Nasta Chemicals handles information connected with orders, delivery and customer support on zimchemicals.com.',
   alternates: { canonical: 'https://www.zimchemicals.com/privacy' },
 }
 
+// The client's text, supplied 22 September 2026 as "Privacy Policy, Version 1.0".
+// Reproduced as written: this is their legal wording, not ours to tidy. Section
+// numbers are kept because the Terms and Shipping Policy refer across to them.
 const sections: LegalSection[] = [
   {
-    heading: 'Who We Are',
+    heading: '1. Who handles your information',
     body: [
-      'Zim Chemicals manufactures and sells coolants, automatic transmission fluids, and gear oils from Faisalabad, Pakistan. This policy explains what personal information we collect through www.zimchemicals.com, why we collect it, and what we do with it.',
-      'By using this website or placing an order with us, you agree to the practices described below.',
+      'Nasta Chemicals owns ZIM and ZIMX and operates zimchemicals.com from Faisalabad, Punjab, Pakistan. This policy explains how we handle information connected with website orders, delivery and customer support. For privacy enquiries, contact info@zimchemicals.com or +92 333-1632138. This policy applies from publication on the website.',
     ],
   },
   {
-    heading: 'Information We Collect',
-    body: ['We only ask for what we need to fulfil your order and answer your questions:'],
-    bullets: [
-      'Order details — your name, email address, phone number, delivery address, city, and any notes you add at checkout.',
-      'Enquiries — the name, email address, phone number, and message you submit through our contact form.',
-      'Website usage — anonymous statistics such as pages visited and approximate location, collected through Google Analytics to help us improve the site.',
-      'Your cart — the items you add are stored in your own browser so the cart is still there when you come back. This never leaves your device until you place the order.',
+    heading: '2. Information you provide',
+    body: [
+      'We collect the name, delivery address, phone number, email address and order details needed to process your purchase and arrange delivery. If you contact us, we also receive the messages and supporting material you send, such as photographs of a damaged parcel. For a refund, we request the bank-account or JazzCash recipient details needed to send it. Never send passwords, PINs or one-time security codes. COD checkout does not require payment-card details.',
     ],
   },
   {
-    heading: 'How We Use Your Information',
-    bullets: [
-      'To process, pack, and deliver the orders you place.',
-      'To send you an order confirmation and to contact you about the status of your order.',
-      'To answer questions you send us about products, bulk pricing, or technical support.',
-      'To understand how the website is used so we can improve it.',
-    ],
+    heading: '3. How we use it',
     body: [
-      'We do not sell, rent, or trade your personal information, and we do not send marketing emails unless you have asked us to.',
+      'We use this information to receive and confirm orders, arrange delivery, send tracking and order updates, respond to enquiries, investigate damage claims, process refunds, prevent misuse and maintain necessary business records. We do not currently run promotional email campaigns. If we introduce promotional emails, we will request separate marketing permission and include an unsubscribe option in each promotional email. Necessary order and support messages are separate from marketing.',
     ],
   },
   {
-    heading: 'Who We Share It With',
+    heading: '4. Service providers and sharing',
     body: [
-      'Your details are shared only with the people needed to get your order to you — our delivery partners and couriers, and the email provider that sends your order confirmation. Each receives only what is necessary for that purpose.',
-      'We may also disclose information where the law requires it, or where it is necessary to protect our rights, our customers, or the public.',
+      'We use Hostinger for website hosting. Information needed to deliver your order is shared with Leopards Courier, such as your name, address, phone number and COD amount. Hosting, email and other providers supporting the store may process information needed to perform their services. Banks or JazzCash process the recipient and transaction information required for refunds. We may also disclose information where required by law or reasonably needed to investigate fraud or resolve a dispute. Provider infrastructure may process information outside Pakistan.',
     ],
   },
   {
-    heading: 'Payment Information',
+    heading: '5. Technical information and cookies',
     body: [
-      'We accept Cash on Delivery. You pay the courier directly when your order arrives, which means we never ask for, receive, or store your card or bank details on this website.',
+      'Website infrastructure may process technical information, such as IP addresses, browser details, request times and error logs, to operate and secure the site. Cookies or similar browser storage may support functions such as the shopping cart and session. You can manage browser storage through your browser settings; disabling it may affect store functions.',
     ],
   },
   {
-    heading: 'Cookies and Analytics',
+    heading: '6. Planned Google Analytics',
     body: [
-      'This site uses Google Analytics, which sets cookies to record anonymous usage statistics. We also use your browser’s local storage to remember your shopping cart. You can block or clear cookies in your browser settings at any time; doing so may mean your cart is not remembered between visits.',
+      'We plan to introduce Google Analytics to understand website visits and improve the store. This statement does not mean Analytics is already active. Before activation, this policy and relevant cookie notices will be updated to explain the actual setup and choices available. When enabled, Analytics may collect usage events, page visits, device/browser information and identifiers using cookies or similar technology. Google explains its handling of partner-site information at policies.google.com/technologies/partner-sites. Google’s browser opt-out tool is available at tools.google.com/dlpage/gaoptout.',
     ],
   },
   {
-    heading: 'How Long We Keep It',
+    heading: '7. Retention and security',
     body: [
-      'Order records are kept for as long as we need them for our accounts, warranty claims, and any legal obligations. Contact enquiries are kept only for as long as it takes to deal with them.',
+      'We retain personal information for as long as reasonably needed for order fulfilment, support, refunds, record-keeping, dispute resolution and applicable legal obligations. Retention periods depend on the record type, purpose and applicable requirements. When information is no longer needed for these purposes, we delete or anonymize it. No internet service can guarantee absolute security. Please avoid sending sensitive information unrelated to your request.',
     ],
   },
   {
-    heading: 'Keeping Your Information Safe',
+    heading: '8. Your requests',
     body: [
-      'We take reasonable technical and organisational measures to protect the information you give us, and access is limited to the staff who need it. No website can promise perfect security, but we treat your details with care and act quickly if anything goes wrong.',
+      'Contact info@zimchemicals.com to request access to, correction of, or deletion of information relating to you, or to raise a privacy concern. We may need to verify your identity before acting. Some records may need to be retained to fulfil an order, resolve a dispute or comply with legal obligations; we will explain relevant limitations. Do not send unnecessary identity documents unless we explain why verification is needed.',
     ],
   },
   {
-    heading: 'Your Rights',
+    heading: '9. External services and children',
     body: [
-      'You can ask us for a copy of the personal information we hold about you, ask us to correct anything that is wrong, or ask us to delete it where we are not required to keep it. Email us at contact@zimchemicals.com and we will respond within a reasonable time.',
+      'If you contact us through WhatsApp, or follow a courier or other external link, that service also handles information under its own privacy terms. Our store is intended for purchases by adults legally able to enter a contract. We do not intentionally seek personal information from children; contact us if you believe a child has supplied information that should be reviewed or removed.',
     ],
   },
   {
-    heading: "Children's Privacy",
+    heading: '10. Changes and contact',
     body: [
-      'This website is intended for adults. We do not knowingly collect personal information from children under 18. If you believe a child has provided us with their details, please contact us and we will remove them.',
-    ],
-  },
-  {
-    heading: 'Changes to This Policy',
-    body: [
-      'We may update this policy from time to time. Any changes will appear on this page with a new “last updated” date, so please check back occasionally.',
-    ],
-  },
-  {
-    heading: 'Contact Us',
-    body: [
-      'If you have questions about this policy or about how we handle your information, reach us at contact@zimchemicals.com, call +92 333-1632138 (Mon–Sun, 9AM–8PM), or write to us in Faisalabad, Pakistan.',
+      'We will update this policy when our practices change and show the updated date. Material new uses of information will be explained and permission sought where required. For questions or concerns, contact us using the details below.',
+      'Nasta Chemicals, owner of ZIM and ZIMX — Faisalabad, Punjab, Pakistan. Email: info@zimchemicals.com. WhatsApp / phone: +92 333-1632138. Website: zimchemicals.com',
     ],
   },
 ]
@@ -100,8 +80,8 @@ export default function Privacy() {
     <LegalPage
       title="Privacy"
       titleAccent="Policy"
-      intro="We keep this simple: we collect only what we need to get your order to you, and we never sell your information."
-      lastUpdated="22 September 2026"
+      intro="How we handle the information connected with your order, delivery and support."
+      lastUpdated="22 September 2026 (Version 1.0)"
       sections={sections}
     />
   )

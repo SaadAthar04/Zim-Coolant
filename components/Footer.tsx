@@ -86,12 +86,15 @@ export default function Footer() {
             <p className="text-[#72787a] text-xs sm:text-sm text-center sm:text-left">
               © 2026 Zim Chemicals. All rights reserved.
             </p>
-            <div className="flex space-x-4 sm:space-x-6 text-xs sm:text-sm">
+            <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-xs sm:text-sm">
               <Link href="/privacy" className="text-[#72787a] hover:text-[#171c1e] transition-colors">
                 Privacy Policy
               </Link>
+              <Link href="/shipping" className="text-[#72787a] hover:text-[#171c1e] transition-colors">
+                Shipping Policy
+              </Link>
               <Link href="/terms" className="text-[#72787a] hover:text-[#171c1e] transition-colors">
-                Terms of Service
+                Terms &amp; Conditions
               </Link>
             </div>
           </div>

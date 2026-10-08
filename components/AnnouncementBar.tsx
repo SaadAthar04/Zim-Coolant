@@ -1,11 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import {
+  FREE_SHIPPING_THRESHOLD,
+  MINIMUM_ORDER_TOTAL,
+  formatPrice,
+} from '@/lib/store-config'
 
 /**
  * The scrolling announcement strip from the client's reference design.
  *
- * The three messages are repeated several times to form one half of the track,
+ * The messages are repeated several times to form one half of the track,
  * and that half is duplicated. Sliding the track by exactly 50% therefore lands
  * the second half where the first began, so the loop never shows a seam — and
  * because the messages repeat across the whole width, the spacing between them
@@ -20,8 +25,10 @@ import { useState } from 'react'
  * messages simply wrap.
  */
 
+/** The figures come from the store config so they cannot drift from checkout. */
 const MESSAGES = [
-  'Free Shipping on Orders Above Rs. 2,000',
+  `Minimum Order ${formatPrice(MINIMUM_ORDER_TOTAL)} for Delivery`,
+  `Free Shipping on Orders Above ${formatPrice(FREE_SHIPPING_THRESHOLD)}`,
   'Advanced Formulas',
   'Serving Automotives Since 1988',
 ]

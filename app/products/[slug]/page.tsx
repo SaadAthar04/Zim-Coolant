@@ -13,6 +13,7 @@ import { addToCart } from '@/lib/cart'
 import {
   FREE_SHIPPING_THRESHOLD,
   MAX_QUANTITY_PER_ITEM,
+  MINIMUM_ORDER_TOTAL,
   NOZZLE_IMAGE,
   formatPrice,
 } from '@/lib/store-config'
@@ -437,6 +438,12 @@ export default function ProductDetail() {
                 >
                   Buy Now
                 </button>
+
+                {/* Said here, before the cart, so the minimum is never a surprise. */}
+                <p className="text-xs text-gray-500 text-center">
+                  Minimum order {formatPrice(MINIMUM_ORDER_TOTAL)} for delivery, delivery charges
+                  included.
+                </p>
               </div>
 
               {/* Description */}
@@ -478,6 +485,9 @@ export default function ProductDetail() {
                   <Truck className="w-7 h-7 text-primary-600 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">
                     Free delivery above {formatPrice(FREE_SHIPPING_THRESHOLD)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formatPrice(MINIMUM_ORDER_TOTAL)} minimum order
                   </p>
                 </div>
                 <div className="text-center">

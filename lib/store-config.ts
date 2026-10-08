@@ -34,6 +34,17 @@ export const PAYMENT_METHOD_LABEL = 'Cash on Delivery'
 /** Maximum units of one variant a customer may put in the cart. */
 export const MAX_QUANTITY_PER_ITEM = 99
 
+/**
+ * Smallest order (PKR) we will deliver.
+ *
+ * Measured on the amount payable — subtotal plus delivery and tax — not on the
+ * subtotal alone. A Rs. 700 basket carrying Rs. 300 delivery comes to Rs. 1,000
+ * and is therefore deliverable, which is the rule the client asked for.
+ *
+ * At or above, not above: an order of exactly Rs. 1,000 qualifies.
+ */
+export const MINIMUM_ORDER_TOTAL = 1000
+
 /** Free pouring nozzle artwork, included with ZIMX 1 Liter bottles only. */
 export const NOZZLE_IMAGE = '/products/zimx-nozzle.webp'
 
@@ -41,6 +52,22 @@ export const shippingCostFor = (subtotal: number) =>
   subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT_RATE
 
 export const taxFor = (subtotal: number) => Math.round(subtotal * TAX_RATE)
+
+/** What the customer pays in all: the one figure the minimum is judged on. */
+export const orderTotalFor = (subtotal: number) =>
+  subtotal + shippingCostFor(subtotal) + taxFor(subtotal)
+
+export const meetsMinimumOrder = (subtotal: number) =>
+  orderTotalFor(subtotal) >= MINIMUM_ORDER_TOTAL
+
+/**
+ * How much more the customer needs to add to reach the minimum, in basket
+ * terms. Below the free-shipping threshold delivery is a flat charge, so a
+ * rupee added to the basket is a rupee added to the total and the two figures
+ * are the same — which is what makes "add Rs. X more" honest.
+ */
+export const amountBelowMinimum = (subtotal: number) =>
+  Math.max(0, MINIMUM_ORDER_TOTAL - orderTotalFor(subtotal))
 
 /** Rs. 2,999 — the format used consistently across the storefront. */
 export const formatPrice = (amount: number) =>

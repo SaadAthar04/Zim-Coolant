@@ -5,7 +5,9 @@ import { isEmailConfigured } from '@/lib/email/mailer';
 import { sendNewOrderEmails } from '@/lib/email/order-emails';
 import {
   MAX_QUANTITY_PER_ITEM,
+  MINIMUM_ORDER_TOTAL,
   PAYMENT_METHOD,
+  formatPrice,
   shippingCostFor,
   taxFor,
 } from '@/lib/store-config';
@@ -178,6 +180,25 @@ export async function POST(request: NextRequest) {
     const shippingCost = shippingCostFor(subtotal);
     const taxAmount = taxFor(subtotal);
     const totalAmount = subtotal + shippingCost + taxAmount;
+
+    // The delivery minimum, checked here on prices from the database so an
+    // edited cart cannot slip a small order through. It is judged on the total
+    // payable, so the delivery charge counts towards reaching it.
+    //
+    // The shop itself is exempt: a phone order the shop chooses to deliver is
+    // their call to make, not something checkout should refuse.
+    if (!isAdminOrder && totalAmount < MINIMUM_ORDER_TOTAL) {
+      return NextResponse.json(
+        {
+          error: `We deliver orders of ${formatPrice(
+            MINIMUM_ORDER_TOTAL
+          )} and above. Please add ${formatPrice(
+            MINIMUM_ORDER_TOTAL - totalAmount
+          )} more to your cart.`,
+        },
+        { status: 400 }
+      );
+    }
 
     const order = placeOrder(
       {

@@ -1,7 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ShoppingCart, Trash2, ArrowLeft, Truck, CheckCircle, Minus, Plus, Banknote } from 'lucide-react'
+import {
+  ShoppingCart,
+  Trash2,
+  ArrowLeft,
+  Truck,
+  CheckCircle,
+  Minus,
+  Plus,
+  Banknote,
+  AlertCircle,
+} from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
@@ -20,8 +30,11 @@ import {
 import {
   FREE_SHIPPING_THRESHOLD,
   MAX_QUANTITY_PER_ITEM,
+  MINIMUM_ORDER_TOTAL,
   PAYMENT_METHOD_LABEL,
+  amountBelowMinimum,
   formatPrice,
+  meetsMinimumOrder,
   shippingCostFor,
   taxFor,
 } from '@/lib/store-config'
@@ -60,6 +73,17 @@ export default function Cart() {
   const total = subtotal + shipping + tax
   const remainingForFreeDelivery = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal)
 
+  // We only deliver orders of MINIMUM_ORDER_TOTAL or more, judged on the total
+  // payable rather than the basket, so delivery counts towards reaching it.
+  const belowMinimum = items.length > 0 && !meetsMinimumOrder(subtotal)
+  const shortfall = amountBelowMinimum(subtotal)
+
+  // A cart that drops below the minimum must not leave the customer stranded on
+  // the checkout form with a dead button.
+  useEffect(() => {
+    if (belowMinimum && step === 'checkout') setStep('cart')
+  }, [belowMinimum, step])
+
   const handleQuantity = (key: string, quantity: number) => {
     if (quantity < 1) {
       setItems(removeLine(key))
@@ -81,6 +105,15 @@ export default function Cart() {
 
   const placeOrder = async () => {
     if (items.length === 0 || submitting) return
+
+    if (belowMinimum) {
+      toast.error(
+        `We deliver orders of ${formatPrice(MINIMUM_ORDER_TOTAL)} and above. Add ${formatPrice(
+          shortfall
+        )} more to continue.`
+      )
+      return
+    }
 
     setSubmitting(true)
     setFieldErrors({})
@@ -206,8 +239,12 @@ export default function Cart() {
           >
             <ShoppingCart className="w-20 h-20 text-gray-300 mx-auto mb-8" />
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 mb-4">
               Browse the range and add something to get started.
+            </p>
+            <p className="text-sm text-gray-500 mb-8">
+              We deliver orders of {formatPrice(MINIMUM_ORDER_TOTAL)} and above, delivery charges
+              included.
             </p>
             <Link href="/products" className="btn-primary">Start Shopping</Link>
           </div>
@@ -479,25 +516,84 @@ export default function Cart() {
                   </div>
                 </div>
 
-                {remainingForFreeDelivery > 0 && (
-                  <div className="mb-5 p-3 rounded-lg bg-amber-50 border border-amber-100 text-sm text-amber-800">
-                    Add {formatPrice(remainingForFreeDelivery)} more for free delivery.
+                {/*
+                  Below the minimum, that is the only thing worth saying: a
+                  free-delivery nudge alongside it would ask the customer to aim
+                  at two targets at once.
+                */}
+                {belowMinimum ? (
+                  <div
+                    className="mb-5 p-4 rounded-lg bg-amber-50 border border-amber-200"
+                    role="alert"
+                  >
+                    <div className="flex gap-2.5">
+                      <AlertCircle className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-amber-900">
+                        <p className="font-semibold">
+                          Minimum order for delivery is {formatPrice(MINIMUM_ORDER_TOTAL)}
+                        </p>
+                        <p className="mt-1">
+                          Add <strong>{formatPrice(shortfall)}</strong> more to place this order.
+                          Delivery charges count towards the {formatPrice(MINIMUM_ORDER_TOTAL)}.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className="mt-3 h-2 rounded-full bg-amber-100 overflow-hidden"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={MINIMUM_ORDER_TOTAL}
+                      aria-valuenow={total}
+                      aria-label={`Order total progress towards the ${formatPrice(
+                        MINIMUM_ORDER_TOTAL
+                      )} minimum`}
+                    >
+                      <div
+                        className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${Math.min(100, (total / MINIMUM_ORDER_TOTAL) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-amber-800 tabular-nums">
+                      {formatPrice(total)} of {formatPrice(MINIMUM_ORDER_TOTAL)}
+                    </p>
                   </div>
+                ) : (
+                  remainingForFreeDelivery > 0 && (
+                    <div className="mb-5 p-3 rounded-lg bg-amber-50 border border-amber-100 text-sm text-amber-800">
+                      Add {formatPrice(remainingForFreeDelivery)} more for free delivery.
+                    </div>
+                  )
                 )}
 
                 {step === 'cart' ? (
-                  <button
-                    onClick={() => setStep('checkout')}
-                    className="w-full min-h-[52px] btn-primary flex items-center justify-center"
-                  >
-                    Proceed to Checkout
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setStep('checkout')}
+                      disabled={belowMinimum}
+                      aria-describedby={belowMinimum ? 'minimum-order-note' : undefined}
+                      className="w-full min-h-[52px] btn-primary flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Proceed to Checkout
+                    </button>
+                    {belowMinimum && (
+                      <p
+                        id="minimum-order-note"
+                        className="mt-2 text-center text-xs text-gray-500"
+                      >
+                        Checkout opens once your order reaches{' '}
+                        {formatPrice(MINIMUM_ORDER_TOTAL)}.
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <div className="space-y-3">
                     <button
                       onClick={placeOrder}
-                      disabled={submitting}
-                      className="w-full min-h-[52px] btn-primary flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                      disabled={submitting || belowMinimum}
+                      className="w-full min-h-[52px] btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {submitting ? (
                         <>
@@ -518,6 +614,13 @@ export default function Cart() {
                 )}
 
                 <div className="mt-6 pt-5 border-t border-gray-200 space-y-3 text-sm text-gray-600">
+                  <div className="flex items-center gap-3">
+                    <ShoppingCart className="w-5 h-5 text-primary-600 flex-shrink-0" />
+                    <span>
+                      Minimum {formatPrice(MINIMUM_ORDER_TOTAL)} per order, delivery charges
+                      included
+                    </span>
+                  </div>
                   <div className="flex items-center gap-3">
                     <Truck className="w-5 h-5 text-primary-600 flex-shrink-0" />
                     <span>Free delivery on orders over {formatPrice(FREE_SHIPPING_THRESHOLD)}</span>

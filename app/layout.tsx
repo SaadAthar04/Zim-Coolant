@@ -69,9 +69,9 @@ export default function RootLayout({
         <NavbarProvider>
           {children}
         </NavbarProvider>
-        {/* Carries the cookie notice and, once accepted, Google Analytics.
-            Analytics is no longer loaded here directly: it must not run before
-            the visitor has answered. */}
+        {/* Carries the cookie notice and, once accepted, Google Analytics and
+            the Meta Pixel. Neither is loaded here directly: they must not run
+            before the visitor has answered. */}
         <CookieNotice />
         {/* Cart and checkout feedback. Without this mounted, every toast()
             call in the app is silently discarded. */}

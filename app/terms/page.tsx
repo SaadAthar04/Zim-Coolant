@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 
 // The client's text, supplied 22 September 2026 as "Terms & Conditions,
 // Version 1.0". Reproduced as written — their legal wording, not ours to edit.
+// The one exception is the minimum-order sentence in section 3, added on
+// 8 October 2026 at the client's request to match MINIMUM_ORDER_TOTAL.
 const sections: LegalSection[] = [
   {
     heading: '1. About these terms',
@@ -26,7 +28,7 @@ const sections: LegalSection[] = [
   {
     heading: '3. Prices and payment',
     body: [
-      'Prices are in Pakistani rupees (PKR). Cash on Delivery (COD) is currently the only payment method. The total payable, including delivery charges, is shown before you place your order. Delivery is Rs. 300 for orders of Rs. 2,000 or less and free for orders above Rs. 2,000, based on the product subtotal after discounts. Any applicable taxes or charges must be disclosed before purchase. Later price or tax changes do not retrospectively alter a confirmed order.',
+      'Prices are in Pakistani rupees (PKR). Cash on Delivery (COD) is currently the only payment method. The total payable, including delivery charges, is shown before you place your order. Delivery is Rs. 300 for orders of Rs. 2,000 or less and free for orders above Rs. 2,000, based on the product subtotal after discounts. The minimum order is Rs. 1,000, measured on the total payable including delivery charges; for example, a Rs. 700 order plus Rs. 300 delivery qualifies. Any applicable taxes or charges must be disclosed before purchase. Later price or tax changes do not retrospectively alter a confirmed order.',
     ],
   },
   {
@@ -76,7 +78,7 @@ export default function Terms() {
       title="Terms &"
       titleAccent="Conditions"
       intro="The terms governing purchases through our website. Please read them with our Shipping Policy and Privacy Policy."
-      lastUpdated="22 September 2026 (Version 1.0)"
+      lastUpdated="8 October 2026"
       sections={sections}
     />
   )

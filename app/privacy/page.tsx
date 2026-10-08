@@ -45,12 +45,14 @@ const sections: LegalSection[] = [
   // Section 6 as supplied described Analytics as "planned", which did not
   // match the live site. The client confirmed on 23 September 2026 that
   // Analytics is in use and asked for a cookie notice, so this describes the
-  // actual setup: nothing loads until the visitor answers the notice.
+  // actual setup: nothing loads until the visitor answers the notice. The
+  // Meta Pixel sentence was added on 8 October 2026, alongside the pixel.
   {
     heading: '6. Google Analytics and your choice',
     body: [
       'We use Google Analytics to understand website visits and improve the store. Analytics may collect usage events, page visits, device and browser information, and identifiers, using cookies or similar technology.',
       'Analytics does not run until you allow it. When you first visit the site, a notice asks whether you accept analytics cookies. Nothing is loaded while that notice is unanswered, and choosing "Decline" means Analytics is never started for your browser. Your choice is stored in your own browser only; clearing your browser storage will cause the notice to appear again. The cookies needed to operate the shopping cart and your session are unaffected by this choice, as the store cannot function without them.',
+      'With your permission, we also use the Meta Pixel to measure the performance of our Facebook and Instagram ads. Like Analytics, it does not load until you accept the cookie notice.',
       'Google explains its handling of partner-site information at policies.google.com/technologies/partner-sites. Google’s browser opt-out tool is available at tools.google.com/dlpage/gaoptout.',
     ],
   },
@@ -87,7 +89,7 @@ export default function Privacy() {
       title="Privacy"
       titleAccent="Policy"
       intro="How we handle the information connected with your order, delivery and support."
-      lastUpdated="22 September 2026 (Version 1.0)"
+      lastUpdated="8 October 2026"
       sections={sections}
     />
   )

@@ -10,11 +10,13 @@ export const metadata: Metadata = {
 
 // The client's text, supplied 22 September 2026 as "Shipping Policy,
 // Version 1.0". Reproduced as written — their legal wording, not ours to edit.
+// The one exception is the minimum-order sentence in section 1, added on
+// 8 October 2026 at the client's request to match MINIMUM_ORDER_TOTAL.
 const sections: LegalSection[] = [
   {
     heading: '1. Delivery coverage and charges',
     body: [
-      'We deliver across Pakistan through Leopards Courier, subject to the courier serving the destination. If an address cannot be served, we will contact you before dispatch to discuss the available options. Delivery costs Rs. 300 for orders of Rs. 2,000 or less. Orders above Rs. 2,000 receive free delivery. Eligibility is calculated using the product subtotal after discounts, excluding delivery charges.',
+      'We deliver across Pakistan through Leopards Courier, subject to the courier serving the destination. If an address cannot be served, we will contact you before dispatch to discuss the available options. Delivery costs Rs. 300 for orders of Rs. 2,000 or less. Orders above Rs. 2,000 receive free delivery. Eligibility is calculated using the product subtotal after discounts, excluding delivery charges. The minimum order is Rs. 1,000, measured on the total payable including delivery charges; for example, a Rs. 700 order plus Rs. 300 delivery qualifies.',
     ],
   },
   {
@@ -80,7 +82,7 @@ export default function Shipping() {
       title="Shipping"
       titleAccent="Policy"
       intro="Delivery coverage and charges, how long your order takes, and what to do if a parcel arrives damaged."
-      lastUpdated="22 September 2026 (Version 1.0)"
+      lastUpdated="8 October 2026"
       sections={sections}
     />
   )

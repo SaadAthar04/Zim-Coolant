@@ -336,7 +336,7 @@ export default function AdminProducts() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Benefits <span className="font-normal text-gray-500">— one per line</span>
+                  Benefits <span className="font-normal text-gray-500">(one per line)</span>
                 </label>
                 <textarea
                   value={form.benefits}
@@ -348,7 +348,7 @@ export default function AdminProducts() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Directions for use <span className="font-normal text-gray-500">— one per line</span>
+                  Directions for use <span className="font-normal text-gray-500">(one per line)</span>
                 </label>
                 <textarea
                   value={form.directions}

@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (message.name.length < 2) fieldErrors.name = 'Please enter your name.'
     if (!looksLikeEmail(message.email)) fieldErrors.email = 'Please enter a valid email address.'
     if (message.message.length < 10)
-      fieldErrors.message = 'Please tell us a little more — at least 10 characters.'
+      fieldErrors.message = 'Please tell us a little more: at least 10 characters.'
 
     if (Object.keys(fieldErrors).length > 0) {
       return NextResponse.json(
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // The message is safely stored either way, so the sender is told it arrived.
-    return NextResponse.json({ message: 'Thank you — your message has been received.' })
+    return NextResponse.json({ message: 'Thank you, your message has been received.' })
   } catch (error) {
     console.error('Error handling the contact form:', error)
     return NextResponse.json(

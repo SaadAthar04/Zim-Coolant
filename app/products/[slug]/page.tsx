@@ -327,7 +327,7 @@ export default function ProductDetail() {
               {hasColours && (
                 <fieldset className="border-t border-gray-200 pt-5">
                   <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                    Colour — <span className="text-gray-900 capitalize">{colour}</span>
+                    Colour: <span className="text-gray-900 capitalize">{colour}</span>
                   </legend>
                   <div className="flex gap-3">
                     {(['green', 'red'] as Colour[]).map((c) => (

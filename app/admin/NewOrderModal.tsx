@@ -168,7 +168,7 @@ export default function NewOrderModal({
                 >
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name} — {formatPrice(p.price)}
+                      {p.name}, {formatPrice(p.price)}
                       {p.stock_quantity <= 0 ? ' (out of stock)' : ''}
                     </option>
                   ))}

@@ -83,7 +83,7 @@ export default function AdminOrders() {
     if (error || !data) return toast.error('Could not dispatch the order')
     apply(id, data)
     setSelected((prev) => (prev && prev.id === id ? { ...prev, ...data } : prev))
-    toast.success('Marked dispatched — the customer has been emailed')
+    toast.success('Marked dispatched. The customer has been emailed')
   }
 
   const setPaymentStatus = async (id: string, next: string) => {

@@ -484,7 +484,7 @@ export default function Cart() {
                   <div className="mt-5 flex items-center gap-3 p-4 rounded-lg bg-primary-50 border border-primary-100">
                     <Banknote className="w-5 h-5 text-primary-700 flex-shrink-0" />
                     <p className="text-sm text-gray-700">
-                      <strong>{PAYMENT_METHOD_LABEL}</strong> — pay the rider in cash when your
+                      <strong>{PAYMENT_METHOD_LABEL}</strong>: pay the rider in cash when your
                       order arrives. No online payment needed.
                     </p>
                   </div>

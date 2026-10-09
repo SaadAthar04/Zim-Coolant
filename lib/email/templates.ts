@@ -235,7 +235,7 @@ type OrderEmailOptions = {
 /** Order placed. The full receipt. */
 export function orderReceivedEmail(order: Order, o: OrderEmailOptions): EmailContent {
   return {
-    subject: `Order ${order.order_number} received — ${SHOP_NAME}`,
+    subject: `Order ${order.order_number} received | ${SHOP_NAME}`,
     html: layout(
       `Order ${order.order_number} received`,
       `
@@ -258,13 +258,13 @@ export function orderReceivedEmail(order: Order, o: OrderEmailOptions): EmailCon
 /** Order confirmed by the shop. */
 export function orderConfirmedEmail(order: Order, o: OrderEmailOptions): EmailContent {
   return {
-    subject: `Order ${order.order_number} confirmed — ${SHOP_NAME}`,
+    subject: `Order ${order.order_number} confirmed | ${SHOP_NAME}`,
     html: layout(
       `Order ${order.order_number} confirmed`,
       `
       ${greeting(order)}
       <p style="margin:0 0 16px;">
-        Good news — your order ${orderRef(order)} is confirmed and we are preparing it
+        Good news: your order ${orderRef(order)} is confirmed and we are preparing it
         for dispatch. We will email you again the moment it leaves us.
       </p>
       ${o.trackUrl ? btn(o.trackUrl, 'Track my Order') : ''}
@@ -279,7 +279,7 @@ export function orderConfirmedEmail(order: Order, o: OrderEmailOptions): EmailCo
 /** Order handed to the courier. */
 export function orderDispatchedEmail(order: Order, o: OrderEmailOptions): EmailContent {
   return {
-    subject: `Order ${order.order_number} is on its way — ${SHOP_NAME}`,
+    subject: `Order ${order.order_number} is on its way | ${SHOP_NAME}`,
     html: layout(
       `Order ${order.order_number} dispatched`,
       `
@@ -302,7 +302,7 @@ export function orderDispatchedEmail(order: Order, o: OrderEmailOptions): EmailC
 /** Order delivered. */
 export function orderDeliveredEmail(order: Order, o: OrderEmailOptions): EmailContent {
   return {
-    subject: `Order ${order.order_number} delivered — ${SHOP_NAME}`,
+    subject: `Order ${order.order_number} delivered | ${SHOP_NAME}`,
     html: layout(
       `Order ${order.order_number} delivered`,
       `
@@ -334,7 +334,7 @@ export function orderCancelledEmail(
   o: OrderEmailOptions & { byCustomer?: boolean }
 ): EmailContent {
   return {
-    subject: `Order ${order.order_number} cancelled — ${SHOP_NAME}`,
+    subject: `Order ${order.order_number} cancelled | ${SHOP_NAME}`,
     html: layout(
       `Order ${order.order_number} cancelled`,
       `
@@ -343,7 +343,7 @@ export function orderCancelledEmail(
         ${
           o.byCustomer
             ? `Your order ${orderRef(order)} has been cancelled as you requested. Nothing will be delivered and nothing is owed.`
-            : `We are sorry — your order ${orderRef(order)} has been cancelled. Nothing will be delivered and nothing is owed.`
+            : `We are sorry, your order ${orderRef(order)} has been cancelled. Nothing will be delivered and nothing is owed.`
         }
       </p>
       <p style="margin:0 0 16px;">
@@ -364,7 +364,7 @@ export function orderCancelledEmail(
 
 export function adminNewOrderEmail(order: Order, o: OrderEmailOptions): EmailContent {
   return {
-    subject: `New order ${order.order_number} — ${formatPrice(order.total_amount)} — ${order.customer_name}`,
+    subject: `New order ${order.order_number} | ${formatPrice(order.total_amount)} | ${order.customer_name}`,
     html: layout(
       `New order ${order.order_number}`,
       `
@@ -392,7 +392,7 @@ export function adminOrderCancelledEmail(
   o: OrderEmailOptions & { byCustomer?: boolean }
 ): EmailContent {
   return {
-    subject: `Order ${order.order_number} cancelled${o.byCustomer ? ' by the customer' : ''} — ${formatPrice(order.total_amount)}`,
+    subject: `Order ${order.order_number} cancelled${o.byCustomer ? ' by the customer' : ''} | ${formatPrice(order.total_amount)}`,
     html: layout(
       `Order ${order.order_number} cancelled`,
       `
@@ -421,7 +421,7 @@ export function adminContactEmail(
   ]
 
   return {
-    subject: `Website enquiry from ${message.name}${message.subject ? ` — ${message.subject}` : ''}`,
+    subject: `Website enquiry from ${message.name}${message.subject ? `: ${message.subject}` : ''}`,
     html: layout(
       'New enquiry from the contact page',
       `
@@ -487,7 +487,7 @@ export function adminLowStockEmail(
 /** One-click check that the SMTP settings work. */
 export function smtpTestEmail(o: { siteUrl: string }): EmailContent {
   return {
-    subject: `${SHOP_NAME} — test email`,
+    subject: `${SHOP_NAME} test email`,
     html: layout(
       'SMTP test',
       `

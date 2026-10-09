@@ -131,7 +131,7 @@ export default function Products() {
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 leading-relaxed max-w-3xl mx-auto">
               Discover our premium selection of anti-freeze, radiator coolants, gear oil and
-              transmission fluid — engineered for optimal performance and long-lasting protection.
+              transmission fluid, engineered for optimal performance and long-lasting protection.
             </p>
           </div>
         </section>

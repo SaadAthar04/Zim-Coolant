@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     question: "How do I know which fluid is right for my vehicle?",
-    answer: "Every vehicle has specific requirements. You can check your owner’s manual or contact our support team — we’ll help you choose the right coolant, ATF, or gear oil based on your vehicle’s make and model."
+    answer: "Every vehicle has specific requirements. You can check your owner’s manual or contact our support team. We’ll help you choose the right coolant, ATF, or gear oil based on your vehicle’s make and model."
   },
   {
     question: "Are your products suitable for all vehicle types?",

@@ -39,6 +39,11 @@ function readConsent(): Consent {
   }
 }
 
+/** True only once the visitor has accepted Analytics and the Meta Pixel. */
+export function hasTrackingConsent(): boolean {
+  return readConsent() === 'accepted'
+}
+
 function writeConsent(value: Exclude<Consent, null>) {
   try {
     window.localStorage.setItem(STORAGE_KEY, value)

@@ -18,6 +18,7 @@ import { toast } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Order, ordersApi } from '@/lib/api-client'
+import { trackPurchase } from '@/lib/meta-pixel'
 import {
   CartLine,
   cartSubtotal,
@@ -146,6 +147,9 @@ export default function Cart() {
       toast.error(error || 'Could not place your order. Please try again.')
       return
     }
+
+    // Only now is the order real; report it with the server's own total.
+    trackPurchase(data)
 
     setPlacedOrder(data)
     setEmailSent(Boolean(emailConfigured))

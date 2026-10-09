@@ -117,9 +117,9 @@ export default function CookieNotice() {
           </button>
 
           <p className="text-sm text-gray-700 leading-relaxed pr-5">
-            We use cookies to keep your cart working, and — with your permission —
-            Google Analytics to see how the site is used and the Meta Pixel to
-            measure our Facebook and Instagram ads.{' '}
+            We use cookies to keep your cart working. With your permission, we
+            also use Google Analytics to see how the site is used and the Meta
+            Pixel to measure our Facebook and Instagram ads.{' '}
             <Link href="/privacy" className="text-primary-600 hover:text-primary-700 underline">
               Privacy Policy
             </Link>
